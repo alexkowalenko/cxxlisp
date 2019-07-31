@@ -18,10 +18,9 @@ Options* getOptions(int argc, char* argv[])
 {
     auto options = new Options();
     po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message")(
-        "silent",
-        po::value<bool>(&(options->silent))->implicit_value(true),
-        "silent, don't print the prompt");
+    desc.add_options()(
+        "help", "produce help message")(
+        "silent", po::value<bool>(&(options->silent))->implicit_value(true), "silent, don't print the prompt");
 
     try {
         po::variables_map vm;

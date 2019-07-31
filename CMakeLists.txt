@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_compile_options(-Wall -Wextra)
 
-find_package(Boost 1.70 REQUIRED COMPONENTS program_options)
+enable_testing()
+
+find_package(Boost 1.70 REQUIRED COMPONENTS program_options test_exec_monitor)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(include)
@@ -19,3 +21,25 @@ add_executable(cxxlisp
 
 target_link_libraries(cxxlisp 
     LINK_PUBLIC ${Boost_LIBRARIES} )
+
+file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
+
+foreach(testSrc ${test_src})
+        #Extract the filename without an extension (NAME_WE)
+        get_filename_component(testName ${testSrc} NAME_WE)
+
+        #Add compile target
+        add_executable(${testName} ${testSrc} ${source_files})
+
+        #link to Boost libraries AND your targets and dependencies
+        target_link_libraries(${testName} ${Boost_LIBRARIES})
+
+        #I like to move testing binaries into a testBin directory
+        #set_target_properties(${testName} PROPERTIES 
+        #    RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/testBin)
+
+        #Finally add it to test execution - 
+        #Notice the WORKING_DIRECTORY and COMMAND
+        add_test(NAME ${testName} 
+                 COMMAND ${testName} )
+endforeach(testSrc)
