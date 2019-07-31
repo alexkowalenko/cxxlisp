@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_style": "WebKit",
+    "C_Cpp.loggingLevel": "Warning",
+    "C_Cpp.default.includePath": [
+        "/usr/local/include",
+        "include"
+    ]
+}
