@@ -8,13 +8,18 @@ add_compile_options(-Wall -Wextra)
 
 enable_testing()
 
+# Add custom Find cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# Boost libraries
 find_package(Boost 1.70 REQUIRED COMPONENTS program_options test_exec_monitor)
 include_directories(${Boost_INCLUDE_DIRS})
 
-include_directories(include)
+# GNU Readline 
+find_package(readline REQUIRED)
+include_directories(${Readline_INCLUDE_DIR})
 
-add_subdirectory(third_party/linenoise-ng)
-include_directories("${PROJECT_SOURCE_DIR}/third_party/linenoise-ng/include")
+include_directories(include)
 
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 
@@ -23,7 +28,7 @@ add_executable(cxxlisp
     ${source_files})
 
 target_link_libraries(cxxlisp 
-    LINK_PUBLIC ${Boost_LIBRARIES} linenoise)
+    LINK_PUBLIC ${Boost_LIBRARIES} ${Readline_LIBRARY})
 
 file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
 
@@ -35,7 +40,7 @@ foreach(testSrc ${test_src})
         add_executable(${testName} ${testSrc} ${source_files})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} ${Boost_LIBRARIES} linenoise)
+        target_link_libraries(${testName} ${Boost_LIBRARIES} ${Readline_LIBRARY})
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 

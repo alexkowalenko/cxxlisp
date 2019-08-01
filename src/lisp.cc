@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include "exceptions.hh"
+
 namespace ax {
 
 Lisp::Lisp(Options* opt)
@@ -26,8 +28,19 @@ void Lisp::repl(ostream& ostr)
             Token tok = lex.get_token();
             ostr << tok.val << endl;
         }
+    } catch (UnknownToken& e) {
+        cerr << "Unknown token: " << e.tok << endl
+             << flush;
+        return;
+
     } catch (exception& e) {
-        cerr << "Exception: " << e.what() << endl;
+        cerr << "Exception: " << e.what() << endl
+             << flush;
+        return;
+    } catch (...) {
+        cerr << "Unknown excpetion!" << endl
+             << flush;
+        return;
     }
 }
 

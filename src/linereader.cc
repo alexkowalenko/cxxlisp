@@ -7,7 +7,8 @@
 #include "linereader.hh"
 
 #include "exceptions.hh"
-#include "linenoise.h"
+
+#include <readline/readline.h>
 
 namespace ax {
 
@@ -46,11 +47,12 @@ void LineReader::push_char(wchar_t)
 
 void LineReader::get_line()
 {
-    auto cbuf = linenoise(prompt);
+    auto cbuf = readline(prompt);
     if (cbuf == nullptr) {
         throw EOFException();
     }
     buf = string(cbuf);
     ptr = 0;
+    free(cbuf);
 }
 }
