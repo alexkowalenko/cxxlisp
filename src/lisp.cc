@@ -26,7 +26,10 @@ void Lisp::repl(ostream& ostr)
     try {
         while (true) {
             Token tok = lex.get_token();
-            ostr << tok.val << endl;
+            if (tok.type == TokenType::eof) {
+                return;
+            }
+            ostr << tok << endl;
         }
     } catch (UnknownToken& e) {
         cerr << "Unknown token: " << e.tok << endl

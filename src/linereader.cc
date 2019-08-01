@@ -8,6 +8,7 @@
 
 #include "exceptions.hh"
 
+#include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <readline/readline.h>
 
@@ -27,17 +28,17 @@ void LineReader::InitScanner()
 
 wchar_t LineReader::get_char()
 {
-    BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char";
-    if (ptr < 0 || ptr == buf.size()) {
-        get_line();
+    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") % buf % ptr;
+    if (ptr < 0 || ptr == int(buf.size())) {
+        this->get_line();
     }
-    BOOST_LOG_TRIVIAL(trace) << buf;
+    // BOOST_LOG_TRIVIAL(trace) << "buf: " << buf;
     return buf[ptr++];
 };
 
 wchar_t LineReader::peek_char()
 {
-    if (ptr < 0 || ptr == buf.size()) {
+    if (ptr < 0 || ptr == int(buf.size())) {
         get_line();
     }
     return buf[ptr];
@@ -50,13 +51,13 @@ void LineReader::push_char(wchar_t)
 
 void LineReader::get_line()
 {
-    BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line";
     auto cbuf = readline(prompt);
     if (cbuf == nullptr) {
         throw EOFException();
     }
-    BOOST_LOG_TRIVIAL(trace) << cbuf;
+    BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
     buf = string(cbuf);
+    buf.append(1, '\n');
     ptr = 0;
     free(cbuf);
 }

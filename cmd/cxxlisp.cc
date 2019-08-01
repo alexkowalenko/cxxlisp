@@ -34,5 +34,9 @@ int main(int argc, char* argv[])
     lispInterp.terminate();
 
     delete options;
+    if (!options->silent) {
+        cout << endl
+             << "Bye 👾" << endl;
+    }
     return 0;
 }

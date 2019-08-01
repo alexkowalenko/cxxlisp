@@ -62,11 +62,11 @@ Token Lexer::get_token()
             auto id = string(1, c);
             for (auto r = lineReader.peek_char(); isID(r); r = lineReader.peek_char()) {
                 lineReader.get_char();
-                id.append(1, r);
+                id += r;
             }
             return Token(TokenType::atom, id);
         }
-        if (isspace(c)) {
+        if (isspace(c) || c == 0) {
             goto top;
         }
         cerr << "Unknown tokent " << c << endl;

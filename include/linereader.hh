@@ -27,7 +27,7 @@ private:
     void get_line();
 
     string buf;
-    size_t ptr;
+    int ptr;
 };
 }
 #endif

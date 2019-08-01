@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project (demo LANGUAGES CXX)
+project (cxxlisp LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,13 +25,15 @@ link_libraries(${Readline_LIBRARY})
 
 include_directories(include)
 
+# CXX Lisp build
+
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
+add_library(libcxxlisp STATIC ${source_files})
 
-add_executable(cxxlisp 
-    cmd/cxxlisp.cc
-    ${source_files})
+add_executable(cxxlisp cmd/cxxlisp.cc)
+target_link_libraries(cxxlisp libcxxlisp)
 
-target_link_libraries(cxxlisp )
+# Test programs build
 
 file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
 
@@ -40,10 +42,10 @@ foreach(testSrc ${test_src})
         get_filename_component(testName ${testSrc} NAME_WE)
 
         #Add compile target
-        add_executable(${testName} ${testSrc} ${source_files})
+        add_executable(${testName} ${testSrc})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName})
+        target_link_libraries(${testName} libcxxlisp)
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 
