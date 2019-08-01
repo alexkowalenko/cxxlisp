@@ -12,12 +12,16 @@ enable_testing()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Boost libraries
-find_package(Boost 1.70 REQUIRED COMPONENTS program_options test_exec_monitor)
+find_package(Boost 1.70 REQUIRED 
+             COMPONENTS log program_options test_exec_monitor)
 include_directories(${Boost_INCLUDE_DIRS})
+link_libraries(${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_LIBRARIES})
+add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
 
 # GNU Readline 
 find_package(readline REQUIRED)
 include_directories(${Readline_INCLUDE_DIR})
+link_libraries(${Readline_LIBRARY})
 
 include_directories(include)
 
@@ -27,8 +31,7 @@ add_executable(cxxlisp
     cmd/cxxlisp.cc
     ${source_files})
 
-target_link_libraries(cxxlisp 
-    LINK_PUBLIC ${Boost_LIBRARIES} ${Readline_LIBRARY})
+target_link_libraries(cxxlisp )
 
 file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
 
@@ -40,7 +43,7 @@ foreach(testSrc ${test_src})
         add_executable(${testName} ${testSrc} ${source_files})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} ${Boost_LIBRARIES} ${Readline_LIBRARY})
+        target_link_libraries(${testName})
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 

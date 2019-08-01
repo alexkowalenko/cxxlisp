@@ -7,6 +7,8 @@
 #include "lexer.hh"
 
 #include <cctype>
+#include <iostream>
+#include <string>
 
 #include "exceptions.hh"
 
@@ -16,7 +18,7 @@ const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
 
 bool isID(char c)
 {
-    return isalnum(c) || lispIdentifiers.find(c);
+    return isalnum(c) || lispIdentifiers.find(c) != string::npos;
 }
 
 void Lexer::setup_lexer()
@@ -67,6 +69,7 @@ Token Lexer::get_token()
         if (isspace(c)) {
             goto top;
         }
+        cerr << "Unknown tokent " << c << endl;
         throw UnknownToken(c);
     } catch (EOFException& e) {
         return Token(TokenType::eof);

@@ -5,5 +5,10 @@
     "C_Cpp.default.includePath": [
         "/usr/local/include",
         "include"
-    ]
+    ],
+    "files.associations": {
+        "*.mar": "asm",
+        "*.scm": "lisp",
+        "string": "cpp"
+    }
 }

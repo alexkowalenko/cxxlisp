@@ -8,6 +8,7 @@
 
 #include "exceptions.hh"
 
+#include <boost/log/trivial.hpp>
 #include <readline/readline.h>
 
 namespace ax {
@@ -26,9 +27,11 @@ void LineReader::InitScanner()
 
 wchar_t LineReader::get_char()
 {
+    BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char";
     if (ptr < 0 || ptr == buf.size()) {
         get_line();
     }
+    BOOST_LOG_TRIVIAL(trace) << buf;
     return buf[ptr++];
 };
 
@@ -47,10 +50,12 @@ void LineReader::push_char(wchar_t)
 
 void LineReader::get_line()
 {
+    BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line";
     auto cbuf = readline(prompt);
     if (cbuf == nullptr) {
         throw EOFException();
     }
+    BOOST_LOG_TRIVIAL(trace) << cbuf;
     buf = string(cbuf);
     ptr = 0;
     free(cbuf);
