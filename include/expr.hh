@@ -4,7 +4,11 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
+#ifndef EXPR_HH
+#define EXPR_HH
+
 #include <boost/any.hpp>
+#include <iostream>
 #include <list>
 #include <string>
 
@@ -23,4 +27,10 @@ bool is_List(const Expr& s);
 
 List as_List(const Expr& s);
 
+// Output
+
+ostream& operator<<(ostream& os, const Expr& e);
+
 } // namespace ax
+
+#endif

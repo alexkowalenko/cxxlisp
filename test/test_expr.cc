@@ -6,7 +6,7 @@
 
 #define BOOST_TEST_MODULE expr_test
 #include <boost/test/unit_test.hpp>
-#include <iostream>
+#include <sstream>
 
 #include "expr.hh"
 
@@ -41,4 +41,20 @@ BOOST_AUTO_TEST_CASE(expr_as)
 {
     Expr c = List({ Atom("hello"), Int(1) });
     BOOST_TEST(as_List(c).size() == size_t(2));
+}
+
+BOOST_AUTO_TEST_CASE(expr_print)
+{
+    stringstream ss;
+    Expr a = List();
+    ss << a;
+    BOOST_REQUIRE_EQUAL(ss.str(), "()");
+
+    Expr c = List({ Atom("hello"), Int(1) });
+    (ss = stringstream()) << c;
+    BOOST_REQUIRE_EQUAL(ss.str(), "(hello 1)");
+
+    Expr d = List({ Atom("hello"), Int(1), c });
+    (ss = stringstream()) << d;
+    BOOST_REQUIRE_EQUAL(ss.str(), "(hello 1 (hello 1))");
 }

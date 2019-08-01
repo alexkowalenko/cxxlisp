@@ -13,14 +13,17 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(include)
 
-file(GLOB source_files "src/*.cc")
+add_subdirectory(third_party/linenoise-ng)
+include_directories("${PROJECT_SOURCE_DIR}/third_party/linenoise-ng/include")
+
+file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 
 add_executable(cxxlisp 
     cmd/cxxlisp.cc
     ${source_files})
 
 target_link_libraries(cxxlisp 
-    LINK_PUBLIC ${Boost_LIBRARIES} )
+    LINK_PUBLIC ${Boost_LIBRARIES} linenoise)
 
 file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
 
@@ -32,7 +35,7 @@ foreach(testSrc ${test_src})
         add_executable(${testName} ${testSrc} ${source_files})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} ${Boost_LIBRARIES})
+        target_link_libraries(${testName} ${Boost_LIBRARIES} linenoise)
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 

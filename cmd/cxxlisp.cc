@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#include "lisp.hh"
 #include "options.hh"
 
 using namespace std;
@@ -14,10 +15,17 @@ using namespace ax;
 int main(int argc, char* argv[])
 {
     // Get options
-    Options* options = getOptions(argc, argv);
+    ax::Options* options = getOptions(argc, argv);
 
     if (!options->silent) {
         cout << "Hello C++ Lisp 👾 !" << endl;
     }
+
+    Lisp lispInterp = Lisp(options);
+    lispInterp.init();
+    lispInterp.repl(cout);
+    lispInterp.terminate();
+
+    delete options;
     return 0;
 }
