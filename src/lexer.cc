@@ -11,6 +11,7 @@
 #include <string>
 
 #include "exceptions.hh"
+#include "linereaderRL.hh"
 
 namespace ax {
 
@@ -21,17 +22,17 @@ bool isID(char c)
     return isalnum(c) || lispIdentifiers.find(c) != string::npos;
 }
 
-void Lexer::setup_lexer()
+void Lexer::setup_lexer(LineReader* lr)
 {
-    lineReader = LineReader();
+    lineReader = lr;
     return;
-};
+}
 
 Token Lexer::get_token()
 {
     try {
     top:
-        auto c = lineReader.get_char();
+        auto c = lineReader->get_char();
         switch (c) {
         case '(':
             return Token(TokenType::open);
@@ -50,7 +51,7 @@ Token Lexer::get_token()
 
         case ';':
             // comment
-            for (auto r = lineReader.get_char(); r != '\n'; r = lineReader.get_char()) {
+            for (auto r = lineReader->get_char(); r != '\n'; r = lineReader->get_char()) {
             }
             goto top;
         case '#':
@@ -60,8 +61,8 @@ Token Lexer::get_token()
         };
         if (isID(c)) {
             auto id = string(1, c);
-            for (auto r = lineReader.peek_char(); isID(r); r = lineReader.peek_char()) {
-                lineReader.get_char();
+            for (auto r = lineReader->peek_char(); isID(r); r = lineReader->peek_char()) {
+                lineReader->get_char();
                 id += r;
             }
             return Token(TokenType::atom, id);

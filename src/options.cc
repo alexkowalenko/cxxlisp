@@ -20,7 +20,8 @@ Options* getOptions(int argc, char* argv[])
     po::options_description desc("Allowed options");
     desc.add_options()(
         "help", "produce help message")(
-        "silent", po::value<bool>(&(options->silent))->implicit_value(true), "silent, don't print the prompt");
+        "silent", po::value<bool>(&(options->silent))->implicit_value(true), "silent, don't print the prompt")(
+        "noreadline", po::value<bool>(&(options->readline))->implicit_value(false), "don't use readline for input");
 
     try {
         po::variables_map vm;
@@ -29,11 +30,10 @@ Options* getOptions(int argc, char* argv[])
 
         if (vm.count("help")) {
             cout << desc << endl;
+            exit(EXIT_SUCCESS);
         }
     } catch (exception& e) {
         cerr << "error: " << e.what() << "\n";
-    } catch (...) {
-        cerr << "Exception of unknown type!\n";
     }
 
     return options;

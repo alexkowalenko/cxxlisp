@@ -7,27 +7,15 @@
 #ifndef LINEREADER_HH
 #define LINEREADER_HH
 
-#include <string>
-
 namespace ax {
-
-using namespace std;
 
 class LineReader {
 public:
-    LineReader();
+    virtual ~LineReader(){};
 
-    void InitScanner();
-
-    wchar_t get_char();
-    wchar_t peek_char();
-    void push_char(wchar_t c);
-
-private:
-    void get_line();
-
-    string buf;
-    int ptr;
+    virtual wchar_t get_char() = 0;
+    virtual wchar_t peek_char() = 0;
+    virtual void push_char(wchar_t c) = 0;
 };
 }
 #endif

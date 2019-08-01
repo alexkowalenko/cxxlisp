@@ -12,6 +12,7 @@ namespace ax {
 class Options {
 public:
     bool silent = false;
+    bool readline = true;
 };
 
 Options* getOptions(int argc, char* argv[]);

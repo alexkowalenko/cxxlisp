@@ -9,6 +9,8 @@
 #include <iostream>
 
 #include "exceptions.hh"
+#include "linereaderRL.hh"
+#include "linereaderStream.hh"
 
 namespace ax {
 
@@ -22,7 +24,13 @@ void Lisp::init(){};
 
 void Lisp::repl(ostream& ostr)
 {
-    lex.setup_lexer();
+    LineReader* rl;
+    if (opt->readline) {
+        rl = new LineReaderReadLine();
+    } else {
+        rl = new LineReaderStream(cin);
+    }
+    lex.setup_lexer(rl);
     try {
         while (true) {
             Token tok = lex.get_token();
@@ -34,17 +42,14 @@ void Lisp::repl(ostream& ostr)
     } catch (UnknownToken& e) {
         cerr << "Unknown token: " << e.tok << endl
              << flush;
-        return;
-
     } catch (exception& e) {
         cerr << "Exception: " << e.what() << endl
              << flush;
-        return;
     } catch (...) {
-        cerr << "Unknown excpetion!" << endl
+        cerr << "Unknown exception!" << endl
              << flush;
-        return;
     }
+    delete rl;
 }
 
 void Lisp::terminate(){};
