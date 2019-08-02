@@ -35,7 +35,7 @@ void Lisp::repl(ostream& ostr)
         while (true) {
             Token tok = lex.get_token();
             if (tok.type == TokenType::eof) {
-                return;
+                break;
             }
             ostr << tok << endl;
         }
