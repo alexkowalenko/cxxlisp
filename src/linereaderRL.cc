@@ -17,8 +17,8 @@ namespace ax {
 char const* prompt = "++> ";
 
 LineReaderReadLine::LineReaderReadLine()
+    : ptr(-1)
 {
-    ptr = -1;
 }
 
 wchar_t LineReaderReadLine::get_char()

@@ -17,7 +17,6 @@ namespace ax {
 Lisp::Lisp(Options* opt)
 {
     this->opt = opt;
-    lex = Lexer();
 }
 
 void Lisp::init(){};
@@ -30,7 +29,7 @@ void Lisp::repl(ostream& ostr)
     } else {
         rl = new LineReaderStream(cin);
     }
-    lex.setup_lexer(rl);
+    Lexer lex(*rl);
     try {
         while (true) {
             Token tok = lex.get_token();

@@ -22,24 +22,21 @@ bool isID(char c)
     return isalnum(c) || lispIdentifiers.find(c) != string::npos;
 }
 
-void Lexer::setup_lexer(LineReader* lr)
+Lexer::Lexer(LineReader& r)
+    : lineReader(r)
 {
-    lineReader = lr;
-    return;
 }
 
 Token Lexer::get_token()
 {
     try {
     top:
-        auto c = lineReader->get_char();
+        auto c = lineReader.get_char();
         switch (c) {
         case '(':
             return Token(TokenType::open);
         case ')':
             return Token(TokenType::close);
-        case '.':
-            return Token(TokenType::dot);
         case '\'':
             return Token(TokenType::quote);
         case '`':
@@ -51,18 +48,22 @@ Token Lexer::get_token()
 
         case ';':
             // comment
-            for (auto r = lineReader->get_char(); r != '\n'; r = lineReader->get_char()) {
+            for (auto r = lineReader.get_char(); r != '\n'; r = lineReader.get_char()) {
             }
             goto top;
         case '#':
             return Token(TokenType::hash);
-        case ':':
-            return Token(TokenType::colon);
+        case '.':
+            auto n = lineReader.peek_char();
+            if (isspace(n) || n == char_traits<char>::eof()) {
+                return Token(TokenType::dot);
+            }
+            // fallthrough to get the atom
         };
         if (isID(c)) {
             auto id = string(1, c);
-            for (auto r = lineReader->peek_char(); isID(r); r = lineReader->peek_char()) {
-                lineReader->get_char();
+            for (auto r = lineReader.peek_char(); isID(r); r = lineReader.peek_char()) {
+                lineReader.get_char();
                 id += r;
             }
             return Token(TokenType::atom, id);

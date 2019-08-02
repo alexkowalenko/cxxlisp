@@ -12,17 +12,6 @@ namespace ax {
 
 using namespace std;
 
-Token::Token(TokenType t)
-{
-    type = t;
-}
-
-Token::Token(TokenType t, string s)
-{
-    type = t;
-    val = s;
-}
-
 ostream& operator<<(ostream& os, const Token& t)
 {
     switch (t.type) {
@@ -50,24 +39,16 @@ ostream& operator<<(ostream& os, const Token& t)
     case TokenType::hash:
         os << '#';
         break;
-    case TokenType::colon:
-        os << ':';
-        break;
     case TokenType::atom:
         os << t.val;
         break;
     case TokenType::string:
         os << '"' << t.val << '"';
         break;
-    case TokenType::num:
-        os << 'f' << t.val;
-        break;
     case TokenType::eof:
-        os << 'f' << t.val;
-        break;
-    default:
+        os << "eof" << t.val;
         break;
     }
     return os;
-};
+}
 }

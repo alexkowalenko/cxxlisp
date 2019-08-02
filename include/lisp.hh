@@ -26,7 +26,6 @@ public:
 
 private:
     Options* opt;
-    Lexer lex;
 };
 }
 

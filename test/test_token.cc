@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(token_out)
     ss << a;
     BOOST_REQUIRE_EQUAL(ss.str(), "(");
 
-    a = Token(TokenType::atom, string("hello"));
+    a = Token(TokenType::atom, "hello"s);
     (ss = stringstream()) << a;
     BOOST_REQUIRE_EQUAL(ss.str(), "hello");
 }

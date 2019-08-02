@@ -22,17 +22,18 @@ enum class TokenType {
     comma,
     at,
     hash,
-    colon,
     atom,
     string,
-    num,
     eof
 };
 
 class Token {
 public:
-    Token(TokenType t);
-    Token(TokenType t, string s);
+    Token(TokenType t)
+        : type(t){};
+    Token(TokenType t, string s)
+        : type(t)
+        , val(s){};
 
     TokenType type;
     string val;
@@ -40,4 +41,5 @@ public:
 
 ostream& operator<<(ostream& os, const Token& t);
 }
+
 #endif

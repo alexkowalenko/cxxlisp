@@ -17,7 +17,8 @@ using namespace std;
 
 class LineReaderStream : public LineReader {
 public:
-    LineReaderStream(istream& is);
+    LineReaderStream(istream& is)
+        : is(is){};
 
     wchar_t get_char();
     wchar_t peek_char();

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_linereader_1)
         { 0, true },
     };
 
-    istringstream is(string("abc\ndef"));
+    istringstream is("abc\ndef"s);
     LineReaderStream r = LineReaderStream(is);
     test_lineReader(tests, r);
 }
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_linereader_2)
         { 0, true },
     };
 
-    istringstream is(string(""));
+    istringstream is(""s);
     LineReaderStream r = LineReaderStream(is);
     test_lineReader(tests, r);
 }
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_linereader_3)
         { 'b', false },
     };
 
-    istringstream is(string("abc\ndef"));
+    istringstream is("abc\ndef"s);
     LineReaderStream r = LineReaderStream(is);
 
     auto c = r.get_char();
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_linereader_push_char)
         { 'c', false },
     };
 
-    istringstream is(string("abc\ndef"));
+    istringstream is("abc\ndef"s);
     LineReaderStream r = LineReaderStream(is);
 
     auto c = r.get_char();
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_linereader_peek_char)
         { 'c', false },
     };
 
-    istringstream is(string("abc\ndef"));
+    istringstream is("abc\ndef"s);
     LineReaderStream r = LineReaderStream(is);
 
     auto c = r.peek_char();

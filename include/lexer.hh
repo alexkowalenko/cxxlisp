@@ -14,15 +14,14 @@ namespace ax {
 
 class Lexer {
 public:
-
-    void setup_lexer(LineReader*);
+    Lexer(LineReader&);
     Token get_token();
 
     wchar_t peek();
     wchar_t scan();
 
 private:
-    LineReader* lineReader = nullptr;
+    LineReader& lineReader;
 };
 }
 #endif
