@@ -3,12 +3,18 @@
     "C_Cpp.clang_format_style": "WebKit",
     "C_Cpp.loggingLevel": "Warning",
     "C_Cpp.default.includePath": [
-        "/usr/local/include",
-        "include"
+        "/usr/local/include"
     ],
     "files.associations": {
         "*.mar": "asm",
         "*.scm": "lisp",
         "string": "cpp"
-    }
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "cmake.autoRestartBuild": true,
+    "clang.cxxflags": [
+        "-std=c++17"
+    ],
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c11"
 }

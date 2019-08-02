@@ -8,18 +8,41 @@
 
 #include <iostream>
 
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <readline/history.h>
+
 #include "exceptions.hh"
 #include "linereaderRL.hh"
 #include "linereaderStream.hh"
 
 namespace ax {
 
-Lisp::Lisp(Options* opt)
+const string history_file = ".cxxlisp";
+const int max_history = 1000;
+
+Lisp::Lisp(Options* o)
+    : opt(o)
 {
-    this->opt = opt;
 }
 
-void Lisp::init(){};
+void Lisp::init()
+{
+    if (opt->readline) {
+        using_history();
+
+        struct passwd* pw = getpwuid(getuid());
+        my_history_file = string(pw->pw_dir);
+        my_history_file += "/" + history_file;
+        auto res = read_history(my_history_file.c_str());
+        if (res != 0) {
+            cerr << "Can't read the history file: " << my_history_file
+                 << ' ' << strerror(res) << endl;
+        }
+    }
+};
 
 void Lisp::repl(ostream& ostr)
 {
@@ -51,5 +74,19 @@ void Lisp::repl(ostream& ostr)
     delete rl;
 }
 
-void Lisp::terminate(){};
+void Lisp::terminate()
+{
+    if (opt->readline) {
+
+        auto res = write_history(my_history_file.c_str());
+        if (res != 0) {
+            cerr << "Can't write the history file: " << my_history_file
+                 << ' ' << strerror(res) << endl;
+        }
+        res = history_truncate_file(my_history_file.c_str(), max_history);
+        if (res != 0) {
+            cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res) << endl;
+        }
+    }
+};
 }

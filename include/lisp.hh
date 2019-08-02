@@ -26,6 +26,8 @@ public:
 
 private:
     Options* opt;
+
+    string my_history_file;
 };
 }
 

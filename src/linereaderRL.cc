@@ -50,6 +50,7 @@ void LineReaderReadLine::get_line()
     if (cbuf == nullptr) {
         throw EOFException();
     }
+    add_history(cbuf);
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
     buf = string(cbuf);
     buf.append(1, '\n');
