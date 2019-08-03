@@ -20,9 +20,9 @@ public:
     LineReaderStream(istream& is)
         : is(is){};
 
-    wchar_t get_char();
-    wchar_t peek_char();
-    void push_char(wchar_t c);
+    wchar_t get_char() override;
+    wchar_t peek_char() override;
+    void push_char(wchar_t c) override;
 
 private:
     istream& is;

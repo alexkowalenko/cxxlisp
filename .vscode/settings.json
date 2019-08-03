@@ -3,7 +3,8 @@
     "C_Cpp.clang_format_style": "WebKit",
     "C_Cpp.loggingLevel": "Warning",
     "C_Cpp.default.includePath": [
-        "/usr/local/include"
+        "/usr/local/include",
+        "/Users/alex/Development/lisp-proj/cxxlisp/include"
     ],
     "files.associations": {
         "*.mar": "asm",

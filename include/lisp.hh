@@ -18,16 +18,14 @@ using namespace std;
 
 class Lisp {
 public:
-    Lisp(Options* opt);
+    Lisp(const Options& opt);
 
     void init();
     void repl(ostream& os);
     void terminate();
 
 private:
-    Options* opt;
-
-    string my_history_file;
+    const Options& opt;
 };
 }
 

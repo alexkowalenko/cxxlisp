@@ -14,14 +14,14 @@ namespace ax {
 namespace po = boost::program_options;
 using namespace std;
 
-Options* getOptions(int argc, char* argv[])
+Options getOptions(int argc, char* argv[])
 {
-    auto options = new Options();
+    Options options;
     po::options_description desc("Allowed options");
     desc.add_options()(
         "help", "produce help message")(
-        "silent", po::value<bool>(&(options->silent))->implicit_value(true), "silent, don't print the prompt")(
-        "noreadline", po::value<bool>(&(options->readline))->implicit_value(false), "don't use readline for input");
+        "silent", po::value<bool>(&(options.silent))->implicit_value(true), "silent, don't print the prompt")(
+        "noreadline", po::value<bool>(&(options.readline))->implicit_value(false), "don't use readline for input");
 
     try {
         po::variables_map vm;

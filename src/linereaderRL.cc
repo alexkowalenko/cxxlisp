@@ -8,24 +8,56 @@
 
 #include "exceptions.hh"
 
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <iostream>
+
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 #include <readline/readline.h>
 
 namespace ax {
 
-char const* prompt = "++> ";
+inline char const* prompt = "++> ";
+
+inline const string history_file = ".cxxlisp";
+inline const int max_history = 1000;
 
 LineReaderReadLine::LineReaderReadLine()
     : ptr(-1)
 {
+    using_history();
+
+    struct passwd* pw = getpwuid(getuid());
+    my_history_file = string(pw->pw_dir);
+    my_history_file += "/" + history_file;
+    auto res = read_history(my_history_file.c_str());
+    if (res != 0) {
+        cerr << "Can't read the history file: " << my_history_file
+             << ' ' << strerror(res) << endl;
+    }
+}
+
+LineReaderReadLine::~LineReaderReadLine()
+{
+    auto res = write_history(my_history_file.c_str());
+    if (res != 0) {
+        cerr << "Can't write the history file: " << my_history_file
+             << ' ' << strerror(res) << endl;
+    }
+    res = history_truncate_file(my_history_file.c_str(), max_history);
+    if (res != 0) {
+        cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res) << endl;
+    }
 }
 
 wchar_t LineReaderReadLine::get_char()
 {
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") % buf % ptr;
     if (ptr < 0 || ptr == int(buf.size())) {
-        this->get_line();
+        get_line();
     }
     // BOOST_LOG_TRIVIAL(trace) << "buf: " << buf;
     return buf[ptr++];

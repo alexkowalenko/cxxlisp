@@ -8,62 +8,45 @@
 
 #include <iostream>
 
-#include <pwd.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <readline/history.h>
-
 #include "exceptions.hh"
 #include "linereaderRL.hh"
 #include "linereaderStream.hh"
+#include "parser.hh"
 
 namespace ax {
 
-const string history_file = ".cxxlisp";
-const int max_history = 1000;
-
-Lisp::Lisp(Options* o)
+Lisp::Lisp(const Options& o)
     : opt(o)
 {
 }
 
 void Lisp::init()
 {
-    if (opt->readline) {
-        using_history();
-
-        struct passwd* pw = getpwuid(getuid());
-        my_history_file = string(pw->pw_dir);
-        my_history_file += "/" + history_file;
-        auto res = read_history(my_history_file.c_str());
-        if (res != 0) {
-            cerr << "Can't read the history file: " << my_history_file
-                 << ' ' << strerror(res) << endl;
-        }
+    if (!opt.silent) {
+        cout << "Hello C++ Lisp 👾 !" << endl;
     }
 };
 
 void Lisp::repl(ostream& ostr)
 {
-    LineReader* rl;
-    if (opt->readline) {
-        rl = new LineReaderReadLine();
+    unique_ptr<LineReader> rl;
+    if (opt.readline) {
+        rl = unique_ptr<LineReader>(new LineReaderReadLine());
     } else {
-        rl = new LineReaderStream(cin);
+        rl = unique_ptr<LineReader>(new LineReaderStream(cin));
     }
     Lexer lex(*rl);
+    Parser parser(lex);
     try {
         while (true) {
-            Token tok = lex.get_token();
-            if (tok.type == TokenType::eof) {
-                break;
-            }
-            ostr << tok << endl;
+            auto expr = parser.parse();
+            ostr << expr << endl;
         }
     } catch (UnknownToken& e) {
         cerr << "Unknown token: " << e.tok << endl
              << flush;
+    } catch (EOFException& e) {
+        ; // Finish normally
     } catch (exception& e) {
         cerr << "Exception: " << e.what() << endl
              << flush;
@@ -71,22 +54,13 @@ void Lisp::repl(ostream& ostr)
         cerr << "Unknown exception!" << endl
              << flush;
     }
-    delete rl;
 }
 
 void Lisp::terminate()
 {
-    if (opt->readline) {
-
-        auto res = write_history(my_history_file.c_str());
-        if (res != 0) {
-            cerr << "Can't write the history file: " << my_history_file
-                 << ' ' << strerror(res) << endl;
-        }
-        res = history_truncate_file(my_history_file.c_str(), max_history);
-        if (res != 0) {
-            cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res) << endl;
-        }
+    if (!opt.silent) {
+        cout << endl
+             << "Bye 👾" << endl;
     }
 };
 }

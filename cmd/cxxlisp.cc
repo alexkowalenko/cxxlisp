@@ -20,23 +20,14 @@ namespace logging = boost::log;
 int main(int argc, char* argv[])
 {
     // Get options
-    ax::Options* options = getOptions(argc, argv);
+    ax::Options options = getOptions(argc, argv);
 
     logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::trace);
-
-    if (!options->silent) {
-        cout << "Hello C++ Lisp 👾 !" << endl;
-    }
 
     Lisp lispInterp = Lisp(options);
     lispInterp.init();
     lispInterp.repl(cout);
     lispInterp.terminate();
 
-    delete options;
-    if (!options->silent) {
-        cout << endl
-             << "Bye 👾" << endl;
-    }
     return 0;
 }

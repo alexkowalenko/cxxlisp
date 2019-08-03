@@ -8,7 +8,10 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
-            "configurationProvider": "vector-of-bool.cmake-tools"
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "includePath": [
+                "/Users/alex/Development/lisp-proj/cxxlisp/include"
+            ]
         }
     ],
     "version": 4

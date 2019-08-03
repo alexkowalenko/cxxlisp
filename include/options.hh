@@ -15,7 +15,7 @@ public:
     bool readline = true;
 };
 
-Options* getOptions(int argc, char* argv[]);
+Options getOptions(int argc, char* argv[]);
 
 } // namespace ax
 

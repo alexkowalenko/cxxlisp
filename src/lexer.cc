@@ -17,7 +17,7 @@ namespace ax {
 
 const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
 
-bool isID(char c)
+inline bool isID(char c)
 {
     return isalnum(c) || lispIdentifiers.find(c) != string::npos;
 }
