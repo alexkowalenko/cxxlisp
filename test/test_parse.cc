@@ -126,6 +126,37 @@ BOOST_AUTO_TEST_CASE(test_parser_TF)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_quote)
+{
+    vector<TestParser> tests = {
+        { "'a", "(quote a)" },
+        { "('a 'b 'c)", "((quote a) (quote b) (quote c))" },
+        { "('a '(b c))", "((quote a) (quote (b c)))" },
+        { "('(a b) 'c)", "((quote (a b)) (quote c))" },
+    };
+
+    test_Parser(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_backquote)
+{
+    vector<TestParser> tests = {
+        // backquote
+        { "`a", "(backquote a)" },
+        { "(`a `b `c)", "((backquote a) (backquote b) (backquote c))" },
+        { "(`a `(b c))", "((backquote a) (backquote (b c)))" },
+        { "(`(a b) `c)", "((backquote (a b)) (backquote c))" },
+        // unquote
+        { ",", "unquote" },
+        { "`(cons x ,a)", "(backquote (cons x unquote a))" },
+        // splice-unquote
+        { ",@", "splice-unquote" },
+        { "`(cons x ,@ a)", "(backquote (cons x splice-unquote a))" },
+    };
+
+    test_Parser(tests);
+}
+
 void test_Parser(const vector<TestParser>& tests)
 {
     for (auto test : tests) {

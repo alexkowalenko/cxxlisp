@@ -12,6 +12,11 @@
 
 namespace ax {
 
+const Expr quote_atom = Atom("quote");
+const Expr backquote_atom = Atom("backquote");
+const Expr unquote_atom = Atom("unquote");
+const Expr splice_unquote_atom = Atom("splice-unquote");
+
 Parser::Parser(Lexer& lex)
     : lexer(lex)
 {
@@ -47,12 +52,33 @@ ParserResult Parser::parse_list()
             x = mkSymbolInt(tok.val);
             break;
         }
+        case TokenType::quote:
+        case TokenType::backquote: {
+            x = List{};
+            if (tok.type == TokenType::quote) {
+                as_List(x).push_back(quote_atom);
+            } else {
+                as_List(x).push_back(backquote_atom);
+            }
+            auto [next, eof] = parse();
+            as_List(x).push_back(next);
+            break;
+        }
+        case TokenType::comma: {
+            if (lexer.peek() == '@') {
+                lexer.get_token();
+                x = splice_unquote_atom;
+            } else {
+                x = unquote_atom;
+            }
+            break;
+        }
         case TokenType::eof:
             return { top, true };
         default:
             x = sF;
         }
-        if (x.type() != typeid(nullptr_t)) {
+        if (!is_nullptr(x)) {
             top.push_back(x);
         }
 
@@ -63,22 +89,50 @@ ParserResult Parser::parse_list()
 
 ParserResult Parser::parse()
 {
-    auto tok = lexer.get_token();
-    BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
-    switch (tok.type) {
-    case TokenType::open:
-        return parse_list();
-    case TokenType::close:
-        throw ParseException("Unexpected )");
-        break;
-    case TokenType::atom: {
-        auto x = mkSymbolInt(tok.val);
-        return { x, false };
-    }
-    case TokenType::eof:
-        return { sF, true };
-    default:
-        return { sF, false };
-    }
+    Expr cur = nullptr; // for quote objects, lists of atoms
+    while (true) {
+        auto tok = lexer.get_token();
+        BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
+        switch (tok.type) {
+        case TokenType::open: {
+            auto [x, res] = parse_list();
+            if (is_nullptr(cur)) {
+                return { x, res };
+            }
+            as_List(cur).push_back(x);
+            return { cur, false };
+        }
+        case TokenType::close:
+            throw ParseException("Unexpected )");
+            break;
+        case TokenType::atom: {
+            auto x = mkSymbolInt(tok.val);
+            if (is_nullptr(cur)) {
+                return { x, false };
+            }
+            as_List(cur).push_back(x);
+
+            return { cur, false };
+        }
+        case TokenType::quote:
+            cur = List{ quote_atom };
+            break;
+        case TokenType::backquote: {
+            cur = List{ backquote_atom };
+            break;
+        }
+        case TokenType::comma: {
+            if (lexer.peek() == '@') {
+                lexer.get_token();
+                return { splice_unquote_atom, false };
+            }
+            return { unquote_atom, false };
+        }
+        case TokenType::eof:
+            return { sF, true };
+        default:
+            return { sF, false };
+        }
+    };
 }
 }

@@ -28,7 +28,7 @@ bool is_Atom(const Expr& s);
 bool is_Int(const Expr& s);
 bool is_List(const Expr& s);
 
-List as_List(const Expr& s);
+List& as_List(Expr& s);
 
 // Output
 

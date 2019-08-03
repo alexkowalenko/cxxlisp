@@ -12,7 +12,7 @@ using boost::any_cast;
 
 bool is_nullptr(const Expr& x)
 {
-    return x.type() != typeid(nullptr_t);
+    return x.type() == typeid(nullptr_t);
 };
 
 bool is_Atom(const Expr& s)
@@ -30,9 +30,9 @@ bool is_List(const Expr& s)
     return s.type() == typeid(List);
 };
 
-List as_List(const Expr& s)
+List& as_List(Expr& s)
 {
-    return any_cast<List>(s);
+    return any_cast<List&>(s);
 }
 
 ostream& operator<<(ostream& os, const Expr& s)

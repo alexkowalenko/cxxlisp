@@ -80,11 +80,12 @@ Token Lexer::get_token()
 
 wchar_t Lexer::peek()
 {
-    return wchar_t(0);
+    return lineReader.peek_char();
 };
 
 wchar_t Lexer::scan()
 {
-    return wchar_t(0);
+    return lineReader.get_char();
+    ;
 };
 }
