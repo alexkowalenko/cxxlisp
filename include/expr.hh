@@ -22,6 +22,8 @@ typedef bool Bool;
 typedef long Int;
 typedef list<boost::any> List;
 
+bool is_nullptr(const Expr& s);
+
 bool is_Atom(const Expr& s);
 bool is_Int(const Expr& s);
 bool is_List(const Expr& s);
@@ -34,8 +36,8 @@ ostream& operator<<(ostream& os, const Expr& e);
 
 // Bool
 
-const shared_ptr<Expr> sF = make_shared<Expr>(Bool(false));
-const shared_ptr<Expr> sT = make_shared<Expr>(Bool(false));
+const Expr sF = Bool(false);
+const Expr sT = Bool(true);
 
 } // namespace ax
 

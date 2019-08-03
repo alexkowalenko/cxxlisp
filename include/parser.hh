@@ -12,14 +12,21 @@
 
 namespace ax {
 
+struct ParserResult {
+    Expr val;
+    bool eof;
+};
+
 class Parser {
 public:
     Parser(Lexer&);
 
-    shared_ptr<Expr> parse();
+    ParserResult parse();
 
 private:
+    ParserResult parse_list();
+
     Lexer& lexer;
 };
 }
-#endif //
+#endif

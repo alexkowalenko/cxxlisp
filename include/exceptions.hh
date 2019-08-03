@@ -8,6 +8,7 @@
 #define EXCEPTION_HH
 
 #include <exception>
+#include <string>
 
 namespace ax {
 
@@ -18,8 +19,21 @@ class EOFException : exception {
 
 class UnknownToken : exception {
 public:
-    UnknownToken(char t) { tok = t; };
+    UnknownToken(char t)
+        : tok(t){};
     char tok;
+};
+
+class ParseException : exception {
+public:
+    ParseException(string e)
+        : error(e){};
+
+    const char* what() const noexcept override
+    {
+        return error.c_str();
+    }
+    string error;
 };
 }
 #endif

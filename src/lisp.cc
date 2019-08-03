@@ -32,29 +32,41 @@ void Lisp::repl(ostream& ostr)
 {
     unique_ptr<LineReader> rl;
     if (opt.readline) {
-        rl = make_unique<LineReaderReadLine>();
+        // rl = make_unique<LineReaderReadLine>();
         rl = make_unique<LineReaderReplxx>();
     } else {
         rl = make_unique<LineReaderStream>(cin);
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    try {
-        while (true) {
-            auto expr = parser.parse();
-            ostr << *expr << endl;
+
+    while (true) {
+        ParserResult res;
+        try {
+            res = parser.parse();
+
+        } catch (UnknownToken& e) {
+            cerr << "Unknown token: " << e.tok << endl
+                 << flush;
+            continue;
+        } catch (ParseException& e) {
+            cerr << "Parse error: " << e.what() << endl
+                 << flush;
+            continue;
+        } catch (exception& e) {
+            cerr << "Exception: " << e.what() << endl
+                 << flush;
+            continue;
+        } catch (...) {
+            cerr << "Unknown exception!" << endl
+                 << flush;
+            continue;
         }
-    } catch (UnknownToken& e) {
-        cerr << "Unknown token: " << e.tok << endl
-             << flush;
-    } catch (EOFException& e) {
-        ; // Finish normally
-    } catch (exception& e) {
-        cerr << "Exception: " << e.what() << endl
-             << flush;
-    } catch (...) {
-        cerr << "Unknown exception!" << endl
-             << flush;
+
+        ostr << ">" << res.val << endl;
+        if (res.eof) {
+            break;
+        }
     }
 }
 

@@ -4,10 +4,16 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#include <expr.hh>
+#include "expr.hh"
+
 namespace ax {
 
 using boost::any_cast;
+
+bool is_nullptr(const Expr& x)
+{
+    return x.type() != typeid(nullptr_t);
+};
 
 bool is_Atom(const Expr& s)
 {
