@@ -15,12 +15,12 @@ Parser::Parser(Lexer& lex)
 {
 }
 
-Expr Parser::parse()
+shared_ptr<Expr> Parser::parse()
 {
     auto tok = lexer.get_token();
     if (tok.type == TokenType::eof) {
         throw EOFException();
     }
-    return List({});
+    return sF; // make_shared<Expr>(List({}));
 }
 }

@@ -35,6 +35,8 @@ ostream& operator<<(ostream& os, const Expr& s)
         os << any_cast<Atom>(s);
     } else if (s.type() == typeid(Int)) {
         os << any_cast<Int>(s);
+    } else if (s.type() == typeid(Bool)) {
+        os << (any_cast<Bool>(s) ? "t" : "nil");
     } else if (s.type() == typeid(List)) {
         os << '(';
         auto l = any_cast<List>(s);

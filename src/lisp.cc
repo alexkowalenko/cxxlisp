@@ -10,6 +10,7 @@
 
 #include "exceptions.hh"
 #include "linereaderRL.hh"
+#include "linereaderReplxx.hh"
 #include "linereaderStream.hh"
 #include "parser.hh"
 
@@ -31,16 +32,17 @@ void Lisp::repl(ostream& ostr)
 {
     unique_ptr<LineReader> rl;
     if (opt.readline) {
-        rl = unique_ptr<LineReader>(new LineReaderReadLine());
+        rl = make_unique<LineReaderReadLine>();
+        rl = make_unique<LineReaderReplxx>();
     } else {
-        rl = unique_ptr<LineReader>(new LineReaderStream(cin));
+        rl = make_unique<LineReaderStream>(cin);
     }
     Lexer lex(*rl);
     Parser parser(lex);
     try {
         while (true) {
             auto expr = parser.parse();
-            ostr << expr << endl;
+            ostr << *expr << endl;
         }
     } catch (UnknownToken& e) {
         cerr << "Unknown token: " << e.tok << endl

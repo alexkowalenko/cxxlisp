@@ -16,7 +16,7 @@ class Parser {
 public:
     Parser(Lexer&);
 
-    Expr parse();
+    shared_ptr<Expr> parse();
 
 private:
     Lexer& lexer;

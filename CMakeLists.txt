@@ -25,13 +25,18 @@ link_libraries(${Readline_LIBRARY})
 
 include_directories(include)
 
+# Third party libraries local to this project
+
+add_subdirectory(third_party/replxx)
+include_directories("${PROJECT_SOURCE_DIR}/third_party/replxx/include")
+
 # CXX Lisp build
 
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 add_library(libcxxlisp STATIC ${source_files})
 
 add_executable(cxxlisp cmd/cxxlisp.cc)
-target_link_libraries(cxxlisp libcxxlisp)
+target_link_libraries(cxxlisp libcxxlisp replxx)
 
 # Test programs build
 
