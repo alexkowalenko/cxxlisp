@@ -13,9 +13,14 @@ class Options {
 public:
     bool silent = false;
     bool readline = true;
+    bool parse_only = false;
+
+    // Debug options
+    bool debug_expr = false;
 };
 
-Options getOptions(int argc, char* argv[]);
+Options
+getOptions(int argc, char* argv[]);
 
 } // namespace ax
 

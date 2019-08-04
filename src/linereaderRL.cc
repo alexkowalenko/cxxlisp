@@ -20,10 +20,12 @@
 
 namespace ax {
 
-inline char const* prompt = "++> ";
+namespace {
+    char const* prompt = "++> ";
 
-inline const string history_file = ".cxxlisp";
-inline const int max_history = 1000;
+    const string history_file = ".cxxlisp";
+    const int max_history = 1000;
+};
 
 LineReaderReadLine::LineReaderReadLine()
     : ptr(-1)

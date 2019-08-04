@@ -17,5 +17,10 @@ public:
     virtual wchar_t peek_char() = 0;
     virtual void push_char(wchar_t c) = 0;
 };
+
+inline wchar_t operator>>(LineReader& r, wchar_t& c)
+{
+    return c = r.get_char();
+}
 }
 #endif

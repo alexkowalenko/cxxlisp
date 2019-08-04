@@ -23,5 +23,10 @@ public:
 private:
     LineReader& lineReader;
 };
+
+inline Token operator>>(Lexer& l, Token& t)
+{
+    return t = l.get_token();
+}
 }
 #endif

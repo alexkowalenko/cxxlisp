@@ -44,6 +44,15 @@ void Lisp::repl(ostream& ostr)
         ParserResult res;
         try {
             res = parser.parse();
+            ostr << "> ";
+            if (opt.parse_only) {
+                cout << res.val << endl;
+                if (res.eof) {
+                    break;
+                }
+                continue;
+            }
+            ostr << res.val << endl;
 
         } catch (UnknownToken& e) {
             cerr << "Unknown token: " << e.tok << endl
@@ -62,8 +71,6 @@ void Lisp::repl(ostream& ostr)
                  << flush;
             continue;
         }
-
-        ostr << ">" << res.val << endl;
         if (res.eof) {
             break;
         }

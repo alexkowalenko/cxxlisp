@@ -15,11 +15,13 @@
 
 namespace ax {
 
-const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
+namespace {
+    const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
 
-inline bool isID(char c)
-{
-    return isalnum(c) || lispIdentifiers.find(c) != string::npos;
+    bool isID(char c)
+    {
+        return isalnum(c) || lispIdentifiers.find(c) != string::npos;
+    }
 }
 
 Lexer::Lexer(LineReader& r)
@@ -31,7 +33,8 @@ Token Lexer::get_token()
 {
     try {
     top:
-        auto c = lineReader.get_char();
+        wchar_t c;
+        lineReader >> c;
         switch (c) {
         case '(':
             return Token(TokenType::open);
@@ -48,7 +51,8 @@ Token Lexer::get_token()
 
         case ';':
             // comment
-            for (auto r = lineReader.get_char(); r != '\n'; r = lineReader.get_char()) {
+            wchar_t r;
+            for (lineReader >> r; r != '\n'; lineReader >> r) {
             }
             goto top;
         case '#':
@@ -74,7 +78,7 @@ Token Lexer::get_token()
         cerr << "Unknown tokent " << c << endl;
         throw UnknownToken(c);
     } catch (EOFException& e) {
-        return Token(TokenType::eof);
+        return Token();
     };
 };
 

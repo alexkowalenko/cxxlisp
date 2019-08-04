@@ -15,20 +15,25 @@
 namespace ax {
 using namespace std;
 
-typedef boost::any Expr;
+using Expr = boost::any;
+using boost::any_cast;
 
-typedef string Atom;
-typedef bool Bool;
-typedef long Int;
-typedef list<boost::any> List;
+using Atom = string;
+using Bool = bool;
+using Int = long;
+using List = list<boost::any>;
 
-bool is_nullptr(const Expr& s);
+template <typename T>
+constexpr bool is_a(const Expr& s)
+{
+    return s.type() == typeid(T);
+}
 
-bool is_Atom(const Expr& s);
-bool is_Int(const Expr& s);
-bool is_List(const Expr& s);
-
-List& as_List(Expr& s);
+template <typename T>
+constexpr T& as_a(Expr& s)
+{
+    return any_cast<T&>(s);
+}
 
 // Output
 
@@ -36,8 +41,8 @@ ostream& operator<<(ostream& os, const Expr& e);
 
 // Bool
 
-const Expr sF = Bool(false);
-const Expr sT = Bool(true);
+constexpr Bool sF = Bool{ false };
+constexpr Bool sT = Bool{ true };
 
 } // namespace ax
 

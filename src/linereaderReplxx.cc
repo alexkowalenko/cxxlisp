@@ -19,10 +19,12 @@
 
 namespace ax {
 
-inline char const* prompt = "++> ";
+namespace {
+    char const* prompt = "++> ";
 
-inline const string history_file = ".cxxlisp.replxx";
-inline const int max_history = 1000;
+    const string history_file = ".cxxlisp.replxx";
+    const int max_history = 1000;
+};
 
 LineReaderReplxx::LineReaderReplxx()
     : ptr(-1)

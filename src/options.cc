@@ -21,7 +21,8 @@ Options getOptions(int argc, char* argv[])
     desc.add_options()(
         "help", "produce help message")(
         "silent", po::value<bool>(&(options.silent))->implicit_value(true), "silent, don't print the prompt")(
-        "noreadline", po::value<bool>(&(options.readline))->implicit_value(false), "don't use readline for input");
+        "noreadline", po::value<bool>(&(options.readline))->implicit_value(false), "don't use readline for input")(
+        "parseonly", po::value<bool>(&(options.parse_only))->implicit_value(true), "only parse the input and print result");
 
     try {
         po::variables_map vm;

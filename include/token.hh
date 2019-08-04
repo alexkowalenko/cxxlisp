@@ -29,6 +29,8 @@ enum class TokenType {
 
 class Token {
 public:
+    Token()
+        : type(TokenType::eof){};
     Token(TokenType t)
         : type(t){};
     Token(TokenType t, string s)

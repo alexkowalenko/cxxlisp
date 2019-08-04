@@ -12,17 +12,17 @@
 
 namespace ax {
 
-const Expr quote_atom = Atom("quote");
-const Expr backquote_atom = Atom("backquote");
-const Expr unquote_atom = Atom("unquote");
-const Expr splice_unquote_atom = Atom("splice-unquote");
+const Atom quote_atom = Atom("quote");
+const Atom backquote_atom = Atom("backquote");
+const Atom unquote_atom = Atom("unquote");
+const Atom splice_unquote_atom = Atom("splice-unquote");
 
 Parser::Parser(Lexer& lex)
     : lexer(lex)
 {
 }
 
-Expr mkSymbolInt(string atom)
+Expr mkSymbolInt(string& atom)
 {
     if (atom == "nil") {
         return sF;
@@ -34,7 +34,8 @@ Expr mkSymbolInt(string atom)
 
 ParserResult Parser::parse_list()
 {
-    auto tok = lexer.get_token();
+    Token tok;
+    lexer >> tok;
     // BOOST_LOG_TRIVIAL(trace) << "parse_list: " << tok;
     List top = List{};
     while (true) {
@@ -56,12 +57,12 @@ ParserResult Parser::parse_list()
         case TokenType::backquote: {
             x = List{};
             if (tok.type == TokenType::quote) {
-                as_List(x).push_back(quote_atom);
+                as_a<List>(x).push_back(quote_atom);
             } else {
-                as_List(x).push_back(backquote_atom);
+                as_a<List>(x).push_back(backquote_atom);
             }
             auto [next, eof] = parse();
-            as_List(x).push_back(next);
+            as_a<List>(x).push_back(next);
             break;
         }
         case TokenType::comma: {
@@ -78,11 +79,12 @@ ParserResult Parser::parse_list()
         default:
             x = sF;
         }
-        if (!is_nullptr(x)) {
+        if (!is_a<nullptr_t>(x)) {
             top.push_back(x);
         }
 
-        tok = lexer.get_token();
+        // tok = lexer.get_token();
+        lexer >> tok;
         BOOST_LOG_TRIVIAL(trace) << "parse_list: " << tok << " list: " << top.size();
     }
 }
@@ -91,15 +93,16 @@ ParserResult Parser::parse()
 {
     Expr cur = nullptr; // for quote objects, lists of atoms
     while (true) {
-        auto tok = lexer.get_token();
+        Token tok;
+        lexer >> tok;
         BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
         switch (tok.type) {
         case TokenType::open: {
             auto [x, res] = parse_list();
-            if (is_nullptr(cur)) {
+            if (is_a<nullptr_t>(cur)) {
                 return { x, res };
             }
-            as_List(cur).push_back(x);
+            as_a<List>(cur).push_back(x);
             return { cur, false };
         }
         case TokenType::close:
@@ -107,10 +110,10 @@ ParserResult Parser::parse()
             break;
         case TokenType::atom: {
             auto x = mkSymbolInt(tok.val);
-            if (is_nullptr(cur)) {
+            if (is_a<nullptr_t>(cur)) {
                 return { x, false };
             }
-            as_List(cur).push_back(x);
+            as_a<List>(cur).push_back(x);
 
             return { cur, false };
         }
