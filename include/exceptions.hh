@@ -14,29 +14,45 @@ namespace ax {
 
 using namespace std;
 
-class EOFException : exception {
+class EOFException : public exception {
 };
 
-class UnknownToken : exception {
+class UnknownToken : public exception {
 public:
     UnknownToken(char t)
         : tok(t){};
     char tok;
 };
 
-class ParseException : exception {
+class AXException : public exception {
 public:
-    ParseException(string e)
-        : error(e){};
+    AXException(const string& s)
+        : whatStr(s){};
 
     const char* what() const noexcept override
     {
-        return error.c_str();
+        return whatStr.c_str();
     }
-    string error;
+
+protected:
+    string whatStr;
+};
+
+class ParseException : public AXException {
+public:
+    ParseException(const string& e)
+        : AXException(e){};
 };
 
 class EndBracketException : exception {
+};
+
+class EvalException : public AXException {
+public:
+    EvalException(const string& s)
+        : AXException(s)
+    {
+    }
 };
 }
 #endif

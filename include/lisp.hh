@@ -21,7 +21,7 @@ public:
     Lisp(const Options& opt);
 
     void init();
-    void repl(ostream& os);
+    void repl(istream& in, ostream& os);
     void terminate();
 
 private:

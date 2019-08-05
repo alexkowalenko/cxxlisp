@@ -21,7 +21,7 @@ using boost::any_cast;
 using Atom = string;
 using Bool = bool;
 using Int = long;
-using List = list<boost::any>;
+using List = vector<boost::any>;
 
 template <typename T>
 constexpr bool is_a(const Expr& s)
@@ -44,6 +44,17 @@ string to_string(const Expr& e);
 
 constexpr Bool sF = Bool{ false };
 constexpr Bool sT = Bool{ true };
+
+constexpr bool is_atomic(const Expr& s)
+{
+    return s.type() == typeid(Atom) || s.type() == typeid(Bool) || s.type() == typeid(Int);
+}
+
+constexpr bool is_false(Expr& s)
+{
+    return (s.type() == typeid(Bool) && as_a<Bool>(s) == sF)
+        || (s.type() == typeid(List) && as_a<List>(s).size() == 0);
+}
 
 } // namespace ax
 

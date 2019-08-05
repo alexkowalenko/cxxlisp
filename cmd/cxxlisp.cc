@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     Lisp lispInterp
         = Lisp(options);
     lispInterp.init();
-    lispInterp.repl(cout);
+    lispInterp.repl(cin, cout);
     lispInterp.terminate();
 
     return 0;

@@ -31,5 +31,10 @@ private:
 
     Lexer& lexer;
 };
+
+const Atom quote_atom = Atom("quote");
+const Atom backquote_atom = Atom("backquote");
+const Atom unquote_atom = Atom("unquote");
+const Atom splice_unquote_atom = Atom("splice-unquote");
 }
 #endif
