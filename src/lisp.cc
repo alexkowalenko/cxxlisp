@@ -55,20 +55,19 @@ void Lisp::repl(ostream& ostr)
             ostr << res.val << endl;
 
         } catch (UnknownToken& e) {
-            cerr << "Unknown token: " << e.tok << endl
-                 << flush;
+            cerr << "Unknown token: " << e.tok << endl;
             continue;
         } catch (ParseException& e) {
-            cerr << "Parse error: " << e.what() << endl
-                 << flush;
+            cerr << "Parse error: " << e.what() << endl;
+            continue;
+        } catch (EndBracketException& e) {
+            cerr << "Parse error: Extra bracket found" << endl;
             continue;
         } catch (exception& e) {
-            cerr << "Exception: " << e.what() << endl
-                 << flush;
+            cerr << "Exception: " << e.what() << endl;
             continue;
         } catch (...) {
-            cerr << "Unknown exception!" << endl
-                 << flush;
+            cerr << "Unknown exception!" << endl;
             continue;
         }
         if (res.eof) {

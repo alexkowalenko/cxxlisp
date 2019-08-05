@@ -38,6 +38,7 @@ constexpr T& as_a(Expr& s)
 // Output
 
 ostream& operator<<(ostream& os, const Expr& e);
+string to_string(const Expr& e);
 
 // Bool
 

@@ -26,6 +26,9 @@ public:
 private:
     ParserResult parse_list();
 
+    Expr parse_comma();
+    ParserResult parse_quote(Token&);
+
     Lexer& lexer;
 };
 }

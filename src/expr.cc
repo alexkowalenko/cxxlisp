@@ -6,6 +6,8 @@
 
 #include "expr.hh"
 
+#include <sstream>
+
 namespace ax {
 
 ostream& operator<<(ostream& os, const Expr& s)
@@ -31,5 +33,12 @@ ostream& operator<<(ostream& os, const Expr& s)
         os << "Unprintable type";
     }
     return os;
+}
+
+string to_string(const Expr& e)
+{
+    stringstream ss;
+    ss << e;
+    return ss.str();
 }
 }

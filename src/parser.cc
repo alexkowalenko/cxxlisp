@@ -32,110 +32,72 @@ Expr mkSymbolInt(string& atom)
     return Atom(atom);
 }
 
+Expr Parser::parse_comma()
+{
+    if (lexer.peek() == '@') {
+        lexer.get_token();
+        return splice_unquote_atom;
+    }
+    return unquote_atom;
+}
+
+ParserResult Parser::parse_quote(Token& tok)
+{
+    auto x = List{};
+    if (tok.type == TokenType::quote) {
+        x.push_back(quote_atom);
+    } else {
+        x.push_back(backquote_atom);
+    }
+    auto [next, eof] = parse();
+    x.push_back(next);
+    return { x, eof };
+}
+
 ParserResult Parser::parse_list()
 {
-    Token tok;
-    lexer >> tok;
-    // BOOST_LOG_TRIVIAL(trace) << "parse_list: " << tok;
+    bool eof = false;
     List top = List{};
     while (true) {
-        Expr x = nullptr;
-        switch (tok.type) {
-        case TokenType::open: {
-            auto res = parse_list();
-            x = res.val;
-            break;
-        }
-        case TokenType::close: {
-            return { top, false };
-        }
-        case TokenType::atom: {
-            x = mkSymbolInt(tok.val);
-            break;
-        }
-        case TokenType::quote:
-        case TokenType::backquote: {
-            x = List{};
-            if (tok.type == TokenType::quote) {
-                as_a<List>(x).push_back(quote_atom);
-            } else {
-                as_a<List>(x).push_back(backquote_atom);
+        try {
+            auto res = parse();
+            eof = res.eof;
+            if (!is_a<nullptr_t>(res.val)) {
+                top.push_back(res.val);
             }
-            auto [next, eof] = parse();
-            as_a<List>(x).push_back(next);
-            break;
+        } catch (EndBracketException) {
+            return { top, eof };
         }
-        case TokenType::comma: {
-            if (lexer.peek() == '@') {
-                lexer.get_token();
-                x = splice_unquote_atom;
-            } else {
-                x = unquote_atom;
-            }
-            break;
-        }
-        case TokenType::eof:
-            return { top, true };
-        default:
-            x = sF;
-        }
-        if (!is_a<nullptr_t>(x)) {
-            top.push_back(x);
-        }
-
-        // tok = lexer.get_token();
-        lexer >> tok;
-        BOOST_LOG_TRIVIAL(trace) << "parse_list: " << tok << " list: " << top.size();
     }
 }
 
 ParserResult Parser::parse()
 {
-    Expr cur = nullptr; // for quote objects, lists of atoms
-    while (true) {
-        Token tok;
-        lexer >> tok;
-        BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
-        switch (tok.type) {
-        case TokenType::open: {
-            auto [x, res] = parse_list();
-            if (is_a<nullptr_t>(cur)) {
-                return { x, res };
-            }
-            as_a<List>(cur).push_back(x);
-            return { cur, false };
-        }
-        case TokenType::close:
-            throw ParseException("Unexpected )");
-            break;
-        case TokenType::atom: {
-            auto x = mkSymbolInt(tok.val);
-            if (is_a<nullptr_t>(cur)) {
-                return { x, false };
-            }
-            as_a<List>(cur).push_back(x);
+    Token tok;
+    lexer >> tok;
+    BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
+    switch (tok.type) {
+    case TokenType::open:
+        return parse_list();
 
-            return { cur, false };
-        }
-        case TokenType::quote:
-            cur = List{ quote_atom };
-            break;
-        case TokenType::backquote: {
-            cur = List{ backquote_atom };
-            break;
-        }
-        case TokenType::comma: {
-            if (lexer.peek() == '@') {
-                lexer.get_token();
-                return { splice_unquote_atom, false };
-            }
-            return { unquote_atom, false };
-        }
-        case TokenType::eof:
-            return { sF, true };
-        default:
-            return { sF, false };
-        }
-    };
+    case TokenType::close:
+        throw EndBracketException();
+
+    case TokenType::atom:
+        return { mkSymbolInt(tok.val), false };
+
+    case TokenType::quote:
+    case TokenType::backquote:
+        return parse_quote(tok);
+
+    case TokenType::comma: {
+        return { parse_comma(), false };
+    }
+    case TokenType::eof:
+        return { sF, true };
+
+    default:
+        throw ParseException("Unknown token "s + string(tok));
+    }
 }
 }

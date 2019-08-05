@@ -12,7 +12,7 @@ namespace ax {
 
 wchar_t LineReaderStream::get_char()
 {
-    if (is.eof())
+    if (!is)
         throw EOFException();
     char ch;
     is >> ch;
@@ -21,7 +21,7 @@ wchar_t LineReaderStream::get_char()
 
 wchar_t LineReaderStream::peek_char()
 {
-    if (is.eof())
+    if (!is)
         throw EOFException();
     return is.peek();
 }

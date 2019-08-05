@@ -37,6 +37,8 @@ public:
         : type(t)
         , val(s){};
 
+    explicit operator string() const;
+
     TokenType type;
     string val;
 };

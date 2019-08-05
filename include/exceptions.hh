@@ -35,5 +35,8 @@ public:
     }
     string error;
 };
+
+class EndBracketException : exception {
+};
 }
 #endif

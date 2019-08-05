@@ -12,43 +12,38 @@ namespace ax {
 
 using namespace std;
 
+Token::operator string() const
+{
+    switch (type) {
+    case TokenType::open:
+        return "("s;
+    case TokenType::close:
+        return ")"s;
+    case TokenType::dot:
+        return "."s;
+    case TokenType::quote:
+        return "\""s;
+    case TokenType::backquote:
+        return "`"s;
+    case TokenType::comma:
+        return ","s;
+    case TokenType::at:
+        return "@"s;
+    case TokenType::hash:
+        return "#"s;
+    case TokenType::atom:
+        return val;
+    case TokenType::string:
+        return "\"" + val + "\"";
+    case TokenType::eof:
+        return "eof"s;
+    default:
+        return ""s;
+    }
+}
+
 ostream& operator<<(ostream& os, const Token& t)
 {
-    switch (t.type) {
-    case TokenType::open:
-        os << '(';
-        break;
-    case TokenType::close:
-        os << ')';
-        break;
-    case TokenType::dot:
-        os << '.';
-        break;
-    case TokenType::quote:
-        os << '\'';
-        break;
-    case TokenType::backquote:
-        os << '`';
-        break;
-    case TokenType::comma:
-        os << ',';
-        break;
-    case TokenType::at:
-        os << '@';
-        break;
-    case TokenType::hash:
-        os << '#';
-        break;
-    case TokenType::atom:
-        os << t.val;
-        break;
-    case TokenType::string:
-        os << '"' << t.val << '"';
-        break;
-    case TokenType::eof:
-        os << "eof" << t.val;
-        break;
-    }
-    return os;
+    return os << string(t);
 }
 }
