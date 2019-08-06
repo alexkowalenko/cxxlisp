@@ -38,6 +38,7 @@ public:
         , val(s){};
 
     explicit operator string() const;
+    friend ostream& operator<<(ostream& os, const Token& t);
 
     TokenType type;
     string val;

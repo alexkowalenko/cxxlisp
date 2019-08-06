@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(expr_is)
 BOOST_AUTO_TEST_CASE(expr_as)
 {
     Expr c = List({ Atom("hello"), Int(1) });
-    BOOST_TEST(as_a<List>(c).size() == size_t(2));
+    BOOST_TEST(any_cast<List>(c).size() == size_t(2));
 }
 
 BOOST_AUTO_TEST_CASE(expr_print)

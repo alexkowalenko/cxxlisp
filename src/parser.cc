@@ -17,7 +17,7 @@ Parser::Parser(Lexer& lex)
 {
 }
 
-Expr mkSymbolInt(string& atom)
+Expr mkSymbolInt(const string& atom)
 {
     if (atom == "nil") {
         return sF;

@@ -15,7 +15,7 @@
 namespace ax {
 
 using namespace std;
-typedef Expr (*PrimFunct)(List& args);
+typedef Expr (*PrimFunct)(const string& name, List& args);
 
 struct Primitive {
     string name;

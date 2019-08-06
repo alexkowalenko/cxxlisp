@@ -31,7 +31,8 @@ Expr Evaluator::eval(Expr& e)
     // Eval basic types
     if (is_a<Bool>(e)) {
         return e;
-    } else if (is_a<Atom>(e)) {
+    }
+    if (is_a<Atom>(e)) {
         throw EvalException("Can't evaluate "s + to_string(e));
     }
 
@@ -41,7 +42,7 @@ Expr Evaluator::eval(Expr& e)
     }
 
     // Expression is a list
-    List e_list = as_a<List>(e);
+    List e_list = any_cast<List>(e);
     if (e_list.size() == 0) {
         return sF;
     }
@@ -49,7 +50,7 @@ Expr Evaluator::eval(Expr& e)
     auto e_car = e_list.front();
     if (is_a<Atom>(e_car)) {
         // Atom in function position
-        Atom name = as_a<Atom>(e_car);
+        Atom name = any_cast<Atom>(e_car);
 
         // quote
         if (name == quote_atom) {
@@ -66,7 +67,7 @@ Expr Evaluator::eval(Expr& e)
             if (check) {
                 throw EvalException(*check);
             }
-            return prim->second.pf(result);
+            return prim->second.pf(name, result);
         }
     }
 

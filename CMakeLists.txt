@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
+
+# Change compiler here
+set(AX_BASE_CLANG /usr/local/Cellar/llvm/8.0.0_1/bin)
+set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/clang++)
+
 project (cxxlisp LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wall)
 
 enable_testing()
+
+#set(CMAKE_CXX_CLANG_TIDY "/Users/alex/Development/lisp-proj/cxxlisp/build/clang-tidy;-checks=*")
 
 # Add custom Find cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")

@@ -7,12 +7,14 @@
 #ifndef EXPR_HH
 #define EXPR_HH
 
-#include <boost/any.hpp>
 #include <iostream>
 #include <list>
 #include <string>
 
+#include <boost/any.hpp>
+
 namespace ax {
+
 using namespace std;
 
 using Expr = boost::any;
@@ -27,12 +29,6 @@ template <typename T>
 constexpr bool is_a(const Expr& s)
 {
     return s.type() == typeid(T);
-}
-
-template <typename T>
-constexpr T& as_a(Expr& s)
-{
-    return any_cast<T&>(s);
 }
 
 // Output
@@ -52,8 +48,8 @@ constexpr bool is_atomic(const Expr& s)
 
 constexpr bool is_false(Expr& s)
 {
-    return (s.type() == typeid(Bool) && as_a<Bool>(s) == sF)
-        || (s.type() == typeid(List) && as_a<List>(s).size() == 0);
+    return (s.type() == typeid(Bool) && any_cast<Bool>(s) == sF)
+        || (s.type() == typeid(List) && any_cast<List>(s).size() == 0);
 }
 
 } // namespace ax

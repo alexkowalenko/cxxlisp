@@ -12,7 +12,7 @@ namespace ax {
 
 map<string, Primitive> prim_table;
 
-Expr atom(List& args)
+Expr atom(const string&, List& args)
 {
     if (is_atomic(args[0]) || is_false(args[0])) {
         return sT;
@@ -20,14 +20,14 @@ Expr atom(List& args)
     return sF;
 }
 
-Expr symbolp(List& args)
+Expr symbolp(const string&, List& args)
 {
     auto a = args.front();
     if (is_atomic(a)
-        && (a.type() == typeid(Atom) || a.type() == typeid(Bool))) {
+        && (is_a<Atom>(a) || is_a<Bool>(a))) {
         return sT;
     }
-    if (a.type() == typeid(List) && as_a<List>(a).size() == 0) {
+    if (is_a<List>(a) && any_cast<List>(a).size() == 0) {
         return sT;
     }
     return sF;
