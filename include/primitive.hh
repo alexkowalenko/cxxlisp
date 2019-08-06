@@ -21,7 +21,10 @@ struct Primitive {
     string name;
     PrimFunct pf;
     ArgConstraint cons;
+    bool preEval = false;
 };
+
+inline const bool preEvaluate = true;
 
 extern map<string, Primitive> prim_table;
 

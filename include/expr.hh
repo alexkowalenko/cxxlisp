@@ -41,12 +41,18 @@ string to_string(const Expr& e);
 constexpr Bool sF = Bool{ false };
 constexpr Bool sT = Bool{ true };
 
+constexpr bool is_sF(const Expr& e)
+{
+    return is_a<Bool>(e) && any_cast<Bool>(e) == sF;
+}
+
 constexpr bool is_atomic(const Expr& s)
 {
     return s.type() == typeid(Atom) || s.type() == typeid(Bool) || s.type() == typeid(Int);
 }
 
 constexpr bool is_false(Expr& s)
+// Is the Bool sF, or is the empty list
 {
     return (s.type() == typeid(Bool) && any_cast<Bool>(s) == sF)
         || (s.type() == typeid(List) && any_cast<List>(s).size() == 0);

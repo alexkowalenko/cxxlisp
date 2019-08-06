@@ -62,7 +62,10 @@ Expr Evaluator::eval(Expr& e)
 
         // Lookup primitive table
         if (auto prim = prim_table.find(name); prim != prim_table.end()) {
-            auto result = eval_list(List(e_list.begin() + 1, e_list.end()));
+            auto result = List(e_list.begin() + 1, e_list.end());
+            if (prim->second.preEval) {
+                result = eval_list(result);
+            }
             auto check = checkArgs(prim->second.cons, name, result);
             if (check) {
                 throw EvalException(*check);
