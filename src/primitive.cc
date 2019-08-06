@@ -159,6 +159,14 @@ Expr rplacd(const string& name, List& args)
     throw EvalException("rplaca first argument not a list");
 }
 
+Expr numberp(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        return sT;
+    }
+    return sF;
+}
+
 void init_prims()
 {
     vector<Primitive> defs{
@@ -183,6 +191,9 @@ void init_prims()
 
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
+
+        { "numberp", &numberp, one_arg, preEvaluate },
+        { "integerp", &numberp, one_arg, preEvaluate },
     };
 
     for (auto p : defs) {

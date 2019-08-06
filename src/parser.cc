@@ -24,6 +24,11 @@ Expr mkSymbolInt(const string& atom)
     } else if (atom == "t") {
         return sT;
     }
+    try {
+        return Int{ stol(atom) };
+    } catch (invalid_argument) { //fallthrough to be an atom
+    } catch (out_of_range) {
+    };
     return Atom(atom);
 }
 

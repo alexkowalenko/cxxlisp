@@ -5,27 +5,12 @@
 //
 
 #define BOOST_TEST_MODULE test_eval
-#include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup.hpp>
+
 #include <boost/test/unit_test.hpp>
-#include <sstream>
-#include <vector>
 
-#include "exceptions.hh"
-#include "linereaderStream.hh"
-#include "lisp.hh"
+#include "test.hh"
 
-using namespace ax;
 using namespace std;
-namespace logging = boost::log;
-
-struct TestEval {
-    string input;
-    string output;
-};
-
-void test_Evaluator(const vector<TestEval>& tests);
 
 BOOST_AUTO_TEST_CASE(test_eval)
 {
@@ -66,6 +51,8 @@ BOOST_AUTO_TEST_CASE(test_eval_atom)
         { "(atom ())", "t" },
         { "(atom (cdr '(a)))", "t" },
         { "(atom (cdr '(a b)))", "nil" },
+
+        { "(atom 1)", "t" },
     };
     test_Evaluator(tests);
 }
@@ -75,10 +62,12 @@ BOOST_AUTO_TEST_CASE(test_eval_symbolp)
     vector<TestEval> tests = {
         { "(symbolp 'a)", "t" },
         { "(symbolp '(a b))", "nil" },
-        //{ "(symbolp (car '(a b)))", "t" },
+        { "(symbolp (car '(a b)))", "t" },
         { "(symbolp t)", "t" },
         { "(symbolp nil)", "t" },
         { "(symbolp '())", "t" },
+
+        { "(symbolp 3)", "nil" },
 
         { "(symbolp)", "Eval error: symbolp expecting an argument" },
         { "(symbolp nil nil)", "Eval error: symbolp expecting an argument" },
@@ -94,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_eval_null)
 
         { "(null 'a)", "nil" },
         { "(null t)", "nil" },
-        //{ "(null 1)", "nil" },
+        { "(null 1)", "nil" },
         { "(null '(a b))", "nil" },
         { "(null (list))", "t" },
 
@@ -112,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_eval_not)
 
         { "(not t)", "nil" },
         { "(not 'a)", "nil" },
-        //{"(not 1)", "nil"},
+        { "(not 1)", "nil" },
         { "(not '(a b))", "nil" },
         { "(not (list))", "t" },
 
@@ -144,15 +133,15 @@ BOOST_AUTO_TEST_CASE(test_eval_and)
         // R3R2
         //{"(and (= 2 2) (> 2 1))", "t"},
         //{"(and (= 2 2) (< 2 1))", "nil"},
-        // {"(and 1 2 'c '(f g))", "(f g)"},
+        { "(and 1 2 'c '(f g))", "(f g)" },
 
         { "(and)", "t" },
-        //{ "(and 1)", "1" },
-        //{ "(and 1 2)", "2" },
-        //{ "(and 1 2 3)", "3" },
-        //{ "(and 1 2 3 4)", "4" },
+        { "(and 1)", "1" },
+        { "(and 1 2)", "2" },
+        { "(and 1 2 3)", "3" },
+        { "(and 1 2 3 4)", "4" },
 
-        //{ "(and nil 2)", "nil" },
+        { "(and nil 2)", "nil" },
     };
     test_Evaluator(tests);
 }
@@ -181,15 +170,15 @@ BOOST_AUTO_TEST_CASE(test_eval_or)
         { "(or nil nil nil)", "nil" },
         //{"(or 'a (/ 3 0))", "a"},
 
-        //{ "(or)", "nil" },
-        //{ "(or 1)", "1" },
-        //{ "(or 1 2)", "1" },
-        //{ "(or 1 2 3)", "1" },
-        //{ "(or 1 2 3 4)", "1" },
+        { "(or)", "nil" },
+        { "(or 1)", "1" },
+        { "(or 1 2)", "1" },
+        { "(or 1 2 3)", "1" },
+        { "(or 1 2 3 4)", "1" },
 
-        //{ "(or nil 2)", "2" },
-        //{ "(or nil nil 3)", "3" },
-        //{ "(or nil nil nil 4)", "4" },
+        { "(or nil 2)", "2" },
+        { "(or nil nil 3)", "3" },
+        { "(or nil nil nil 4)", "4" },
     };
     test_Evaluator(tests);
 }
@@ -231,7 +220,7 @@ BOOST_AUTO_TEST_CASE(test_eval_consp)
         { "(consp 'a)", "nil" },
         { "(consp nil)", "nil" },
         { "(consp t)", "nil" },
-        // { "(consp 1)", "nil" },
+        { "(consp 1)", "nil" },
         { "(consp '())", "nil" },
         { "(consp (list))", "nil" },
 
@@ -259,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_eval_listp)
         // true if list and not empty
         { "(listp 'a)", "nil" },
         { "(listp t)", "nil" },
-        //{ "(listp 1)", "nil" },
+        { "(listp 1)", "nil" },
 
         { "(listp '())", "t" },
         { "(listp nil)", "t" }, // this is true as it is also the empty list
@@ -363,31 +352,4 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
         //{ "(f '(1 2 3))", "(1 a b)" },
     };
     test_Evaluator(tests);
-}
-
-void test_Evaluator(const vector<TestEval>& tests)
-{
-    Options options;
-    options.silent = true;
-    options.readline = false;
-
-    logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
-    Lisp lisp(options);
-    lisp.init();
-
-    for (auto test : tests) {
-        istringstream is(test.input);
-        ostringstream out;
-
-        //BOOST_TEST_CHECKPOINT(test.input);
-        lisp.repl(is, out);
-
-        string result = out.str();
-        result.pop_back(); // chop off \n
-        cout << "eval: " << test.input << " -> " << result << endl;
-        if (test.output != result) {
-            BOOST_ERROR(boost::format("\n%1% should be: %3%, \n      not:  %2%") % test.input % result % test.output);
-            continue;
-        }
-    }
 }

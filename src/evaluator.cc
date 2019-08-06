@@ -32,6 +32,9 @@ Expr Evaluator::eval(Expr& e)
     if (is_a<Bool>(e)) {
         return e;
     }
+    if (is_a<Int>(e)) {
+        return e;
+    }
     if (is_a<Atom>(e)) {
         throw EvalException("Can't evaluate "s + to_string(e));
     }

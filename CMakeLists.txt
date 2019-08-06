@@ -47,14 +47,14 @@ target_link_libraries(cxxlisp libcxxlisp replxx)
 
 # Test programs build
 
-file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cc)
+file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/test_*.cc)
 
 foreach(testSrc ${test_src})
         #Extract the filename without an extension (NAME_WE)
         get_filename_component(testName ${testSrc} NAME_WE)
 
         #Add compile target
-        add_executable(${testName} ${testSrc})
+        add_executable(${testName} ${testSrc} test/utils.cc)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${testName} libcxxlisp replxx)
