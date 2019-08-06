@@ -73,6 +73,23 @@ BOOST_AUTO_TEST_CASE(test_eval_atom)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_symbolp)
+{
+    vector<TestEval> tests = {
+        { "(symbolp 'a)", "t" },
+        { "(symbolp '(a b))", "nil" },
+        //{ "(symbolp (car '(a b)))", "t" },
+        { "(symbolp t)", "t" },
+        { "(symbolp nil)", "t" },
+        { "(symbolp '())", "t" },
+
+        { "(symbolp)", "Eval error: symbolp: expects 1 argument" },
+        { "(symbolp nil nil)", "Eval error: symbolp: expects 1 argument" },
+    };
+
+    test_Evaluator(tests);
+}
+
 void test_Evaluator(const vector<TestEval>& tests)
 {
     Options options;
@@ -91,7 +108,7 @@ void test_Evaluator(const vector<TestEval>& tests)
         lisp.repl(is, out);
 
         string result = out.str();
-        result.erase(result.end() - 1); // chop off \n
+        result.pop_back(); // chop off \n
         cout << "eval: " << test.input << " : " << result << endl;
         if (test.output != result) {
             BOOST_ERROR(boost::format("\n%1% should be: %3%, \n      not:  %2%") % test.input % result % test.output);

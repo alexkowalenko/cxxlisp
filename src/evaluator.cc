@@ -46,7 +46,7 @@ Expr Evaluator::eval(Expr& e)
         return sF;
     }
 
-    auto e_car = e_list[0];
+    auto e_car = e_list.front();
     if (is_a<Atom>(e_car)) {
         // Atom in function position
         Atom name = as_a<Atom>(e_car);

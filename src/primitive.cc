@@ -20,10 +20,24 @@ Expr atom(List& args)
     return sF;
 }
 
+Expr symbolp(List& args)
+{
+    auto a = args.front();
+    if (is_atomic(a)
+        && (a.type() == typeid(Atom) || a.type() == typeid(Bool))) {
+        return sT;
+    }
+    if (a.type() == typeid(List) && as_a<List>(a).size() == 0) {
+        return sT;
+    }
+    return sF;
+}
+
 void init_prims()
 {
     vector<Primitive> defs{
-        { "atom", &atom, one_arg }
+        { "atom", &atom, one_arg },
+        { "symbolp", &symbolp, one_arg }
     };
 
     for (auto p : defs) {
