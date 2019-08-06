@@ -91,7 +91,7 @@ void test_Evaluator(const vector<TestEval>& tests)
         lisp.repl(is, out);
 
         string result = out.str();
-        result.erase(result.end() - 1, result.end()); // chop off \n
+        result.erase(result.end() - 1); // chop off \n
         cout << "eval: " << test.input << " : " << result << endl;
         if (test.output != result) {
             BOOST_ERROR(boost::format("\n%1% should be: %3%, \n      not:  %2%") % test.input % result % test.output);

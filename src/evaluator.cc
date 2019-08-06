@@ -6,13 +6,28 @@
 
 #include "evaluator.hh"
 
+#include <boost/log/trivial.hpp>
+
 #include "exceptions.hh"
 #include "parser.hh"
+#include "primitive.hh"
 
 namespace ax {
 
+List Evaluator::eval_list(const List& l)
+{
+    List result;
+    for (auto e : l) {
+        auto r = eval(e);
+        result.push_back(r);
+    }
+    return result;
+}
+
 Expr Evaluator::eval(Expr& e)
 {
+    BOOST_LOG_TRIVIAL(trace) << "eval: " << to_string(e);
+
     // Eval basic types
     if (is_a<Bool>(e)) {
         return e;
@@ -44,17 +59,15 @@ Expr Evaluator::eval(Expr& e)
             return sF;
         }
 
-        // atom 
-        if (name == "atom") {
-            if (e_list.size() > 1) {
-                auto res = eval(e_list[1]);
-                if (is_atomic(res) || is_false(res)) {
-                    return sT;
-                }
+        // Lookup primitive table
+        if (auto prim = prim_table.find(name); prim != prim_table.end()) {
+            auto result = eval_list(List(e_list.begin() + 1, e_list.end()));
+            auto check = checkArgs(prim->second.cons, name, result);
+            if (check) {
+                throw EvalException(*check);
             }
-            return sF;
+            return prim->second.pf(result);
         }
-
     }
 
     throw EvalException("Can't evaluate "s + to_string(e));

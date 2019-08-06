@@ -70,7 +70,7 @@ ParserResult Parser::parse()
 {
     Token tok;
     lexer >> tok;
-    BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
+    // BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
     switch (tok.type) {
     case TokenType::open:
         return parse_list();

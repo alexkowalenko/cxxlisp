@@ -12,8 +12,12 @@
 namespace ax {
 
 class Evaluator {
+
 public:
     Expr eval(Expr& e);
+
+private:
+    List eval_list(const List& l);
 };
 }
 

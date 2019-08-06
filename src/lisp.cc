@@ -14,6 +14,7 @@
 #include "linereaderReplxx.hh"
 #include "linereaderStream.hh"
 #include "parser.hh"
+#include "primitive.hh"
 
 namespace ax {
 
@@ -27,6 +28,7 @@ void Lisp::init()
     if (!opt.silent) {
         cout << "Hello C++ Lisp 👾 !" << endl;
     }
+    init_prims();
 };
 
 void Lisp::repl(istream& istr, ostream& ostr)
@@ -48,9 +50,6 @@ void Lisp::repl(istream& istr, ostream& ostr)
             res = parser.parse();
             if (res.eof) {
                 break;
-            }
-            if (!opt.silent) {
-                ostr << "> ";
             }
             if (opt.parse_only) {
                 cout << res.val << endl;
