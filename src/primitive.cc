@@ -167,41 +167,33 @@ Expr numberp(const string& name, List& args)
     return sF;
 }
 
-Expr zerop(const string& name, List& args)
+PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
+// Returns a function with compare the first element to zero.
 {
-    if (is_a<Int>(args[0])) {
-        if (any_cast<Int>(args[0]) == 0) {
-            return sT;
+    return [&](const string& name, List& args) {
+        if (is_a<Int>(args[0])) {
+            // cout << any_cast<Int>(args[0]) << " : " << f(any_cast<Int>(args[0]), 0) << endl;
+            if (f(any_cast<Int>(args[0]), 0)) {
+                return sT;
+            }
+            return sF;
         }
-        return sF;
-    }
-    throw EvalException("zerop argument needs to be number");
+        throw EvalException(name + " argument needs to be number");
+    };
 }
 
-Expr plusp(const string& name, List& args)
-{
-    if (is_a<Int>(args[0])) {
-        if (any_cast<Int>(args[0]) > 0) {
-            return sT;
-        }
-        return sF;
-    }
-    throw EvalException("plusp argument needs to be number");
-}
+static function<bool(Int, Int)> eq = equal_to<Int>();
+static PrimFunct zerop = numeric_predicate(eq);
 
-Expr minusp(const string& name, List& args)
-{
-    if (is_a<Int>(args[0])) {
-        if (any_cast<Int>(args[0]) < 0) {
-            return sT;
-        }
-        return sF;
-    }
-    throw EvalException("minusp argument needs to be number");
-}
+static function<bool(Int, Int)> gt = greater<Int>();
+static PrimFunct plusp = numeric_predicate(gt);
+
+static function<bool(Int, Int)> ls = less<Int>();
+static PrimFunct minusp = numeric_predicate(ls);
 
 template <Int N>
 Expr nump(const string& name, List& args)
+// Generates a templated function which mods compared to N.
 {
     if (is_a<Int>(args[0])) {
         if (abs(any_cast<Int>(args[0]) % 2) == N) {
@@ -242,12 +234,11 @@ void init_prims()
         { "numberp", &numberp, one_arg, preEvaluate },
         { "integerp", &numberp, one_arg, preEvaluate },
 
-        { "zerop", &zerop, one_arg, preEvaluate },
-
+        { "zerop", zerop, one_arg, preEvaluate },
         { "oddp", &nump<1>, one_arg, preEvaluate },
         { "evenp", &nump<0>, one_arg, preEvaluate },
-        { "plusp", &plusp, one_arg, preEvaluate },
-        { "minusp", &minusp, one_arg, preEvaluate },
+        { "plusp", plusp, one_arg, preEvaluate },
+        { "minusp", minusp, one_arg, preEvaluate },
 
     };
 
