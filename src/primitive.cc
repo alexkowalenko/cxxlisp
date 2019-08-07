@@ -6,6 +6,7 @@
 
 #include "primitive.hh"
 
+#include <cmath>
 #include <vector>
 
 #include <boost/log/trivial.hpp>
@@ -280,27 +281,33 @@ PrimFunct check_zeros(PrimFunct f)
     };
 }
 
-Int power(Int a, Int b)
+static PrimFunct num_power = numeric_operation(
+    [](Int a, Int b) { return Int(pow(a, b)); },
+    0);
+
+static PrimFunct num_max = numeric_operation(
+    [](Int a, Int b) { return Int(max<Int>(a, b)); },
+    0);
+static PrimFunct num_min = numeric_operation(
+    [](Int a, Int b) { return Int(min<Int>(a, b)); },
+    0);
+
+PrimFunct numeric_single(const function<Int(Int)>& f)
+// Returns a function implementing the function f on one argument.
 {
-    return Int(pow(a, b));
+    return [=](const string& name, List& args) {
+        if (is_a<Int>(args[0])) {
+            return f(any_cast<Int>(args[0]));
+        }
+        throw EvalException(name + " argument needs to be number");
+    };
 }
 
-static PrimFunct num_power = numeric_operation(power, 0);
-
-//static function<Int(Int, Int)> max_int = max<Int>;
-Int max_int(Int a, Int b)
-{
-    return max<Int>(a, b);
-}
-
-//static auto min_int = min<Int>;
-Int min_int(Int a, Int b)
-{
-    return min<Int>(a, b);
-}
-
-static PrimFunct num_max = numeric_operation(&max_int, 0);
-static PrimFunct num_min = numeric_operation(&min_int, 0);
+static PrimFunct num_abs = numeric_single([](Int x) { return Int(abs(x)); });
+static PrimFunct num_floor = numeric_single([](Int x) { return Int(floor(x)); });
+static PrimFunct num_ceil = numeric_single([](Int x) { return Int(ceil(x)); });
+static PrimFunct num_round = numeric_single([](Int x) { return Int(round(x)); });
+static PrimFunct num_trunc = numeric_single([](Int x) { return Int(trunc(x)); });
 
 void init_prims()
 {
@@ -354,6 +361,12 @@ void init_prims()
         { "expt", num_power, min_one, preEvaluate },
         { "max", num_max, min_one, preEvaluate },
         { "min", num_min, min_one, preEvaluate },
+
+        { "abs", num_abs, one_arg, preEvaluate },
+        { "floor", num_floor, one_arg, preEvaluate },
+        { "ceiling", num_ceil, one_arg, preEvaluate },
+        { "round", num_round, one_arg, preEvaluate },
+        { "truncate", num_trunc, one_arg, preEvaluate },
 
     };
 

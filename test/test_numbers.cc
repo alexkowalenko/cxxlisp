@@ -604,3 +604,41 @@ BOOST_AUTO_TEST_CASE(test_min)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_abs)
+{
+    vector<TestEval> tests = {
+        { "(abs 12)", "12" },
+        { "(abs -12)", "12" },
+        { "(abs 0)", "0" },
+
+        { "(abs)", "Eval error: abs expecting an argument" },
+        { "(abs 'jones)", "Eval error: abs argument needs to be number" },
+
+        { "(floor 12)", "12" },
+        { "(ceiling 12)", "12" },
+        { "(truncate 12)", "12" },
+        { "(round 12)", "12" },
+
+        // floats
+        /*  { "(abs 12.0)", "12" },
+        { "(abs -12.0)", "12" },
+        { "(abs 0.0)", "0" },
+
+        { "(floor 12.7)", "12" },
+        { "(ceiling 12.7)", "13" },
+        { "(truncate 12.7)", "12" },
+        { "(round 12.7)", "13" },
+
+        { "(floor -12.7)", "-13" },
+        { "(ceiling -12.7)", "-12" },
+        { "(truncate -12.7)", "-12" },
+        { "(round -12.7)", "-12" },
+
+        { "(floor 0.0)", "0" },
+        { "(ceiling 0.0)", "0" },
+        { "(truncate 0.0)", "0" },
+        { "(round 0.0)", "0" }, */
+    };
+    test_Evaluator(tests);
+}

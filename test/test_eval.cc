@@ -125,14 +125,14 @@ BOOST_AUTO_TEST_CASE(test_eval_and)
 
         { "(and 'nil 'nil)", "nil" },
 
-        //{ "(and (symbolp (quote x)) (symbolp (quote y)))", "t" },
-        //{ "(and (symbolp (quote x)) (symbolp (quote (y))))", "nil" },
+        { "(and (symbolp (quote x)) (symbolp (quote y)))", "t" },
+        { "(and (symbolp (quote x)) (symbolp (quote (y))))", "nil" },
         //{ "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
         //{ "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        //{"(and (= 2 2) (> 2 1))", "t"},
-        //{"(and (= 2 2) (< 2 1))", "nil"},
+        { "(and (= 2 2) (> 2 1))", "t" },
+        { "(and (= 2 2) (< 2 1))", "nil" },
         { "(and 1 2 'c '(f g))", "(f g)" },
 
         { "(and)", "t" },
@@ -159,16 +159,16 @@ BOOST_AUTO_TEST_CASE(test_eval_or)
         { "(or () t)", "t" },
         { "(or ())", "nil" },
 
-        //{ "(or (symbolp (quote x)) (symbolp (quote y)))", "t" },
-        //{ "(or (symbolp (quote x)) (symbolp (quote (y))))", "t" },
+        { "(or (symbolp (quote x)) (symbolp (quote y)))", "t" },
+        { "(or (symbolp (quote x)) (symbolp (quote (y))))", "t" },
         //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
         //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        //{"(or (= 2 2) (> 2 1))", "t"},
-        //{"(or (= 2 2) (< 2 1))", "t"},
+        { "(or (= 2 2) (> 2 1))", "t" },
+        { "(or (= 2 2) (< 2 1))", "t" },
         { "(or nil nil nil)", "nil" },
-        //{"(or 'a (/ 3 0))", "a"},
+        { "(or 'a (/ 3 0))", "a" },
 
         { "(or)", "nil" },
         { "(or 1)", "1" },
