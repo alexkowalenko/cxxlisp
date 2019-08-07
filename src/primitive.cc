@@ -167,12 +167,11 @@ Expr numberp(const string& name, List& args)
     return sF;
 }
 
-PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
+PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](const string& name, List& args) {
         if (is_a<Int>(args[0])) {
-            // cout << any_cast<Int>(args[0]) << " : " << f(any_cast<Int>(args[0]), 0) << endl;
             if (f(any_cast<Int>(args[0]), 0)) {
                 return sT;
             }
@@ -183,13 +182,15 @@ PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
 }
 
 static function<bool(Int, Int)> eq = equal_to<Int>();
-static PrimFunct zerop = numeric_predicate(eq);
-
+static function<bool(Int, Int)> neq = not_equal_to<Int>();
 static function<bool(Int, Int)> gt = greater<Int>();
-static PrimFunct plusp = numeric_predicate(gt);
+static function<bool(Int, Int)> ge = greater_equal<Int>();
+static function<bool(Int, Int)> lt = less<Int>();
+static function<bool(Int, Int)> le = less_equal<Int>();
 
-static function<bool(Int, Int)> ls = less<Int>();
-static PrimFunct minusp = numeric_predicate(ls);
+static PrimFunct zerop = numeric_predicate0(eq);
+static PrimFunct plusp = numeric_predicate0(gt);
+static PrimFunct minusp = numeric_predicate0(lt);
 
 template <Int N>
 Expr nump(const string& name, List& args)
@@ -203,6 +204,27 @@ Expr nump(const string& name, List& args)
     }
     throw EvalException(name + " argument needs to be number");
 }
+
+PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
+// Returns a function with compare the first element to zero.
+{
+    return [&](const string& name, List& args) {
+        if (is_a<Int>(args[0]) && is_a<Int>(args[1])) {
+            if (f(any_cast<Int>(args[0]), any_cast<Int>(args[1]))) {
+                return sT;
+            }
+            return sF;
+        }
+        throw EvalException(name + " arguments needs to be number");
+    };
+}
+
+static PrimFunct num_eq = numeric_predicate(eq);
+static PrimFunct num_neq = numeric_predicate(neq);
+static PrimFunct num_gt = numeric_predicate(gt);
+static PrimFunct num_ge = numeric_predicate(ge);
+static PrimFunct num_lt = numeric_predicate(lt);
+static PrimFunct num_le = numeric_predicate(le);
 
 void init_prims()
 {
@@ -239,6 +261,13 @@ void init_prims()
         { "evenp", &nump<0>, one_arg, preEvaluate },
         { "plusp", plusp, one_arg, preEvaluate },
         { "minusp", minusp, one_arg, preEvaluate },
+
+        { "=", num_eq, two_args, preEvaluate },
+        { "/=", num_neq, two_args, preEvaluate },
+        { "<", num_lt, two_args, preEvaluate },
+        { "<=", num_le, two_args, preEvaluate },
+        { ">", num_gt, two_args, preEvaluate },
+        { ">=", num_ge, two_args, preEvaluate },
 
     };
 

@@ -254,3 +254,159 @@ BOOST_AUTO_TEST_CASE(test_oddp)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_equal)
+{
+    auto fmt = boost::format("(= %1% %1%)");
+    vector<TestEval> tests = {
+        { "(= 1 1)", "t" },
+        { "(= 1 2)", "nil" },
+        { "(= -34 -34)", "t" },
+        { "(= 0 -0)", "t" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        // Floats
+        // { "(= 1.5 1.5)", "t" },
+        // { "(= 1.5 3.145926536)", "nil" },
+        // { "(= 1 3.145926536)", "nil" },
+        // { "(= 3.145926536 1)", "nil" },
+        // { "(= 0.0 0.0)", "t" },
+        // { "(= 0.0 -0.0)", "t" },
+
+        // { fmt.Sprintf("(= %[1]g %[1]g)", math.MaxFloat32), "t" },
+        // { fmt.Sprintf("(= %[1]g %[1]g)", math.MaxFloat64), "t" },
+        // { fmt.Sprintf("(= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "t" },
+        // { fmt.Sprintf("(= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "t" },
+
+        // // Mixed
+        // { "(= 0 0.0)", "t" },
+        // { "(= 0 0.0s0)", "t" },
+        // { "(= 0.0f0 0.0s0)", "t" },
+
+        // { "(= 17 17.0)", "t" },
+        // { "(= 17 17.0s0)", "t" },
+        // { "(= 17.0f0 17.0d0)", "t" },
+
+        { "(= 's 0)", "Eval error: = arguments needs to be number" },
+        { "(= 234 'q)", "Eval error: = arguments needs to be number" },
+        { "(=)", "Eval error: = expecting 2 arguments" },
+        { "(= 1)", "Eval error: = expecting 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_less)
+{
+    auto fmt = boost::format("(<= %1% %1%)");
+    vector<TestEval> tests = {
+        { "(< 1 2)", "t" },
+        { "(< 2 1)", "nil" },
+        { "(<= 1 2)", "t" },
+        { "(<= 1 1)", "t" },
+        { "(<= 2 1)", "nil" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        // Floats
+        // { "(< 1.5 1.5)", "nil" },
+        // { "(<= 1.5 1.5)", "t" },
+        // { "(< 1.5 3.145926536)", "t" },
+        // { "(< 1 3.145926536)", "t" },
+        // { "(< 3.145926536 1)", "nil" },
+
+        // { fmt.Sprintf("(<= %[1]g %[1]g)", math.MaxFloat32), "t" },
+        // { fmt.Sprintf("(<= %[1]g %[1]g)", math.MaxFloat64), "t" },
+        // { fmt.Sprintf("(<= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "t" },
+        // { fmt.Sprintf("(<= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "t" },
+
+        // { "(<= 0 0.0)", "t" },
+        // { "(<= 0 0.0s0)", "t" },
+        // { "(<= 0.0f0 0.0s0)", "t" },
+
+        // { "(<= 17 17.0)", "t" },
+        // { "(<= 17 17.0s0)", "t" },
+        // { "(<= 17.0f0 17.0d0)", "t" },
+
+        { "(< 's 0)", "Eval error: < arguments needs to be number" },
+        { "(<= 234 'dois)", "Eval error: <= arguments needs to be number" },
+        { "(<)", "Eval error: < expecting 2 arguments" },
+        { "(<= 1)", "Eval error: <= expecting 2 arguments" }
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_greater)
+{
+    auto fmt = boost::format("(> %1% %1%)");
+    vector<TestEval> tests = {
+        { "(> 1 2)", "nil" },
+        { "(> 2 1)", "t" },
+        { "(>= 1 2)", "nil" },
+        { "(>= 1 1)", "t" },
+        { "(>= 2 1)", "t" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "nil" },
+        { boost::str(fmt % numeric_limits<long>::max()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
+
+        // Floats
+        // { "(> 1.5 1.5)", "nil" },
+        // { "(>= 1.5 1.5)", "t" },
+        // { "(> 1.5 3.145926536)", "nil" },
+        // { "(> 1 3.145926536)", "nil" },
+        // { "(> 3.145926536 1)", "t" },
+
+        // { fmt.Sprintf("(>= %[1]g %[1]g)", math.MaxFloat32), "t" },
+        // { fmt.Sprintf("(>= %[1]g %[1]g)", math.MaxFloat64), "t" },
+        // { fmt.Sprintf("(>= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "t" },
+        // { fmt.Sprintf("(>= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "t" },
+
+        { "(> 's 0)", "Eval error: > arguments needs to be number" },
+        { "(>= 234 'dois)", "Eval error: >= arguments needs to be number" },
+        { "(>)", "Eval error: > expecting 2 arguments" },
+        { "(>= 1)", "Eval error: >= expecting 2 arguments" }
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_notequals)
+{
+    auto fmt = boost::format("(/= %1% %1%)");
+    vector<TestEval> tests = {
+        { "(/= 1 1)", "nil" },
+        { "(/= 1 2)", "t" },
+        { "(/= -34 -34)", "nil" },
+        { "(/= 0 -0)", "nil" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "nil" },
+        { boost::str(fmt % numeric_limits<long>::max()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
+
+        // Floats
+        // { "(/= 1.5 1.5)", "nil" },
+        // { "(/= 1.5 3.145926536)", "t" },
+        // { "(/= 1 3.145926536)", "t" },
+        // { "(/= 3.145926536 1)", "t" },
+
+        // { fmt.Sprintf("(/= %[1]g %[1]g)", math.MaxFloat32), "nil" },
+        // { fmt.Sprintf("(/= %[1]g %[1]g)", math.MaxFloat64), "nil" },
+        // { fmt.Sprintf("(/= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "nil" },
+        // { fmt.Sprintf("(/= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "nil" },
+
+        { "(/= 's 0)", "Eval error: /= arguments needs to be number" },
+        { "(/= 234 'dois)", "Eval error: /= arguments needs to be number" },
+        { "(/=)", "Eval error: /= expecting 2 arguments" },
+        { "(/= 1)", "Eval error: /= expecting 2 arguments" }
+
+    };
+    test_Evaluator(tests);
+}
