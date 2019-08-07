@@ -43,7 +43,7 @@ constexpr Bool sT = Bool{ true };
 
 constexpr bool is_sF(const Expr& e)
 {
-    return is_a<Bool>(e) && any_cast<Bool>(e) == sF;
+    return is_a<Bool>(e) && !any_cast<Bool>(e);
 }
 
 constexpr bool is_atomic(const Expr& s)
@@ -54,7 +54,7 @@ constexpr bool is_atomic(const Expr& s)
 constexpr bool is_false(Expr& s)
 // Is the Bool sF, or is the empty list
 {
-    return (s.type() == typeid(Bool) && any_cast<Bool>(s) == sF)
+    return (s.type() == typeid(Bool) && !any_cast<Bool>(s))
         || (s.type() == typeid(List) && any_cast<List>(s).size() == 0);
 }
 

@@ -20,10 +20,7 @@ map<string, Primitive> prim_table;
 
 Expr atom(const string&, List& args)
 {
-    if (is_atomic(args[0]) || is_false(args[0])) {
-        return sT;
-    }
-    return sF;
+    return is_atomic(args[0]) || is_false(args[0]);
 }
 
 Expr symbolp(const string&, List& args)
@@ -47,16 +44,13 @@ Expr null(const string&, List& args)
 Expr andor(const string& name, List& args)
 {
     if (args.size() == 0) {
-        if (name == "and") {
-            return sT;
-        }
-        return sF;
+        return name == "and";
     }
     Expr last = sF;
     for (auto& x : args) {
         last = Evaluator::eval(x);
         if (name == "and") {
-            BOOST_LOG_TRIVIAL(trace) << "and: " << to_string(last) << " : " << is_false(last);
+            // BOOST_LOG_TRIVIAL(trace) << "and: " << to_string(last) << " : " << is_false(last);
             if (is_false(last)) {
                 return sF;
             }
@@ -67,10 +61,7 @@ Expr andor(const string& name, List& args)
             }
         }
     }
-    if (name == "and") {
-        return last;
-    }
-    return sF;
+    return name == "and" ? last : sF;
 }
 
 Expr carcdr(const string& name, List& args)
@@ -97,19 +88,13 @@ Expr carcdr(const string& name, List& args)
 Expr consp(const string& name, List& args)
 {
     auto res = args.front();
-    if (is_a<List>(res) && any_cast<List>(res).size() > 0) {
-        return sT;
-    }
-    return sF;
+    return is_a<List>(res) && any_cast<List>(res).size() > 0;
 }
 
 Expr listp(const string& name, List& args)
 {
     auto res = args.front();
-    if (is_a<List>(res) || is_sF(res)) {
-        return sT;
-    }
-    return sF;
+    return is_a<List>(res) || is_sF(res);
 }
 
 Expr cons(const string& name, List& args)
@@ -162,10 +147,7 @@ Expr rplacd(const string& name, List& args)
 
 Expr numberp(const string& name, List& args)
 {
-    if (is_a<Int>(args[0])) {
-        return sT;
-    }
-    return sF;
+    return is_a<Int>(args[0]);
 }
 
 PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
@@ -173,10 +155,7 @@ PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
 {
     return [&](const string& name, List& args) {
         if (is_a<Int>(args[0])) {
-            if (f(any_cast<Int>(args[0]), 0)) {
-                return sT;
-            }
-            return sF;
+            return f(any_cast<Int>(args[0]), 0);
         }
         throw EvalException(name + " argument needs to be number");
     };
@@ -198,10 +177,7 @@ Expr nump(const string& name, List& args)
 // Generates a templated function which mods compared to N.
 {
     if (is_a<Int>(args[0])) {
-        if (abs(any_cast<Int>(args[0]) % 2) == N) {
-            return sT;
-        }
-        return sF;
+        return abs(any_cast<Int>(args[0]) % 2) == N;
     }
     throw EvalException(name + " argument needs to be number");
 }
@@ -211,10 +187,7 @@ PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
 {
     return [&](const string& name, List& args) {
         if (is_a<Int>(args[0]) && is_a<Int>(args[1])) {
-            if (f(any_cast<Int>(args[0]), any_cast<Int>(args[1]))) {
-                return sT;
-            }
-            return sF;
+            return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
         }
         throw EvalException(name + " arguments needs to be number");
     };
