@@ -200,26 +200,16 @@ Expr minusp(const string& name, List& args)
     throw EvalException("minusp argument needs to be number");
 }
 
-Expr oddp(const string& name, List& args)
+template <Int N>
+Expr nump(const string& name, List& args)
 {
     if (is_a<Int>(args[0])) {
-        if (any_cast<Int>(args[0]) % 2 != 0) {
+        if (abs(any_cast<Int>(args[0]) % 2) == N) {
             return sT;
         }
         return sF;
     }
-    throw EvalException("oddp argument needs to be number");
-}
-
-Expr evenp(const string& name, List& args)
-{
-    if (is_a<Int>(args[0])) {
-        if (any_cast<Int>(args[0]) % 2 == 0) {
-            return sT;
-        }
-        return sF;
-    }
-    throw EvalException("evenp argument needs to be number");
+    throw EvalException(name + " argument needs to be number");
 }
 
 void init_prims()
@@ -253,10 +243,12 @@ void init_prims()
         { "integerp", &numberp, one_arg, preEvaluate },
 
         { "zerop", &zerop, one_arg, preEvaluate },
-        { "evenp", &evenp, one_arg, preEvaluate },
-        { "oddp", &oddp, one_arg, preEvaluate },
+
+        { "oddp", &nump<1>, one_arg, preEvaluate },
+        { "evenp", &nump<0>, one_arg, preEvaluate },
         { "plusp", &plusp, one_arg, preEvaluate },
         { "minusp", &minusp, one_arg, preEvaluate },
+
     };
 
     for (auto p : defs) {
