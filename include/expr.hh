@@ -58,6 +58,10 @@ constexpr bool is_false(Expr& s)
         || (s.type() == typeid(List) && any_cast<List>(s).size() == 0);
 }
 
+Bool expr_eq(const Expr& x, const Expr&);
+Bool expr_eql(const Expr& x, const Expr&);
+Bool expr_equal(const Expr& x, const Expr&);
+
 } // namespace ax
 
 #endif

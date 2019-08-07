@@ -145,6 +145,25 @@ Expr rplacd(const string& name, List& args)
     throw EvalException("rplaca first argument not a list");
 }
 
+Expr eq_p(const string& name, List& args)
+{
+    return expr_eq(args[0], args[1]);
+}
+
+Expr eql_p(const string& name, List& args)
+{
+    return expr_eql(args[0], args[1]);
+}
+
+Expr equal_p(const string& name, List& args)
+{
+    return expr_equal(args[0], args[1]);
+}
+
+//
+// Number Functions
+//
+
 Expr numberp(const string& name, List& args)
 {
     return is_a<Int>(args[0]);
@@ -306,6 +325,10 @@ void init_prims()
 
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
+
+        { "eq", &eq_p, two_args, preEvaluate },
+        { "eql", &eql_p, two_args, preEvaluate },
+        { "equal", &equal_p, two_args, preEvaluate },
 
         // Number functions
 

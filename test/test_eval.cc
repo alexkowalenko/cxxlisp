@@ -6,6 +6,7 @@
 
 #define BOOST_TEST_MODULE test_eval
 
+#include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "test.hh"
@@ -350,6 +351,154 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
 
         //{ "(defun f (x) (rplacd x '(a b)))", "f" },
         //{ "(f '(1 2 3))", "(1 a b)" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_eq)
+{
+    auto fmt = boost::format("(eq %1% %1%)");
+    vector<TestEval> tests = {
+        { "(eq t t)", "t" },
+        { "(eq nil nil)", "t" },
+        { "(eq t nil)", "nil" },
+        { "(eq nil t)", "nil" },
+        { "(eq () ())", "t" },
+
+        { "(eq 'a 'a)", "t" },
+        { "(eq 'a 'b)", "nil" },
+
+        { "(eq '(a b) '(a b)) ; this is false", "nil" },
+        { "(eq '(a b) '(a z))", "nil" },
+        { "(eq 'a '(a b))", "nil" },
+
+        // Characters
+        // {`(eq #\a #\a)`, "t" },
+        // {`(eq #\a #\A)`, "nil" },
+        // {`(eq #\α #\α)`, "t" },
+        // {`(eq #\β #\α)`, "nil" },
+        // {`(eq #\a 1)`, "nil" },
+
+        // Int
+        { "(eq 1 1)", "t" },
+        { "(eq 1 2)", "nil" },
+        { "(eq 0 -0)", "t" },
+        { "(eq -1 1)", "nil" },
+        { "(eq 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        // Real
+        // {`(eq 1.1 1.1)`, "t" },
+        // {`(eq 1.1 2.1)`, "nil" },
+        // {`(eq 0.0 - 0.0)`, "t" },
+        // {`(eq - 0.9 0.09)`, "nil" },
+
+        // Errors
+        { "(eq)", "Eval error: eq expecting 2 arguments" },
+        { "(eq ())", "Eval error: eq expecting 2 arguments" },
+        { "(eq nil nil nil)", "Eval error: eq expecting 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_eql)
+{
+    auto fmt = boost::format("(eql %1% %1%)");
+    vector<TestEval> tests = {
+        { "(eql '(a) '(b))", "nil" },
+
+        // Characters
+        // {`(eql #\a #\a)`, "t" },
+        // {`(eql #\a #\A)`, "nil" },
+        // {`(eql #\α #\α)`, "t" },
+        // {`(eql #\β #\α)`, "nil" },
+        // {`(eql #\a 1)`, "nil" },
+
+        // Int
+        { "(eql 1 1)", "t" },
+        { "(eql 1 2)", "nil" },
+        { "(eql 0 -0)", "t" },
+        { "(eql -1 1)", "nil" },
+        { "(eql 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        // Real
+        // {`(eql 1.1 1.1)`, "t" },
+        // {`(eql 1.1 2.1)`, "nil" },
+        // {`(eql 0.0 - 0.0)`, "t" },
+        // {`(eql - 0.9 0.09)`, "nil" },
+
+        // Errors
+        { "(eql)", "Eval error: eql expecting 2 arguments" },
+        { "(eql ())", "Eval error: eql expecting 2 arguments" },
+        { "(eql nil nil nil)", "Eval error: eql expecting 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_equal)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(equal t t)", "t" },
+        { "(equal nil nil)", "t" },
+        { "(equal t nil)", "nil" },
+        { "(equal nil t)", "nil" },
+        { "(equal () ())", "t" },
+
+        { "(equal (quote a) (quote a))", "t" },
+        { "(equal (quote a) (quote b))", "nil" },
+        { "(equal (quote (a b)) (quote (a z)) )", "nil" },
+        { "(equal (quote a) (quote (a b)))", "nil" },
+
+        { "(equal 1 1)", "t" },
+        { "(equal 0 0)", "t" },
+        { "(equal 1 2)", "nil" },
+        { "(equal -1 1)", "nil" },
+        { "(equal 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        // Characters
+        // {`(equal #\a #\a)`, "t"},
+        // {`(equal #\a #\A)`, "nil"},
+        // {`(equal #\α #\α)`, "t"},
+        // {`(equal #\β #\α)`, "nil"},
+        // {`(equal #\a 1)`, "nil"},
+
+        // Real
+        // {`(equal 1.1 1.1)`, "t"},
+        // {`(equal 1.1 2.1)`, "nil"},
+        // {`(equal 0.0 -0.0)`, "t"},
+        // {`(equal -0.9 0.09)`, "nil"},
+
+        // changes from eql
+        { "(equal '(a b) '(a b))", "t" },
+        //{ "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
+        { "(equal (list 'a 'b) (list 'a 'b))", "t" },
+        { "(equal (list 'a 'b) (list 'a 'c))", "nil" },
+        { "(equal '(a b (c)) '(a b (c)))", "t" },
+        { "(equal '(a b) '(a z))", "nil" },
+        { "(equal (quote a) (quote (a b)))", "nil" },
+
+        // Strings
+        // {`(equal "cat" "cat")`, "t"},
+        // {`(equal "cat" "dog")`, "nil"},
+        // {`(equal "" "")`, "t"},
+        // {`(equal "cat" 'cat)`, "nil"},
+
+        // Errors
+        { "(equal)", "Eval error: equal expecting 2 arguments" },
+        { "(equal ())", "Eval error: equal expecting 2 arguments" },
+        { "(equal nil nil nil)", "Eval error: equal expecting 2 arguments" },
     };
     test_Evaluator(tests);
 }
