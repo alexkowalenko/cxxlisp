@@ -167,6 +167,61 @@ Expr numberp(const string& name, List& args)
     return sF;
 }
 
+Expr zerop(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        if (any_cast<Int>(args[0]) == 0) {
+            return sT;
+        }
+        return sF;
+    }
+    throw EvalException("zerop argument needs to be number");
+}
+
+Expr plusp(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        if (any_cast<Int>(args[0]) > 0) {
+            return sT;
+        }
+        return sF;
+    }
+    throw EvalException("plusp argument needs to be number");
+}
+
+Expr minusp(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        if (any_cast<Int>(args[0]) < 0) {
+            return sT;
+        }
+        return sF;
+    }
+    throw EvalException("minusp argument needs to be number");
+}
+
+Expr oddp(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        if (any_cast<Int>(args[0]) % 2 != 0) {
+            return sT;
+        }
+        return sF;
+    }
+    throw EvalException("oddp argument needs to be number");
+}
+
+Expr evenp(const string& name, List& args)
+{
+    if (is_a<Int>(args[0])) {
+        if (any_cast<Int>(args[0]) % 2 == 0) {
+            return sT;
+        }
+        return sF;
+    }
+    throw EvalException("evenp argument needs to be number");
+}
+
 void init_prims()
 {
     vector<Primitive> defs{
@@ -192,8 +247,16 @@ void init_prims()
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
 
+        // Number functions
+
         { "numberp", &numberp, one_arg, preEvaluate },
         { "integerp", &numberp, one_arg, preEvaluate },
+
+        { "zerop", &zerop, one_arg, preEvaluate },
+        { "evenp", &evenp, one_arg, preEvaluate },
+        { "oddp", &oddp, one_arg, preEvaluate },
+        { "plusp", &plusp, one_arg, preEvaluate },
+        { "minusp", &minusp, one_arg, preEvaluate },
     };
 
     for (auto p : defs) {

@@ -83,3 +83,174 @@ BOOST_AUTO_TEST_CASE(test_numberp)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_zerop)
+{
+    auto fmt = boost::format("(zerop %1%)");
+    vector<TestEval> tests = {
+        { "(zerop 0)", "t" },
+        { "(zerop 0.0)", "t" },
+        //{ "(zerop 0.0s0)", "t" },
+        //{ "(zerop 0.0f0)", "t" },
+        //{ "(zerop 0.0d0)", "t" },
+        //{ "(zerop 0.0l0)", "t" },
+        { "(zerop -0.0)", "t" },
+        //{ "(zerop -0.0s0)", "t" },
+        //{ "(zerop -0.0f0)", "t" },
+        //{ "(zerop -0.0d0)", "t" },
+        //{ "(zerop -0.0l0)", "t" },
+
+        { "(zerop 1)", "nil" },
+        //{ "(zerop (+ 2 3))", "nil" },
+        { "(zerop -1)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "nil" },
+        { boost::str(fmt % numeric_limits<long>::max()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
+
+        // Floats
+        //{ "(zerop 3.145926536)", "nil" },
+        //{ "(zerop -1.2345e-8)", "nil" },
+        //{ fmt.Sprintf("(zerop %g)", math.MaxFloat32), "nil" },
+        //{ fmt.Sprintf("(zerop %g)", math.MaxFloat64), "nil" },
+        //{ fmt.Sprintf("(zerop %g)", math.SmallestNonzeroFloat32), "nil" },
+        //{ fmt.Sprintf("(zerop %g)", math.SmallestNonzeroFloat64), "nil" },
+
+        // Complex
+        //{ "(zerop #C(0 0))", "t" },
+        //{ "(zerop #C(0 1))", "nil" },
+
+        { "(zerop 'a)", "Eval error: zerop argument needs to be number" },
+        { "(zerop)", "Eval error: zerop expecting an argument" },
+        { "(zerop 1 0)", "Eval error: zerop expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_plusp)
+{
+    auto fmt = boost::format("(plusp %1%)");
+    vector<TestEval> tests = {
+        { "(plusp 1)", "t" },
+        //{ "(plusp (* 2 3))", "t" },
+        { boost::str(fmt % numeric_limits<long>::min()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "nil" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        { "(plusp 0)", "nil" },
+        { "(plusp -1)", "nil" },
+        { "(plusp 0)", "nil" },
+        { "(plusp 0.0)", "nil" },
+        //{ "(plusp 0.0s0)", "nil" },
+        //{ "(plusp 0.0f0)", "nil" },
+        //{ "(plusp 0.0d0)", "nil" },
+        //{ "(plusp 0.0l0)", "nil" },
+        { "(plusp -0.0)", "nil" },
+        //{ "(plusp -0.0s0)", "nil" },
+        //{ "(plusp -0.0f0)", "nil" },
+        //{ "(plusp -0.0d0)", "nil" },
+        //{ "(plusp -0.0l0)", "nil" },
+
+        // Floats
+        //{ "(plusp 3.145926536)", "t" },
+        //{ "(plusp -1.2345e-8)", "nil" },
+        //{ "(plusp 0.0)", "nil" },
+        //{ fmt.Sprintf("(plusp %g)", math.MaxFloat32), "t" },
+        //{ fmt.Sprintf("(plusp %g)", math.MaxFloat64), "t" },
+        //{ fmt.Sprintf("(plusp %g)", math.SmallestNonzeroFloat32), "t" },
+        //{ fmt.Sprintf("(plusp %g)", math.SmallestNonzeroFloat64), "t" },
+
+        { "(plusp 'a)", "Eval error: plusp argument needs to be number" },
+        { "(plusp)", "Eval error: plusp expecting an argument" },
+        { "(plusp 1 0)", "Eval error: plusp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_minusp)
+{
+    auto fmt = boost::format("(minusp %1%)");
+    vector<TestEval> tests = {
+        //{ "(minusp (- 2 3))", "t" },
+        { "(minusp -1)", "t" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
+
+        { "(minusp 0)", "nil" },
+        { "(minusp 0)", "nil" },
+        { "(minusp 0)", "nil" },
+        //{ "(minusp 0.0)", "nil" },
+        //{ "(minusp 0.0s0)", "nil" },
+        //{ "(minusp 0.0f0)", "nil" },
+        //{ "(minusp 0.0d0)", "nil" },
+        //{ "(minusp 0.0l0)", "nil" },
+        //{ "(minusp -0.0)", "nil" },
+        //{ "(minusp -0.0s0)", "nil" },
+        //{ "(minusp -0.0f0)", "nil" },
+        //{ "(minusp -0.0d0)", "nil" },
+        //{ "(minusp -0.0l0)", "nil" },
+
+        { "(minusp 1)", "nil" },
+
+        // Floats
+        //{ "(minusp 3.145926536)", "nil" },
+        //{ "(minusp -1.2345e-8)", "t" },
+        //{ "(minusp 0.0)", "nil" },
+        //{ fmt.Sprintf("(minusp %g)", -math.MaxFloat32), "t" },
+        //{ fmt.Sprintf("(minusp %g)", -math.MaxFloat64), "t" },
+        //{ fmt.Sprintf("(minusp %g)", -math.SmallestNonzeroFloat32), "t" },
+        //{ fmt.Sprintf("(minusp %g)", -math.SmallestNonzeroFloat64), "t" },
+
+        { "(minusp 'a)", "Eval error: minusp argument needs to be number" },
+        { "(minusp)", "Eval error: minusp expecting an argument" },
+        { "(minusp 1 0)", "Eval error: minusp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_evenp)
+{
+    auto fmt = boost::format("(evenp %1%)");
+    vector<TestEval> tests = {
+        { "(evenp 1)", "nil" },
+        //{ "(evenp (+ 3 3))", "t" },
+        { "(evenp 0)", "t" },
+        { "(evenp -1)", "nil" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "nil" },
+        { boost::str(fmt % numeric_limits<long>::max()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+
+        //{ "(evenp 3.145926536)", "Eval error: evenp argument needs to be integer\nnil" },
+        { "(evenp 'a)", "Eval error: evenp argument needs to be number" },
+        { "(evenp)", "Eval error: evenp expecting an argument" },
+        { "(evenp 1 0)", "Eval error: evenp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_oddp)
+{
+    auto fmt = boost::format("(oddp %1%)");
+    vector<TestEval> tests = {
+        { "(oddp 1)", "t" },
+        //{ "(oddp (/ 2 3))", "nil" },
+        { "(oddp 0)", "nil" },
+        { "(oddp -1)", "t" },
+
+        { boost::str(fmt % numeric_limits<long>::min()), "nil" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
+
+        //{ "(oddp 3.145926536)", "Error: oddp argument needs to be integer\nnil" },
+        { "(oddp 'a)", "Eval error: oddp argument needs to be number" },
+        { "(oddp)", "Eval error: oddp expecting an argument" },
+        { "(oddp 1 0)", "Eval error: oddp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
