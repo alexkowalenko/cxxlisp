@@ -226,6 +226,82 @@ static PrimFunct num_ge = numeric_predicate(ge);
 static PrimFunct num_lt = numeric_predicate(lt);
 static PrimFunct num_le = numeric_predicate(le);
 
+static function<Int(Int, Int)> add = plus<Int>();
+static function<Int(Int, Int)> sub = minus<Int>();
+static function<Int(Int, Int)> mult = multiplies<Int>();
+static function<Int(Int, Int)> div = divides<Int>();
+static function<Int(Int, Int)> mod = modulus<Int>();
+
+PrimFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
+// Returns a function implementing the function f across the list of arguments.
+{
+    return [=](const string& name, List& args) {
+        if (args.size() == 0) {
+            return s;
+        }
+        auto iter = args.begin();
+        if (!is_a<Int>(*iter)) {
+            throw EvalException(name + " arguments needs to be number");
+        }
+        auto acc = any_cast<Int>(*iter);
+        for (iter++; iter != args.end(); iter++)
+            if (is_a<Int>(*iter)) {
+                acc = f(acc, any_cast<Int>(*iter));
+            } else {
+                throw EvalException(name + " arguments needs to be number");
+            }
+        return acc;
+    };
+}
+
+static PrimFunct num_add = numeric_operation(add, 0);
+static PrimFunct num_sub = numeric_operation(sub, 0);
+static PrimFunct num_mult = numeric_operation(mult, 1);
+static PrimFunct num_div = numeric_operation(div, 1);
+static PrimFunct num_mod = numeric_operation(mod, 0);
+
+Expr num_sub_init(const string& name, List& args)
+{
+    if (args.size() == 1 && is_a<Int>(args[0])) {
+        return -any_cast<Int>(args[0]);
+    }
+    return num_sub(name, args);
+}
+
+PrimFunct check_zeros(PrimFunct f)
+{
+    return [=](const string& name, List& args) {
+        auto iter = args.begin();
+        for (iter++; iter != args.end(); ++iter)
+            if (is_a<Int>(*iter) && any_cast<Int>(*iter) == 0) {
+                throw NumericException("divide by zero");
+            }
+        return f(name, args);
+    };
+}
+
+Int power(Int a, Int b)
+{
+    return Int(pow(a, b));
+}
+
+static PrimFunct num_power = numeric_operation(power, 0);
+
+//static function<Int(Int, Int)> max_int = max<Int>;
+Int max_int(Int a, Int b)
+{
+    return max<Int>(a, b);
+}
+
+//static auto min_int = min<Int>;
+Int min_int(Int a, Int b)
+{
+    return min<Int>(a, b);
+}
+
+static PrimFunct num_max = numeric_operation(&max_int, 0);
+static PrimFunct num_min = numeric_operation(&min_int, 0);
+
 void init_prims()
 {
     vector<Primitive> defs{
@@ -268,6 +344,16 @@ void init_prims()
         { "<=", num_le, two_args, preEvaluate },
         { ">", num_gt, two_args, preEvaluate },
         { ">=", num_ge, two_args, preEvaluate },
+
+        { "+", num_add, no_check, preEvaluate },
+        { "-", &num_sub_init, no_check, preEvaluate },
+        { "*", num_mult, no_check, preEvaluate },
+        { "/", check_zeros(num_div), no_check, preEvaluate },
+        { "mod", check_zeros(num_mod), two_args, preEvaluate },
+        { "^", num_power, min_one, preEvaluate },
+        { "expt", num_power, min_one, preEvaluate },
+        { "max", num_max, min_one, preEvaluate },
+        { "min", num_min, min_one, preEvaluate },
 
     };
 

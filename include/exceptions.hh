@@ -54,5 +54,13 @@ public:
     {
     }
 };
+
+class NumericException : public AXException {
+public:
+    NumericException(const string& s)
+        : AXException(s)
+    {
+    }
+};
 }
 #endif

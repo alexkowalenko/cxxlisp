@@ -410,3 +410,197 @@ BOOST_AUTO_TEST_CASE(test_notequals)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_add)
+{
+    vector<TestEval> tests = {
+        { "(+ 12)", "12" },
+        { "(+ 2 3)", "5" },
+        { "(+ 3 -3)", "0" },
+        { "(+ 0 0)", "0" },
+        { "(+ 0 2)", "2" },
+        { "(+ 1 2 3 4 5 6)", "21" },
+        { "(+)", "0" },
+
+        // floats
+        // { "(+ 1.2)", "1.2" },
+        // { "(+ 2.1 3)", "5.1" },
+        // { "(+ 2 3.1)", "5.1" },
+        // { "(+ 2.1 3.1)", "5.2" },
+        // { "(+ 2.1 3.1 1.1)", "6.300000000000001" },
+
+        // // complex
+        // { "(+ 1 #C(0 1))", "#C(1 1)" },
+        // { "(+ #C(0 1) 1.5)", "#C(1.5 1)" },
+
+        { "(+ 1 'jones)", "Eval error: + arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_mult)
+{
+    vector<TestEval> tests = {
+        { "(* 12)", "12" },
+        { "(* 2 3)", "6" },
+        { "(* 3 -3)", "-9" },
+        { "(* 0 0)", "0" },
+        { "(* 0 2)", "0" },
+        { "(* 1 2 3 4 5 6)", "720" },
+        { "(* 66433534 345847684)", "22975883873835256" },
+        { "(*)", "1" },
+
+        // floats
+        // { "(* 1.2)", "1.2" },
+        // { "(* 2.1 3)", "6.300000000000001" },
+        // { "(* 2 3.1)", "6.2" },
+        // { "(* 2.1 3.1)", "6.510000000000001" },
+        // { "(* 2.1 3.1 1.1)", "7.161000000000001" },
+
+        // { fmt.Sprintf("(* %[1]g 0)", math.MaxFloat32), "0" },
+        // { fmt.Sprintf("(* 0 %[1]g )", math.MaxFloat64), "0" },
+        // { fmt.Sprintf("(* %[1]g 0)", math.SmallestNonzeroFloat32), "0" },
+        // { fmt.Sprintf("(* 0 %[1]g)", math.SmallestNonzeroFloat64), "0" },
+
+        // Complex
+        //{ "(* #C(0 1) #C(0 1))", "#C(-1 0)" },
+
+        { "(* 1 'jones)", "Eval error: * arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_sub)
+{
+    vector<TestEval> tests = {
+        { "(- 12)", "-12" },
+        { "(- 2 3)", "-1" },
+        { "(- 3 -3)", "6" },
+        { "(- 0 0)", "0" },
+        { "(- 0 2)", "-2" },
+        { "(- 2)", "-2" },
+
+        // floats
+        // { "(- 1.2)", "-1.2" },
+        // { "(- 2.1 3)", "-0.8999999999999999" },
+        // { "(- 2 3.1)", "-1.1" },
+        // { "(- 2.1 3.1)", "-1" },
+        // { "(- 2.1 3.1 1.1)", "-2.1" },
+
+        // { fmt.Sprintf("(- %[1]g %[1]g)", math.MaxFloat32), "0" },
+        // { fmt.Sprintf("(- %[1]g %[1]g)", math.MaxFloat64), "0" },
+        // { fmt.Sprintf("(- %[1]g %[1]g)", math.SmallestNonzeroFloat32), "0" },
+        // { fmt.Sprintf("(- %[1]g %[1]g)", math.SmallestNonzeroFloat64), "0" },
+
+        // // Complex
+        // { "(- #C(1 3) #C(3 1))", "#C(-2 2)" },
+
+        { "(- 1 'jones)", "Eval error: - arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_div)
+{
+    vector<TestEval> tests = {
+        { "(/ 32 2)", "16" },
+        { "(/ 32 -3)", "-10" },
+        { "(/ 0 0)", "Numeric exception: divide by zero" },
+        { "(/ 0 2)", "0" },
+        { "(/ 3 -1)", "-3" },
+        { "(/ 66433345534 34684)", "1915388" },
+        //{ "(/ 3.0 4 5)", "0.15" },
+
+        { "(/ 1 'jones)", "Eval error: / arguments needs to be number" },
+
+        // floats
+        // { "(/ 0.5 2)", "0.25" },
+        // { "(/ 1 3.0)", "0.3333333333333333" },
+        // { "(/ 8)", "0.125" },
+
+        // { fmt.Sprintf("(/ %[1]g %[1]g)", math.MaxFloat32), "1" },
+        // { fmt.Sprintf("(/ %[1]g %[1]g)", math.MaxFloat64), "1" },
+        // { fmt.Sprintf("(/ %[1]g %[1]g)", math.SmallestNonzeroFloat32), "1" },
+        // { fmt.Sprintf("(/ %[1]g %[1]g)", math.SmallestNonzeroFloat64), "1" },
+
+        // // Complex
+        // { "(/ #C(1 0) #C(0 1))", "#C(0 -1)" },
+
+        // { "(/ )", "Error: / expecting at least 1 argument(s)\nnil" },
+
+        // mod
+        { "(mod 32 2)", "0" },
+        //{ "(rem 32 -3)", "2" },
+        { "(mod 0 0)", "Numeric exception: divide by zero" },
+        //{ "(rem 0 2)", "0" },
+        { "(mod 3 -1)", "0" },
+        { "(mod 66433345534 28142)", "17660" },
+        { "(mod 12)", "Eval error: mod expecting 2 arguments" },
+        { "(mod 1 'jones)", "Eval error: mod arguments needs to be number" },
+
+        { "(mod 13 4)", "1" },
+        //{ "(rem 13 4)", "1" },
+        // {"(mod -13 4)", "3"},
+        //{ "(rem -13 4)", "-1" },
+        // {"(mod 13 -4)", "-3"},
+        //{ "(rem 13 -4)", "1" },
+        { "(mod -13 -4)", "-1" },
+        //{ "(rem -13 -4)", "-1" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_power)
+{
+    vector<TestEval> tests = {
+        { "(^ 12)", "12" },
+        { "(expt 2 3)", "8" },
+        //{ "(^ 3 -3)", "0.037037037037037035" },
+        { "(expt 0 0)", "1" },
+        { "(^ 0 2)", "0" },
+
+        // Complex
+        //{ "(^ #C(0 1) #C(0 1))", "#C(0.20787957635076193 0)" },
+
+        { "(^ 1 'jones)", "Eval error: ^ arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_max)
+{
+    vector<TestEval> tests = {
+        { "(max 12)", "12" },
+        { "(max 12 24)", "24" },
+        { "(max 3 -3)", "3" },
+        { "(max 0 0)", "0" },
+        { "(max 0 2)", "2" },
+        { "(max 1 2 3 4 5 6)", "6" },
+        { "(max 66433534 345847684)", "345847684" },
+        { "(max 2)", "2" },
+
+        //{ "(max 1.2 2.4)", "2.4" },
+
+        { "(max 1 'jones)", "Eval error: max arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_min)
+{
+    vector<TestEval> tests = {
+        { "(min 12)", "12" },
+        { "(min 12 24)", "12" },
+        { "(min 3 -3)", "-3" },
+        { "(min 0 0)", "0" },
+        { "(min 0 2)", "0" },
+        { "(min 1 2 3 4 5 6)", "1" },
+        { "(min 66433534 345847684)", "66433534" },
+        { "(min 2)", "2" },
+
+        //{ "(min 1.2 2.4)", "1.2" },
+
+        { "(min 1 'jones)", "Eval error: min arguments needs to be number" },
+    };
+    test_Evaluator(tests);
+}

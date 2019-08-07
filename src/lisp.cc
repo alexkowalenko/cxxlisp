@@ -70,6 +70,8 @@ void Lisp::repl(istream& istr, ostream& ostr)
             continue;
         } catch (EvalException& e) {
             ostr << "Eval error: " << e.what() << endl;
+        } catch (NumericException& e) {
+            ostr << "Numeric exception: " << e.what() << endl;
         } catch (exception& e) {
             ostr << "Exception: " << e.what() << endl;
             continue;
