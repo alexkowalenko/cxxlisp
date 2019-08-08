@@ -11,6 +11,7 @@
 
 #include "lexer.hh"
 #include "options.hh"
+#include "symboltable.hh"
 
 namespace ax {
 
@@ -26,6 +27,7 @@ public:
 
 private:
     const Options& opt;
+    SymbolTable symboltable;
 };
 }
 

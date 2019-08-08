@@ -62,5 +62,13 @@ public:
     {
     }
 };
+
+class RuntimeException : public AXException {
+public:
+    RuntimeException(const string& s)
+        : AXException(s)
+    {
+    }
+};
 }
 #endif

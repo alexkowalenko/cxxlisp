@@ -14,19 +14,19 @@
 
 namespace ax {
 
-List Evaluator::eval_list(const List& l)
+List Evaluator::eval_list(const List& l, SymbolTable& a)
 {
     List result;
     for (auto e : l) {
-        auto r = eval(e);
+        auto r = eval(e, a);
         result.push_back(r);
     }
     return result;
 }
 
-Expr Evaluator::eval(Expr& e)
+Expr Evaluator::eval(Expr& e, SymbolTable& a)
 {
-    BOOST_LOG_TRIVIAL(trace) << "eval: " << to_string(e);
+    BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
 
     // Eval basic types
     if (is_a<Bool>(e)) {
@@ -36,7 +36,10 @@ Expr Evaluator::eval(Expr& e)
         return e;
     }
     if (is_a<Atom>(e)) {
-        throw EvalException("Can't evaluate "s + to_string(e));
+        if (auto val = a.find(any_cast<Atom>(e))) {
+            return *val;
+        }
+        throw EvalException("unbound variable: "s + to_string(e));
     }
 
     // Test for list
@@ -67,13 +70,13 @@ Expr Evaluator::eval(Expr& e)
         if (auto prim = prim_table.find(name); prim != prim_table.end()) {
             auto result = List(e_list.begin() + 1, e_list.end());
             if (prim->second.preEval) {
-                result = eval_list(result);
+                result = eval_list(result, a);
             }
             auto check = checkArgs(prim->second.cons, name, result);
             if (check) {
                 throw EvalException(*check);
             }
-            return prim->second.pf(name, result);
+            return prim->second.pf(name, result, a);
         }
     }
 

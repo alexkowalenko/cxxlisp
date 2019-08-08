@@ -9,15 +9,17 @@
 
 #include "expr.hh"
 
+#include "symboltable.hh"
+
 namespace ax {
 
 class Evaluator {
 
 public:
-    static Expr eval(Expr& e);
+    static Expr eval(Expr& e, SymbolTable& a);
 
 private:
-    static List eval_list(const List& l);
+    static List eval_list(const List& l, SymbolTable& a);
 };
 }
 

@@ -15,6 +15,7 @@
 #include "linereaderStream.hh"
 #include "parser.hh"
 #include "primitive.hh"
+#include "symboltable.hh"
 
 namespace ax {
 
@@ -56,7 +57,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
                 continue;
             }
 
-            auto ex = evaluator.eval(res.val);
+            auto ex = evaluator.eval(res.val, symboltable);
             ostr << ex << endl;
 
         } catch (UnknownToken& e) {
@@ -72,6 +73,8 @@ void Lisp::repl(istream& istr, ostream& ostr)
             ostr << "Eval error: " << e.what() << endl;
         } catch (NumericException& e) {
             ostr << "Numeric exception: " << e.what() << endl;
+        } catch (RuntimeException& e) {
+            ostr << "Runtime exception: " << e.what() << endl;
         } catch (exception& e) {
             ostr << "Exception: " << e.what() << endl;
             continue;

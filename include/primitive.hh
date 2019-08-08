@@ -11,12 +11,13 @@
 
 #include "args.hh"
 #include "expr.hh"
+#include "symboltable.hh"
 
 namespace ax {
 
 using namespace std;
 
-using PrimFunct = function<Expr(const string& name, List& args)>;
+using PrimFunct = function<Expr(const string& name, List& args, SymbolTable& a)>;
 
 struct Primitive {
     string name;

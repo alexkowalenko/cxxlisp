@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "(quote)", "nil" },
         { "(quote (a b))", "(a b)" },
 
-        { "a", "Eval error: Can't evaluate a" },
+        { "a", "Eval error: unbound variable: a" },
     };
     test_Evaluator(tests);
 }
@@ -499,6 +499,161 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { "(equal)", "Eval error: equal expecting 2 arguments" },
         { "(equal ())", "Eval error: equal expecting 2 arguments" },
         { "(equal nil nil nil)", "Eval error: equal expecting 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_const)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(defconstant a 1)", "a" },
+        { "a", "1" },
+
+        { "(defconstant x '(a b c))", "x" },
+        { "(car x)", "a" },
+        { "(defconstant y '(i j k))", "y" },
+        { "(cdr y)", "(j k)" },
+        { "(defconstant z 'c)", "z" },
+        { "z", "c" },
+        { "(defconstant z 'd)", "Runtime exception: defconstant redefined const z" },
+        { "z", "c" },
+
+        //{ R"x((defconstant zz 'd "Documentation"))x", "zz" },
+
+        //{ R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
+        //{ "my_pi", "3.14" },
+
+        { "(defparameter xp '(a b c))", "xp" },
+        { "(car xp)", "a" },
+        { "(defparameter yp '(i j k))", "yp" },
+        { "(cdr yp)", "(j k)" },
+        { "(defparameter zp 'c)", "zp" },
+        { "zp", "c" },
+        { "(defparameter zp 'd)", "zp" },
+        { "zp", "d" },
+
+        //{ "(defparameter * my_pi * 3.1 \" My pi is better than your pi \")", " * my_pi * " },
+        //{ "*my_pi*", "3.1" },
+
+        { "(defconstant)", "Eval error: defconstant needs a name" },
+        { "(defconstant w)", "Eval error: defconstant needs a value" },
+
+        // globals - should not change
+        { "(defconstant xx 1)", "xx" },
+        //{ "(defun f() (defconstant xx '2))", "f" },
+        { "xx", "1" },
+        //{ "(f)", "xx" },
+        //{ "xx", "2" },
+
+        // fail
+        { "(defconstant 1 'd)", "Eval error: defconstant requires a symbol as a first argument" },
+        //{ "(defconstant \"s\" 'd)", "Error: defconstant: requires a symbol as a first argument" },
+        { "(defconstant n1 100 n2 200 )", "Eval error: defconstant only takes maximum of 3 arguments" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_defvar)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(defvar x '(a b c))", "x" },
+        { "(car x)", "a" },
+        { "(defvar y '(i j k))", "y" },
+        { "(cdr y)", "(j k)" },
+        { "(defvar z 'c)", "z" },
+        { "z", "c" },
+        { "(defvar z 'd)", "z" },
+        { "z", "d" },
+
+        //{`(defvar zz 'e "Doc string")`, "zz"},
+        //{"zz", "e"},
+
+        { "(defvar)", "Eval error: defvar needs a name" },
+        { "(defvar w)", "w" },
+
+        // globals - should not change
+        { "(defvar xx 1)", "xx" },
+        //{"(defun f() (defvar xx 2))", "f"},
+        { "xx", "1" },
+        //{"(f)", "xx"},
+        { "xx", "1" },
+
+        // locally defined
+        //{ "(defun g () (defvar y 1) y)", "g" },
+        //{ "(g)", "1" },
+
+        // fail
+        { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },
+        //{ "(defvar \"s\" 'd)", "Error: defvar requires a symbol as a first argument" },
+        { "(defvar n1 100 n2 200 )", "Eval error: defvar only takes maximum of 3 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_setq)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(setq x '(a b c))", "(a b c)" },
+        { "(car x)", "a" },
+        { "(setq y '(i j k))", "(i j k)" },
+        { "(cdr y)", "(j k)" },
+        { "(setq z 'c)", "c" },
+        { "z", "c" },
+        { "(setq z 'd)", "d" },
+        { "z", "d" },
+        { "(setq n1 100 n2 200 )", "200" },
+        { "n1", "100" },
+        { "n2", "200" },
+
+        { "(setq a 1 b 2 c 3)", "3" },
+        { "a", "1" },
+        { "b", "2" },
+        { "c", "3" },
+
+        { "(setq)", "nil" },
+
+        { "(setq w)", "Eval error: setq requires an even number of variables" },
+
+        // globals - should change
+        { "(setq x '1)", "1" },
+        //{ "(defun f() (setq x '2))", "f" },
+        { "x", "1" },
+        //{ "(f)", "2" },
+        //{ "x", "2" },
+
+        // fail
+        { "(setq 1 'd)", "Eval error: setq requires a symbol as an argument" },
+        //{ "(setq \"s\" 'd)", "Error: setq: requires a var as a first argument\nnil" }
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_setf)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(setf x '(a b c))", "(a b c)" },
+        { "(car x)", "a" },
+        { "(setf y '(i j k))", "(i j k)" },
+        { "(cdr y)", "(j k)" },
+        { "(setf z 'c)", "c" },
+        { "z", "c" },
+        { "(setf z 'd)", "d" },
+        { "z", "d" },
+        { "(setf n1 100 n2 200 )", "200" },
+        { "n1", "100" },
+        { "n2", "200" },
+
+        //{ "(setf)", "Eval error: setf expecting at least 2 argument(s)" },
+        //{ "(setf w)", "Eval error: setf expecting at least 2 argument(s)" },
+
+        // fail
+        { "(setf 1 'd)", "Eval error: setf requires a symbol as an argument" },
+        //{ "(setf \"s\" 'd)", "Error: setf: requires a var or list as a first argument\nnil" },
     };
     test_Evaluator(tests);
 }

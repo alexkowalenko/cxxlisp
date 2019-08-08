@@ -41,7 +41,7 @@ void test_Evaluator(const vector<TestEval>& tests)
         result.pop_back(); // chop off \n
         cout << "eval: " << test.input << " -> " << result << endl;
         if (test.output != result) {
-            BOOST_ERROR(boost::format("\n%1% should be: %3%, \n      not:  %2%") % test.input % result % test.output);
+            BOOST_ERROR(boost::format("\n%1%\nshould be: %3%, \n      not: %2%") % test.input % result % test.output);
             continue;
         }
     }
