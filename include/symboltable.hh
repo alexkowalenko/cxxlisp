@@ -23,6 +23,7 @@ public:
 
     void put(const string& name, const Expr& val);
     optional<Expr> find(const string& name);
+    void remove(const string& name);
 
     void dump(ostream& os);
 

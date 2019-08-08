@@ -18,6 +18,8 @@ class Evaluator {
 public:
     static Expr eval(Expr& e, SymbolTable& a);
 
+    static Expr perform_list(const List& l, SymbolTable& a);
+
 private:
     static List eval_list(const List& l, SymbolTable& a);
 };

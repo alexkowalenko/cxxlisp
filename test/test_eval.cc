@@ -657,3 +657,144 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_makunbound)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(setq x '(a b c))", "(a b c)" },
+        { "x", "(a b c)" },
+        { "(makunbound 'x)", "x" },
+        { "x", "Eval error: unbound variable: x" },
+        { "(makunbound 'y)", "y" },
+
+        // fail
+        { "(makunbound)", "Eval error: makunbound expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_if)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(if t 'a 'z)", "a" },
+        { "(if t 1 2)", "1" },
+        { "(if nil 'a 'z)", "z" },
+        { "(if nil 1 2)", "2" },
+
+        { "(if t 'a)", "a" },
+        { "(if nil 'a)", "nil" },
+
+        { "(if '0 'a 'z)", "a" },
+
+        // Incorrect, return nil
+        { "(if t)", "Eval error: if requires 2 or 3 arguments" },
+        { "(if nil)", "Eval error: if requires 2 or 3 arguments" },
+        { "(if)", "Eval error: if requires 2 or 3 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_cond)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { R"((cond (t t) 
+			(nil nil)))",
+            "t" },
+        { R"((cond (t nil) 
+			(nil t)))",
+            "nil" },
+        { R"((cond (nil t) 
+			(t nil)) )",
+            "nil" },
+        { R"((cond (nil nil) 
+			(t (quote x))) )",
+            "x" },
+        { R"((cond (t 1) 
+			(nil nil)))",
+            "1" },
+        { R"((cond (nil 1) 
+			(t 2)))",
+            "2" },
+        { R"((cond (nil 1) 
+			(nil 2)
+			(t 3)))",
+            "3" },
+
+        { R"((cond (() t) 
+			(t nil)))",
+            "nil" },
+        { R"((cond (t (quote a))) )", "a" },
+        { R"((cond (nil nil) 
+			(t (quote a))) )",
+            "a" },
+        { R"((cond (nil (quote a))
+			(t   (quote (1 2 3)))) )",
+            "(1 2 3)" },
+        { R"((cond ( (eq (quote a) (quote a))   (quote equal))) )", "equal" },
+        { R"((cond ((eq (quote a) (quote b)) (quote first))
+			    ((atom (quote a)) (quote second))) )",
+            "second" },
+        { R"((cond ((eq (quote a) (quote b))   (quote equal))
+			    ((quote t) (quote unequal))) )",
+            "unequal" },
+        { R"((cond ((atom t) (quote is-atom)) 
+				(t (quote not-atom))) )",
+            "is-atom" },
+
+        { R"((cond (t (quote a)) 
+			    (nil (quote b))) )",
+            "a" },
+        { R"((cond (nil (quote a))
+			    (t (quote b))) )",
+            "b" },
+        { R"((cond (t (quote a))
+			    (t (quote b))) )",
+            "a" },
+        { R"((cond (nil (quote a))
+				(nil (quote b))) )",
+            "nil" },
+        { R"((cond (nil (quote a))
+				('b)) )",
+            "b" },
+
+        { R"((cond (nil 'a 'a)
+			    (t 'b 'c)) )",
+            "c" },
+
+        { R"((cond (() t) 
+			(t nil)) )",
+            "nil" },
+        { R"((cond (t 'a)) )", "a" },
+        { R"((cond (nil nil) 
+			(t 'a)) )",
+            "a" },
+        { R"((cond (nil (quote a))
+			(t '(1 2 3))) )",
+            "(1 2 3)" },
+
+        // multiple expressions
+        { R"((cond (t 1 2 3) 
+			    (nil (quote b))) )",
+            "3" },
+        { R"((cond (nil (quote a))
+				(t 'a 'b)) )",
+            "b" },
+        // R3RS
+        { R"((cond ((> 3 2) 'greater)
+			((< 3 2) 'less)) )",
+            "greater" },
+        { R"((cond ((> 3 3) 'greater)
+				((< 3 3) 'less)
+				(t 'equal)) )",
+            "equal" },
+
+        { "(cond)",
+            "nil" },
+        { "(cond ('a))", "a" },
+        { "(cond (nil))", "nil" },
+    };
+    test_Evaluator(tests);
+}

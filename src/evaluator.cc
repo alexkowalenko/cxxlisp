@@ -24,6 +24,15 @@ List Evaluator::eval_list(const List& l, SymbolTable& a)
     return result;
 }
 
+Expr Evaluator::perform_list(const List& l, SymbolTable& a)
+{
+    Expr result = sF;
+    for (auto e : l) {
+        result = eval(e, a);
+    }
+    return result;
+}
+
 Expr Evaluator::eval(Expr& e, SymbolTable& a)
 {
     BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);

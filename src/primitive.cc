@@ -225,6 +225,56 @@ Expr setq(const string& name, List& args, SymbolTable& a)
     return val;
 }
 
+Expr makunbound(const string& name, List& args, SymbolTable& a)
+{
+    if (is_a<Atom>(args[0])) {
+        a.remove(any_cast<Atom>(args[0]));
+    }
+    return args[0];
+}
+
+//
+// Program control
+//
+
+Expr ifFunc(const string& name, List& args, SymbolTable& a)
+{
+    if (args.size() < 2) {
+        throw EvalException("if requires 2 or 3 arguments");
+    }
+    auto res = Evaluator::eval(args[0], a);
+    if (is_false(res)) {
+        if (args.size() < 3) {
+            return sF;
+        }
+        return Evaluator::eval(args[2], a);
+    }
+    //
+    if (args.size() < 2) {
+        return sF;
+    }
+    return Evaluator::eval(args[1], a);
+}
+
+Expr cond(const string& name, List& args, SymbolTable& a)
+{
+    for (auto clause : args) {
+        if (is_a<List>(clause)) {
+            auto clauseList = any_cast<List>(clause);
+            auto first = Evaluator::eval(clauseList[0], a);
+            if (is_false(first)) {
+                continue;
+            }
+            if (clauseList.size() == 1) {
+                return first;
+            }
+            return Evaluator::perform_list(List(clauseList.begin() + 1, clauseList.end()), a);
+        }
+        return EvalException("cond: clause " + to_string(clause) + "is not a list");
+    }
+    return sF;
+}
+
 //
 // Number Functions
 //
@@ -391,15 +441,25 @@ void init_prims()
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
 
+        // eq
+
         { "eq", &eq_p, two_args, preEvaluate },
         { "eql", &eql_p, two_args, preEvaluate },
         { "equal", &equal_p, two_args, preEvaluate },
+
+        // variables
 
         { "defvar", &defvar, no_check },
         { "defconstant", &defvar, no_check },
         { "defparameter", &defvar, no_check },
         { "setq", &setq, no_check },
         { "setf", &setq, no_check },
+        { "makunbound", makunbound, one_arg, preEvaluate },
+
+        // Program control
+
+        { "if", &ifFunc, no_check },
+        { "cond", &cond, no_check },
 
         // Number functions
 

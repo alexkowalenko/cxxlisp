@@ -21,6 +21,11 @@ optional<Expr> SymbolTable::find(const string& name)
     return {};
 }
 
+void SymbolTable::remove(const string& name)
+{
+    table.erase(name);
+}
+
 void SymbolTable::dump(ostream& os)
 {
     os << "Dump symbol table: " << endl;
