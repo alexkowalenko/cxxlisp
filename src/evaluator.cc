@@ -12,24 +12,21 @@
 #include "parser.hh"
 #include "primitive.hh"
 
+// 👾
+
 namespace ax {
 
-List Evaluator::eval_list(const List& l, SymbolTable& a)
+List Evaluator::eval_list(List& l, SymbolTable& a)
 {
     List result;
-    for (auto e : l) {
-        auto r = eval(e, a);
-        result.push_back(r);
-    }
+    for_each(l.begin(), l.end(), [&](Expr& e) { result.push_back(eval(e, a)); });
     return result;
 }
 
-Expr Evaluator::perform_list(const List& l, SymbolTable& a)
+Expr Evaluator::perform_list(List& l, SymbolTable& a)
 {
     Expr result = sF;
-    for (auto e : l) {
-        result = eval(e, a);
-    }
+    for_each(l.begin(), l.end(), [&](Expr& e) { result = eval(e, a); });
     return result;
 }
 

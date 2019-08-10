@@ -97,14 +97,17 @@ Expr listp(const string& name, List& args, SymbolTable&)
     return is_a<List>(res) || is_sF(res);
 }
 
+//   (cons 'a '(x y z)) --> (a x y z)
 Expr cons(const string& name, List& args, SymbolTable&)
 {
     if (is_a<List>(args[1])) {
-        auto res = List(1, args[0]);
-        for (auto& x : any_cast<List>(args[1])) {
-            res.push_back(x);
-        }
+        List list = any_cast<List>(args[1]);
+        List res;
+        res.reserve(1 + list.size());
+        res.push_back(args[0]);
+        res.insert(res.end(), list.begin(), list.end());
         return res;
+
     } else if (is_sF(args[1])) {
         return List(1, args[0]);
     }
@@ -268,7 +271,8 @@ Expr cond(const string& name, List& args, SymbolTable& a)
             if (clauseList.size() == 1) {
                 return first;
             }
-            return Evaluator::perform_list(List(clauseList.begin() + 1, clauseList.end()), a);
+            auto stats = List(clauseList.begin() + 1, clauseList.end());
+            return Evaluator::perform_list(stats, a);
         }
         return EvalException("cond: clause " + to_string(clause) + "is not a list");
     }
@@ -319,7 +323,7 @@ Expr nump(const string& name, List& args, SymbolTable&)
 PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](const string& name, List& args, SymbolTable&) {
+    return [&](const string& name, List& args, SymbolTable&) -> Expr {
         if (is_a<Int>(args[0]) && is_a<Int>(args[1])) {
             return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
         }
@@ -343,7 +347,7 @@ static function<Int(Int, Int)> mod = modulus<Int>();
 PrimFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
-    return [=](const string& name, List& args, SymbolTable&) {
+    return [=](const string& name, List& args, SymbolTable&) -> Expr {
         if (args.size() == 0) {
             return s;
         }
@@ -378,31 +382,31 @@ Expr num_sub_init(const string& name, List& args, SymbolTable& a)
 
 PrimFunct check_zeros(PrimFunct f)
 {
-    return [=](const string& name, List& args, SymbolTable& a) {
-        auto iter = args.begin(); // skip first
-        for (iter++; iter != args.end(); ++iter)
-            if (is_a<Int>(*iter) && any_cast<Int>(*iter) == 0) {
+    return [=](const string& name, List& args, SymbolTable& a) -> Expr {
+        for_each(args.begin() + 1,
+            args.end(),
+            [](Expr e) { if (is_a<Int>(e) && any_cast<Int>(e) == 0) {
                 throw NumericException("divide by zero");
-            }
+            } });
         return f(name, args, a);
     };
 }
 
 static PrimFunct num_power = numeric_operation(
-    [](Int a, Int b) { return Int(pow(a, b)); },
+    [](Int a, Int b) -> Int { return Int(pow(a, b)); },
     0);
 
 static PrimFunct num_max = numeric_operation(
-    [](Int a, Int b) { return Int(max<Int>(a, b)); },
+    [](Int a, Int b) -> Int { return Int(max<Int>(a, b)); },
     0);
 static PrimFunct num_min = numeric_operation(
-    [](Int a, Int b) { return Int(min<Int>(a, b)); },
+    [](Int a, Int b) -> Int { return Int(min<Int>(a, b)); },
     0);
 
 PrimFunct numeric_single(const function<Int(Int)>& f)
 // Returns a function implementing the function f on one argument.
 {
-    return [=](const string& name, List& args, SymbolTable&) {
+    return [=](const string& name, List& args, SymbolTable&) -> Expr {
         if (is_a<Int>(args[0])) {
             return f(any_cast<Int>(args[0]));
         }
@@ -410,11 +414,11 @@ PrimFunct numeric_single(const function<Int(Int)>& f)
     };
 }
 
-static PrimFunct num_abs = numeric_single([](Int x) { return Int(abs(x)); });
-static PrimFunct num_floor = numeric_single([](Int x) { return Int(floor(x)); });
-static PrimFunct num_ceil = numeric_single([](Int x) { return Int(ceil(x)); });
-static PrimFunct num_round = numeric_single([](Int x) { return Int(round(x)); });
-static PrimFunct num_trunc = numeric_single([](Int x) { return Int(trunc(x)); });
+static PrimFunct num_abs = numeric_single([](Int x) -> Int { return Int(abs(x)); });
+static PrimFunct num_floor = numeric_single([](Int x) -> Int { return Int(floor(x)); });
+static PrimFunct num_ceil = numeric_single([](Int x) -> Int { return Int(ceil(x)); });
+static PrimFunct num_round = numeric_single([](Int x) -> Int { return Int(round(x)); });
+static PrimFunct num_trunc = numeric_single([](Int x) -> Int { return Int(trunc(x)); });
 
 void init_prims()
 {
