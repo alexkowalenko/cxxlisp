@@ -798,3 +798,27 @@ BOOST_AUTO_TEST_CASE(test_eval_cond)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_progn)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(progn 'α 'β 'γ 'δ)", "δ" },
+        { "(progn 4)", "4" },
+        { "(progn (atom 'a) (atom '(a v)))", "nil" },
+        { "(progn)", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_prog1)
+{
+    auto fmt = boost::format("(equal %1% %1%)");
+    vector<TestEval> tests = {
+        { "(prog1'α 'β 'γ 'δ)", "α" },
+        { "(prog1 4)", "4" },
+        { "(prog1 (atom 'a) (atom '(a v)))", "t" },
+        { "(prog1)", "nil" },
+    };
+    test_Evaluator(tests);
+}

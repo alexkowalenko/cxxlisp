@@ -279,6 +279,22 @@ Expr cond(const string& name, List& args, SymbolTable& a)
     return sF;
 }
 
+Expr progn(const string& name, List& args, SymbolTable& a)
+{
+    return Evaluator::perform_list(args, a);
+}
+
+Expr prog1(const string& name, List& args, SymbolTable& a)
+{
+    if (args.size() == 0) {
+        return sF;
+    }
+    auto result = Evaluator::eval(args[0], a);
+    auto rest = List(args.begin() + 1, args.end());
+    Evaluator::perform_list(rest, a);
+    return result;
+}
+
 //
 // Number Functions
 //
@@ -464,6 +480,9 @@ void init_prims()
 
         { "if", &ifFunc, no_check },
         { "cond", &cond, no_check },
+
+        { "progn", &progn, no_check },
+        { "prog1", &prog1, no_check },
 
         // Number functions
 
