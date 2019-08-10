@@ -37,13 +37,22 @@ include_directories(include)
 add_subdirectory(third_party/replxx)
 include_directories("${PROJECT_SOURCE_DIR}/third_party/replxx/include")
 
+# add_subdirectory(third_party/utfcpp)
+include_directories("${PROJECT_SOURCE_DIR}/third_party/utfcpp/source")
+
+set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
+set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
+set(ICU_LIBRARIES icuuc)
+include_directories(${ICU_INCLUDE_DIRS})
+link_directories(${ICU_LIBRARY_DIRS})
+
 # CXX Lisp build
 
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 add_library(libcxxlisp STATIC ${source_files})
 
 add_executable(cxxlisp cmd/cxxlisp.cc)
-target_link_libraries(cxxlisp libcxxlisp replxx)
+target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES})
 
 # Test programs build
 
@@ -59,7 +68,7 @@ foreach(testSrc ${test_src})
         add_executable(${testName} ${testSrc})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} libcxxlisp replxx testlib)
+        target_link_libraries(${testName} libcxxlisp replxx testlib ${ICU_LIBRARIES})
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 

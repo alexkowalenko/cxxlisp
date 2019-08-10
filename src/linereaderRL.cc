@@ -28,7 +28,6 @@ namespace {
 };
 
 LineReaderReadLine::LineReaderReadLine()
-    : ptr(-1)
 {
     using_history();
 
@@ -40,6 +39,7 @@ LineReaderReadLine::LineReaderReadLine()
         cerr << "Can't read the history file: " << my_history_file
              << ' ' << strerror(res) << endl;
     }
+    ptr = buf.end();
 }
 
 LineReaderReadLine::~LineReaderReadLine()
@@ -55,25 +55,25 @@ LineReaderReadLine::~LineReaderReadLine()
     }
 }
 
-wchar_t LineReaderReadLine::get_char()
+uint32_t LineReaderReadLine::get_char()
 {
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") % buf % ptr;
-    if (ptr < 0 || ptr == int(buf.size())) {
+    if (ptr == buf.end()) {
         get_line();
     }
     // BOOST_LOG_TRIVIAL(trace) << "buf: " << buf;
-    return buf[ptr++];
+    return *ptr++;
 }
 
-wchar_t LineReaderReadLine::peek_char()
+uint32_t LineReaderReadLine::peek_char()
 {
-    if (ptr < 0 || ptr == int(buf.size())) {
+    if (ptr == buf.end()) {
         get_line();
     }
-    return buf[ptr];
+    return *ptr;
 }
 
-void LineReaderReadLine::push_char(wchar_t)
+void LineReaderReadLine::push_char(uint32_t)
 {
     return;
 }
@@ -88,7 +88,7 @@ void LineReaderReadLine::get_line()
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
     buf = string(cbuf);
     buf.append(1, '\n');
-    ptr = 0;
+    ptr = buf.begin();
     free(cbuf);
 }
 }

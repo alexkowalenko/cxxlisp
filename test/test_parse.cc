@@ -165,6 +165,18 @@ BOOST_AUTO_TEST_CASE(test_parser_backquote)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_unicode)
+{
+    vector<TestParser> tests = {
+        { "'七", "(quote 七)" },
+        { "('一 '二 '三)", "((quote 一) (quote 二) (quote 三))" },
+        { "('liberté '(égalité fraternité))",
+            "((quote liberté) (quote (égalité fraternité)))" },
+    };
+
+    test_Parser(tests);
+}
+
 void test_Parser(const vector<TestParser>& tests)
 {
     for (auto test : tests) {

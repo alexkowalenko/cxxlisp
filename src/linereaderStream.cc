@@ -6,29 +6,55 @@
 
 #include "linereaderStream.hh"
 
+#include <array>
+
+#include <boost/log/trivial.hpp>
+
+#include "utf8.h"
+
 #include "exceptions.hh"
 
 namespace ax {
 
-wchar_t LineReaderStream::get_char()
+LineReaderStream::LineReaderStream(istream& s)
+    : is(s)
 {
-    if (!is)
-        throw EOFException();
-    char ch;
-    is >> ch;
-    return ch;
+    ptr = buf.end();
 }
 
-wchar_t LineReaderStream::peek_char()
+uint32_t LineReaderStream::get_char()
 {
-    if (!is)
-        throw EOFException();
-    return is.peek();
+    //BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char";
+    while (ptr == buf.end()) {
+        get_line();
+    }
+    //BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char: >" << buf << "<";
+    uint32_t c = utf8::next(ptr, buf.end());
+    //BOOST_LOG_TRIVIAL(trace) << "get_char : " << c;
+    return c;
 }
 
-void LineReaderStream::push_char(wchar_t c)
+uint32_t LineReaderStream::peek_char()
 {
-    is.putback(c);
+    while (ptr == buf.end()) {
+        get_line();
+    }
+    // BOOST_LOG_TRIVIAL(trace) << "LineReader::peek_char: >" << buf << "<";
+    return utf8::peek_next(ptr, buf.end());
+}
+
+void LineReaderStream::push_char(uint32_t c)
+{
+    utf8::advance(ptr, -1, buf.end());
     return;
+}
+
+void LineReaderStream::get_line()
+{
+    if (!getline(is, buf)) {
+        throw EOFException();
+    }
+    buf.push_back('\n');
+    ptr = buf.begin();
 }
 }

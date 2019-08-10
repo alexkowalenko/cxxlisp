@@ -50,6 +50,12 @@ BOOST_AUTO_TEST_CASE(test_lexer_1)
         { "a34kTMNs", TokenType::atom, "a34kTMNs" },
         { "the-word-recursion-has-many-meanings", TokenType::atom, "the-word-recursion-has-many-meanings" },
 
+        // unicode identifiers
+        { "estação", TokenType::atom, "estação" },
+        { "λὀγος", TokenType::atom, "λὀγος" },
+        { "ἄλφα", TokenType::atom, "ἄλφα" },
+        { "👾", TokenType::atom, "👾" },
+
         { "format.^.\\:{.1", TokenType::atom, "format.^.\\:{.1" }, // In common lisp tests
 
         { "+", TokenType::atom, "+" }, // R4RS Identifiers in r4rstest.scm

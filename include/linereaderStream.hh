@@ -17,14 +17,15 @@ using namespace std;
 
 class LineReaderStream : public LineReader {
 public:
-    LineReaderStream(istream& is)
-        : is(is){};
+    LineReaderStream(istream& is);
 
-    wchar_t get_char() override;
-    wchar_t peek_char() override;
-    void push_char(wchar_t c) override;
+    uint32_t get_char() override;
+    uint32_t peek_char() override;
+    void push_char(uint32_t c) override;
 
 private:
+    void get_line();
+
     istream& is;
 };
 }

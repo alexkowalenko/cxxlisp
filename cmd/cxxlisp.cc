@@ -4,6 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
+#include <clocale>
 #include <iostream>
 
 #include "lisp.hh"
@@ -40,6 +41,7 @@ int main(int argc, char* argv[])
 {
     // Get options
     ax::Options options = getOptions(argc, argv);
+    setlocale(LC_ALL, "en_US.utf8");
 
     init_logging();
 

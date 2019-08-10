@@ -17,8 +17,8 @@ public:
     Lexer(LineReader&);
     Token get_token();
 
-    wchar_t peek();
-    wchar_t scan();
+    uint32_t peek();
+    uint32_t scan();
 
 private:
     LineReader& lineReader;

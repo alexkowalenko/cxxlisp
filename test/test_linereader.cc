@@ -25,11 +25,11 @@ void test_lineReader(const vector<TestLineReader>& tests, LineReaderStream& r)
     for (auto t : tests) {
         try {
             auto got = r.get_char();
-            // cout << "got: " << char(got) << " want: " << t.want << endl;
+            cout << "got: " << char(got) << " want: " << t.want << endl;
             BOOST_REQUIRE_EQUAL(got, t.want);
         } catch (EOFException) {
             if (!t.eof) {
-                BOOST_FAIL("No eof at end of file");
+                BOOST_FAIL("No eof at end of file :"s + t.want);
             }
         }
     }
@@ -41,10 +41,11 @@ BOOST_AUTO_TEST_CASE(test_linereader_1)
         { 'a', false },
         { 'b', false },
         { 'c', false },
+        { 10, false },
         { 'd', false },
         { 'e', false },
         { 'f', false },
-        { 0, true },
+        { 10, true },
     };
 
     istringstream is("abc\ndef"s);
