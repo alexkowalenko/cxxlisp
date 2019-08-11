@@ -55,7 +55,7 @@ constexpr bool is_false(Expr& s)
 // Is the Bool sF, or is the empty list
 {
     return (s.type() == typeid(Bool) && !any_cast<Bool>(s))
-        || (s.type() == typeid(List) && any_cast<List>(s).size() == 0);
+        || (s.type() == typeid(List) && any_cast<List>(s).empty());
 }
 
 Bool expr_eq(const Expr& x, const Expr&);

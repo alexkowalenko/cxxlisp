@@ -9,12 +9,26 @@
 #include <boost/log/trivial.hpp>
 
 #include "exceptions.hh"
+#include "function.hh"
 #include "parser.hh"
 #include "primitive.hh"
 
 // 👾
 
 namespace ax {
+
+SymbolTable Evaluator::populate_parameters(const Function& f, List& args, SymbolTable& a)
+{
+    List evalArgs = eval_list(args, a);
+    if (f.parameters.size() != args.size()) {
+        throw EvalException(f.name + ": invalid number of arguments"s);
+    }
+    SymbolTable context(&a);
+    for (int i = 0; i < evalArgs.size(); ++i) {
+        context.put(any_cast<Atom>(f.parameters[i]), evalArgs[i]);
+    }
+    return context;
+}
 
 List Evaluator::eval_list(List& l, SymbolTable& a)
 {
@@ -55,7 +69,7 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
 
     // Expression is a list
     List e_list = any_cast<List>(e);
-    if (e_list.size() == 0) {
+    if (e_list.empty()) {
         return sF;
     }
 
@@ -70,6 +84,17 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
                 return e_list[1];
             }
             return sF;
+        }
+
+        // Lookup symbol table for function
+        if (auto f = a.find(name)) {
+            if (!is_a<Function>(*f)) {
+                throw EvalException("A non function in function location "s + to_string(*f));
+            }
+            Function fn = any_cast<Function>(*f);
+            List fn_args = List(e_list.begin() + 1, e_list.end());
+            SymbolTable context = populate_parameters(fn, fn_args, a);
+            return perform_list(fn.body, context);
         }
 
         // Lookup primitive table

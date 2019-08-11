@@ -9,6 +9,7 @@
 
 #include "expr.hh"
 
+#include "function.hh"
 #include "symboltable.hh"
 
 namespace ax {
@@ -22,6 +23,7 @@ public:
 
 private:
     static List eval_list(List& l, SymbolTable& a);
+    static SymbolTable populate_parameters(const Function& f, List& args, SymbolTable& a);
 };
 }
 

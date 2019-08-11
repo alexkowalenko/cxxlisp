@@ -21,6 +21,7 @@ namespace ax {
 
 Lisp::Lisp(const Options& o)
     : opt(o)
+    , symboltable(nullptr)
 {
 }
 

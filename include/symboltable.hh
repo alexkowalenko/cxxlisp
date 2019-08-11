@@ -19,7 +19,7 @@ using namespace std;
 
 class SymbolTable {
 public:
-    SymbolTable(){};
+    SymbolTable(SymbolTable* s);
 
     void put(const string& name, const Expr& val);
     optional<Expr> find(const string& name);
@@ -29,6 +29,7 @@ public:
 
 private:
     map<string, Expr> table;
+    SymbolTable* next;
 };
 }
 

@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(expr_print)
     stringstream ss;
     Expr a = List();
     ss << a;
-    BOOST_REQUIRE_EQUAL(ss.str(), "()");
+    BOOST_REQUIRE_EQUAL(ss.str(), "nil");
 
     Expr c = List({ Atom("hello"), Int(1) });
     (ss = stringstream()) << c;

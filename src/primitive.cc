@@ -13,6 +13,7 @@
 
 #include "evaluator.hh"
 #include "exceptions.hh"
+#include "function.hh"
 
 namespace ax {
 
@@ -296,6 +297,34 @@ Expr prog1(const string& name, List& args, SymbolTable& a)
 }
 
 //
+// Function functions
+//
+
+Expr defun(const string& name, List& args, SymbolTable& a)
+{
+    if (!is_a<Atom>(args[0])) {
+        throw EvalException(name + " function name needs to an atom");
+    }
+    auto fname = any_cast<Atom>(args[0]);
+    if (!is_a<List>(args[1])) {
+        throw EvalException(fname + " needs a list of parameters");
+    }
+    for (auto p : any_cast<List>(args[1])) {
+        if (!is_a<Atom>(p)) {
+            throw EvalException(fname + " parameter needs to be an atom :" + to_string(p));
+        }
+    }
+    Function f(fname, any_cast<List>(args[1]));
+    if (args.size() > 2) {
+        f.body = List(args.begin() + 2, args.end());
+    } else {
+        f.body = List();
+    }
+    a.put(fname, f);
+    return fname;
+}
+
+//
 // Number Functions
 //
 
@@ -483,6 +512,9 @@ void init_prims()
 
         { "progn", &progn, no_check },
         { "prog1", &prog1, no_check },
+
+        // Function
+        { "defun", &defun, min_two },
 
         // Number functions
 
