@@ -12,7 +12,7 @@
 namespace ax {
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const List& args)
 {
-    switch (cons.type) {
+    switch (cons.constraint) {
     case ArgConstraintType::none:
         if (args.size() != 0) {
             ostringstream os;
@@ -46,6 +46,19 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
         }
         break;
     case ArgConstraintType::no_check:;
+    }
+    if (cons.argType == ArgType::numeric) {
+        if (args.size() == 1) {
+            if (!is_a<Int>(args[0])) {
+                return name + " argument needs to be number";
+            }
+        } else {
+            for (auto x : args) {
+                if (!is_a<Int>(x)) {
+                    return name + " arguments needs to be number";
+                }
+            }
+        }
     }
     return {};
 }

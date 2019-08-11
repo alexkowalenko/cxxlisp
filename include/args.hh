@@ -24,9 +24,15 @@ enum class ArgConstraintType {
     min
 };
 
+enum class ArgType {
+    any,
+    numeric
+};
+
 struct ArgConstraint {
-    ArgConstraintType type;
+    ArgConstraintType constraint;
     int num;
+    ArgType argType;
 };
 
 const ArgConstraint one_arg = { ArgConstraintType::eq, 1 };
@@ -40,6 +46,14 @@ const ArgConstraint min_three = { ArgConstraintType::min, 3 };
 const ArgConstraint max_two = { ArgConstraintType::max, 2 };
 
 const ArgConstraint no_check = { ArgConstraintType::no_check, 0 };
+
+const ArgConstraint one_num = { ArgConstraintType::eq, 1, ArgType::numeric };
+const ArgConstraint two_num = { ArgConstraintType::eq, 2, ArgType::numeric };
+const ArgConstraint min_one_num = { ArgConstraintType::min, 1, ArgType::numeric };
+const ArgConstraint any_num = { ArgConstraintType::no_check, 0,  ArgType::numeric};
+
+
+
 
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const List& args);
 }

@@ -7,6 +7,7 @@
 #include "primitive.hh"
 
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 #include <boost/log/trivial.hpp>
@@ -31,7 +32,7 @@ Expr symbolp(const string&, List& args, SymbolTable&)
         && (is_a<Atom>(a) || is_a<Bool>(a))) {
         return sT;
     }
-    if (is_a<List>(a) && any_cast<List>(a).size() == 0) {
+    if (is_a<List>(a) && any_cast<List>(a).empty()) {
         return sT;
     }
     return sF;
@@ -44,7 +45,7 @@ Expr null(const string&, List& args, SymbolTable&)
 
 Expr andor(const string& name, List& args, SymbolTable& a)
 {
-    if (args.size() == 0) {
+    if (args.empty()) {
         return name == "and";
     }
     Expr last = sF;
@@ -117,7 +118,7 @@ Expr cons(const string& name, List& args, SymbolTable&)
 
 Expr list(const string& name, List& args, SymbolTable&)
 {
-    if (args.size() == 0) {
+    if (args.empty()) {
         return sF;
     }
     return args;
@@ -174,7 +175,7 @@ Expr equal_p(const string& name, List& args, SymbolTable&)
 
 Expr defvar(const string& name, List& args, SymbolTable& a)
 {
-    if (args.size() == 0) {
+    if (args.empty()) {
         throw EvalException(name + " needs a name");
     }
     if (args.size() > 3) {
@@ -287,7 +288,7 @@ Expr progn(const string& name, List& args, SymbolTable& a)
 
 Expr prog1(const string& name, List& args, SymbolTable& a)
 {
-    if (args.size() == 0) {
+    if (args.empty()) {
         return sF;
     }
     auto result = Evaluator::eval(args[0], a);
@@ -337,10 +338,7 @@ PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](const string& name, List& args, SymbolTable&) {
-        if (is_a<Int>(args[0])) {
-            return f(any_cast<Int>(args[0]), 0);
-        }
-        throw EvalException(name + " argument needs to be number");
+        return f(any_cast<Int>(args[0]), 0);
     };
 }
 
@@ -359,20 +357,14 @@ template <Int N>
 Expr nump(const string& name, List& args, SymbolTable&)
 // Generates a templated function which mods compared to N.
 {
-    if (is_a<Int>(args[0])) {
-        return abs(any_cast<Int>(args[0]) % 2) == N;
-    }
-    throw EvalException(name + " argument needs to be number");
+    return abs(any_cast<Int>(args[0]) % 2) == N;
 }
 
 PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](const string& name, List& args, SymbolTable&) -> Expr {
-        if (is_a<Int>(args[0]) && is_a<Int>(args[1])) {
-            return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
-        }
-        throw EvalException(name + " arguments needs to be number");
+        return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
     };
 }
 
@@ -393,21 +385,21 @@ PrimFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
     return [=](const string& name, List& args, SymbolTable&) -> Expr {
-        if (args.size() == 0) {
+        if (args.empty()) {
             return s;
         }
-        auto iter = args.begin();
-        if (!is_a<Int>(*iter)) {
-            throw EvalException(name + " arguments needs to be number");
-        }
-        auto acc = any_cast<Int>(*iter);
-        for (iter++; iter != args.end(); iter++)
-            if (is_a<Int>(*iter)) {
-                acc = f(acc, any_cast<Int>(*iter));
-            } else {
-                throw EvalException(name + " arguments needs to be number");
-            }
-        return acc;
+        // auto iter = args.begin();
+        // auto acc = any_cast<Int>(*iter);
+        // for (iter++; iter != args.end(); iter++) {
+        //     acc = f(acc, any_cast<Int>(*iter));
+        // }
+        // return acc;
+        return accumulate(args.begin() + 1,
+            args.end(),
+            any_cast<Int>(*args.begin()),
+            [=](Expr a, Expr b) -> Int {
+                return f(any_cast<Int>(a), any_cast<Int>(b));
+            });
     };
 }
 
@@ -419,7 +411,7 @@ static PrimFunct num_mod = numeric_operation(mod, 0);
 
 Expr num_sub_init(const string& name, List& args, SymbolTable& a)
 {
-    if (args.size() == 1 && is_a<Int>(args[0])) {
+    if (args.size() == 1) {
         return -any_cast<Int>(args[0]);
     }
     return num_sub(name, args, a);
@@ -430,7 +422,7 @@ PrimFunct check_zeros(PrimFunct f)
     return [=](const string& name, List& args, SymbolTable& a) -> Expr {
         for_each(args.begin() + 1,
             args.end(),
-            [](Expr e) { if (is_a<Int>(e) && any_cast<Int>(e) == 0) {
+            [](Expr e) { if (any_cast<Int>(e) == 0) {
                 throw NumericException("divide by zero");
             } });
         return f(name, args, a);
@@ -452,10 +444,7 @@ PrimFunct numeric_single(const function<Int(Int)>& f)
 // Returns a function implementing the function f on one argument.
 {
     return [=](const string& name, List& args, SymbolTable&) -> Expr {
-        if (is_a<Int>(args[0])) {
-            return f(any_cast<Int>(args[0]));
-        }
-        throw EvalException(name + " argument needs to be number");
+        return f(any_cast<Int>(args[0]));
     };
 }
 
@@ -521,34 +510,34 @@ void init_prims()
         { "numberp", &numberp, one_arg, preEvaluate },
         { "integerp", &numberp, one_arg, preEvaluate },
 
-        { "zerop", zerop, one_arg, preEvaluate },
-        { "oddp", &nump<1>, one_arg, preEvaluate },
-        { "evenp", &nump<0>, one_arg, preEvaluate },
-        { "plusp", plusp, one_arg, preEvaluate },
-        { "minusp", minusp, one_arg, preEvaluate },
+        { "zerop", zerop, one_num, preEvaluate },
+        { "oddp", &nump<1>, one_num, preEvaluate },
+        { "evenp", &nump<0>, one_num, preEvaluate },
+        { "plusp", plusp, one_num, preEvaluate },
+        { "minusp", minusp, one_num, preEvaluate },
 
-        { "=", num_eq, two_args, preEvaluate },
-        { "/=", num_neq, two_args, preEvaluate },
-        { "<", num_lt, two_args, preEvaluate },
-        { "<=", num_le, two_args, preEvaluate },
-        { ">", num_gt, two_args, preEvaluate },
-        { ">=", num_ge, two_args, preEvaluate },
+        { "=", num_eq, two_num, preEvaluate },
+        { "/=", num_neq, two_num, preEvaluate },
+        { "<", num_lt, two_num, preEvaluate },
+        { "<=", num_le, two_num, preEvaluate },
+        { ">", num_gt, two_num, preEvaluate },
+        { ">=", num_ge, two_num, preEvaluate },
 
-        { "+", num_add, no_check, preEvaluate },
-        { "-", &num_sub_init, no_check, preEvaluate },
-        { "*", num_mult, no_check, preEvaluate },
-        { "/", check_zeros(num_div), no_check, preEvaluate },
-        { "mod", check_zeros(num_mod), two_args, preEvaluate },
-        { "^", num_power, min_one, preEvaluate },
-        { "expt", num_power, min_one, preEvaluate },
-        { "max", num_max, min_one, preEvaluate },
-        { "min", num_min, min_one, preEvaluate },
+        { "+", num_add, any_num, preEvaluate },
+        { "-", &num_sub_init, any_num, preEvaluate },
+        { "*", num_mult, any_num, preEvaluate },
+        { "/", check_zeros(num_div), any_num, preEvaluate },
+        { "mod", check_zeros(num_mod), two_num, preEvaluate },
+        { "^", num_power, min_one_num, preEvaluate },
+        { "expt", num_power, min_one_num, preEvaluate },
+        { "max", num_max, min_one_num, preEvaluate },
+        { "min", num_min, min_one_num, preEvaluate },
 
-        { "abs", num_abs, one_arg, preEvaluate },
-        { "floor", num_floor, one_arg, preEvaluate },
-        { "ceiling", num_ceil, one_arg, preEvaluate },
-        { "round", num_round, one_arg, preEvaluate },
-        { "truncate", num_trunc, one_arg, preEvaluate },
+        { "abs", num_abs, one_num, preEvaluate },
+        { "floor", num_floor, one_num, preEvaluate },
+        { "ceiling", num_ceil, one_num, preEvaluate },
+        { "round", num_round, one_num, preEvaluate },
+        { "truncate", num_trunc, one_num, preEvaluate },
 
     };
 
