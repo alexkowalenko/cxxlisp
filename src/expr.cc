@@ -34,6 +34,8 @@ ostream& operator<<(ostream& os, const Expr& s)
         os << ')';
     } else if (s.type() == typeid(Function)) {
         os << string(any_cast<Function>(s));
+    } else if (s.type() == typeid(FunctionRef)) {
+        os << "#'" << any_cast<FunctionRef>(s);
     } else {
         os << "*Unprintable type*";
     }

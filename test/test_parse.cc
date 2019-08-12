@@ -98,7 +98,6 @@ BOOST_AUTO_TEST_CASE(test_parser)
 				))x",
             "(a (b) c)" },
     };
-
     test_Parser(tests);
 }
 
@@ -108,7 +107,28 @@ BOOST_AUTO_TEST_CASE(test_parser_comments)
         { "a ; Hello", "a" },
         { "; In 1960, John McCarthy published a remarkable paper in which he did for programming something like what Euclid did for geometry.", "nil" },
     };
+    test_Parser(tests);
+}
 
+BOOST_AUTO_TEST_CASE(test_parser_multiline_comments)
+{
+    vector<TestParser> tests = {
+        { "a #| Hello |#", "a" },
+        { "#| Hello |# a", "a" },
+        { R"(#|
+			 
+			In 1960, John McCarthy published a remarkable paper in which he did 
+			for programming something like what Euclid did for geometry.
+
+		  |#)",
+            "" },
+        { "a #||#", "a" },
+        { "(a #| Hello |# b c)", "(a b c)" },
+        { R"(#|
+
+            |#a)",
+            "a" },
+    };
     test_Parser(tests);
 }
 
@@ -130,7 +150,6 @@ BOOST_AUTO_TEST_CASE(test_parser_TF)
         { "(t nil (t))", "(t nil (t))" },
         { "(nil nil (t))", "(nil nil (t))" },
     };
-
     test_Parser(tests);
 }
 
@@ -142,7 +161,6 @@ BOOST_AUTO_TEST_CASE(test_parser_quote)
         { "('a '(b c))", "((quote a) (quote (b c)))" },
         { "('(a b) 'c)", "((quote (a b)) (quote c))" },
     };
-
     test_Parser(tests);
 }
 
@@ -161,7 +179,6 @@ BOOST_AUTO_TEST_CASE(test_parser_backquote)
         { ",@", "splice-unquote" },
         { "`(cons x ,@ a)", "(backquote (cons x splice-unquote a))" },
     };
-
     test_Parser(tests);
 }
 
@@ -173,7 +190,33 @@ BOOST_AUTO_TEST_CASE(test_parser_unicode)
         { "('liberté '(égalité fraternité))",
             "((quote liberté) (quote (égalité fraternité)))" },
     };
+    test_Parser(tests);
+}
 
+BOOST_AUTO_TEST_CASE(test_parser_numbers)
+{
+    vector<TestParser> tests = {
+        { "1", "1" },
+        { "0", "0" },
+        { "46846368464", "46846368464" },
+        { "-1", "-1" },
+        { "+1", "1" },
+        { to_string(numeric_limits<long>::min()), "-9223372036854775808" },
+        { to_string(numeric_limits<long>::min() + 1), "-9223372036854775807" },
+        { to_string(numeric_limits<long>::max()), "9223372036854775807" },
+        { to_string(numeric_limits<long>::max() - 1), "9223372036854775806" },
+
+        { "(42 7)", "(42 7)" },
+    };
+    test_Parser(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
+{
+    vector<TestParser> tests = {
+        { "#'id", "#'id" },
+        { "#'+", "#'+" },
+    };
     test_Parser(tests);
 }
 

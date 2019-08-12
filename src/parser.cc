@@ -7,6 +7,7 @@
 #include "parser.hh"
 
 #include "exceptions.hh"
+#include "function.hh"
 
 #include <boost/log/trivial.hpp>
 
@@ -39,6 +40,20 @@ Expr Parser::parse_comma()
         return splice_unquote_atom;
     }
     return unquote_atom;
+}
+
+Expr Parser::parse_hash(const Token& tok)
+{
+    if (tok.val == "'") {
+        // function ref
+        Token t = lexer.get_token();
+        if (t.type == TokenType::atom) {
+            return FunctionRef(t.val);
+        } else {
+            throw ParseException("#' function ref unknown token "s + string(t));
+        }
+    }
+    throw ParseException("# unknown "s + string(tok));
 }
 
 ParserResult Parser::parse_quote(Token& tok)
@@ -92,6 +107,9 @@ ParserResult Parser::parse()
 
     case TokenType::comma: {
         return { parse_comma(), false };
+    }
+    case TokenType::hash: {
+        return { parse_hash(tok), false };
     }
     case TokenType::eof:
         return { sF, true };

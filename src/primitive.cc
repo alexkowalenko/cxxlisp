@@ -38,6 +38,12 @@ Expr symbolp(const string&, List& args, SymbolTable&)
     return sF;
 }
 
+template <typename T>
+Expr typep(const string& name, List& args, SymbolTable&)
+{
+    return is_a<T>(args[0]);
+}
+
 Expr null(const string&, List& args, SymbolTable&)
 {
     return is_false(args.front());
@@ -343,14 +349,35 @@ Expr lambda(const string& name, List& args, SymbolTable& a)
     return f;
 }
 
+Expr funct(const string& name, List& args, SymbolTable& a)
+{
+    if (is_a<Atom>(args[0])) {
+        return FunctionRef(any_cast<Atom>(args[0]));
+    }
+    throw EvalException(name + " function name needs to an atom");
+}
+
+Expr functionp(const string& name, List& args, SymbolTable& a)
+{
+    auto f = args[0];
+    if (is_a<Function>(f)) {
+        return sT;
+    } else if (is_a<FunctionRef>(f)) {
+        if (auto p = prim_table.find(any_cast<FunctionRef>(f)); p != prim_table.end()) {
+            return sT;
+        }
+        if (auto fs = a.find(any_cast<FunctionRef>(f))) {
+            if (is_a<Function>(*fs)) {
+                return sT;
+            }
+        }
+    }
+    return sF;
+}
+
 //
 // Number Functions
 //
-
-Expr numberp(const string& name, List& args, SymbolTable&)
-{
-    return is_a<Int>(args[0]);
-}
 
 PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
@@ -525,11 +552,13 @@ void init_prims()
         { "lambda", &lambda, min_one },
         { "defmacro", &defun, min_one },
         { "macro", &lambda, min_one },
+        { "functionp", &functionp, min_one, preEvaluate },
+        { "function", &funct, one_arg },
 
         // Number functions
 
-        { "numberp", &numberp, one_arg, preEvaluate },
-        { "integerp", &numberp, one_arg, preEvaluate },
+        { "numberp", &typep<Int>, one_arg, preEvaluate },
+        { "integerp", &typep<Int>, one_arg, preEvaluate },
 
         { "zerop", zerop, one_num, preEvaluate },
         { "oddp", &nump<1>, one_num, preEvaluate },

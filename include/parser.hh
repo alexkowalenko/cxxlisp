@@ -27,6 +27,7 @@ private:
     ParserResult parse_list();
 
     Expr parse_comma();
+    Expr parse_hash(const Token&);
     ParserResult parse_quote(Token&);
 
     Lexer& lexer;

@@ -84,7 +84,9 @@ BOOST_AUTO_TEST_CASE(test_lexer_1)
         { "`", TokenType::backquote, "" },
         { ",", TokenType::comma, "," },
         { "@", TokenType::at, "@" },
-        { "#", TokenType::hash, "" },
+
+        // hash function ref
+        { "#'", TokenType::hash, "'" },
     };
 
     test_Lexer(tests);
@@ -96,6 +98,29 @@ BOOST_AUTO_TEST_CASE(test_lexer_2)
         { "", TokenType::eof, "" },
         { ";", TokenType::eof, "" },
         { "; jones", TokenType::eof, "" },
+    };
+
+    test_Lexer(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_lexer_comments)
+{
+    vector<TestLexer> tests = {
+        // Multiline comments
+        { "#| Hello |#a", TokenType::atom, "a" },
+        { R"(#| Hello 
+               There this is a long comment
+            |# a)",
+            TokenType::atom, "a" },
+    };
+    test_Lexer(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_lexer_3)
+{
+    vector<TestLexer> tests = {
+        // hash function ref
+        { "#'", TokenType::hash, "'" },
     };
 
     test_Lexer(tests);

@@ -110,6 +110,9 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
         }
         throw EvalException("unbound variable: "s + to_string(e));
     }
+    if (is_a<FunctionRef>(e)) {
+        return e;
+    }
 
     // Test for list
     if (!is_a<List>(e)) {

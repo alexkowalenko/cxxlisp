@@ -24,6 +24,12 @@ public:
     List body;
     bool macro = false;
 };
+
+class FunctionRef : public string {
+public:
+    FunctionRef(const string& s)
+        : string(s){};
+};
 }
 
 #endif

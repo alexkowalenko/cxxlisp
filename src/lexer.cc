@@ -22,8 +22,9 @@ namespace ax {
 
 namespace {
     const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
-
-    bool isID(uint32_t c)
+    const string hashChars = "\\('+-";
+    bool
+    isID(uint32_t c)
     {
         // BOOST_LOG_TRIVIAL(trace) << "idID char " << char(c);
         return u_isalnum(c) || lispIdentifiers.find(c) != string::npos;
@@ -61,8 +62,22 @@ Token Lexer::get_token()
             for (lineReader >> r; r != '\n'; lineReader >> r) {
             }
             goto top;
+
         case '#':
-            return Token(TokenType::hash);
+            c = lineReader.get_char();
+            if (c == '|') {
+                // Multiline comment
+                auto prev = c;
+                for (auto t = lineReader.get_char(); !(t == '#' && prev == '|'); t = lineReader.get_char()) {
+                    prev = t;
+                }
+                goto top;
+            } else if (u_isalnum(c) || hashChars.find(c) != string::npos) {
+                Token result = Token(TokenType::hash);
+                result.val = ""s + char(c);
+                return result;
+            }
+            throw UnknownToken(c);
         case '.':
             auto n = lineReader.peek_char();
             if (isspace(n) || n == char_traits<char>::eof()) {
@@ -84,7 +99,6 @@ Token Lexer::get_token()
         if (isspace(c) || c == 0) {
             goto top;
         }
-        cerr << "Unknown token " << c << endl;
         throw UnknownToken(c);
     } catch (EOFException& e) {
         return Token();

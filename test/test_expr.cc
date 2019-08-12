@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "expr.hh"
+#include "function.hh"
 
 using namespace ax;
 using namespace std;
@@ -39,6 +40,10 @@ BOOST_AUTO_TEST_CASE(expr_is)
     BOOST_TEST(is_a<Int>(d) == false);
     BOOST_TEST(is_a<List>(d) == false);
     BOOST_TEST(is_a<nullptr_t>(d) == true);
+
+    Expr e = FunctionRef("atom");
+    BOOST_TEST(is_a<Atom>(e) == false);
+    BOOST_TEST(is_a<FunctionRef>(e) == true);
 }
 
 BOOST_AUTO_TEST_CASE(expr_as)

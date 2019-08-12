@@ -30,7 +30,7 @@ Token::operator string() const
     case TokenType::at:
         return "@"s;
     case TokenType::hash:
-        return "#"s;
+        return "#"s + val;
     case TokenType::atom:
         return val;
     case TokenType::string:
