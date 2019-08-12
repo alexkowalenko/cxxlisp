@@ -17,9 +17,16 @@
 
 namespace ax {
 
-SymbolTable Evaluator::populate_parameters(const Function& f, List& args, SymbolTable& a)
+Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
 {
-    List evalArgs = eval_list(args, a);
+    List evalArgs;
+    if (f.macro) {
+        // Macro args are not evaluated
+        evalArgs = args;
+    } else {
+        evalArgs = eval_list(args, a);
+    }
+
     if (f.parameters.size() != args.size()) {
         throw EvalException(f.name + ": invalid number of arguments"s);
     }
@@ -27,7 +34,49 @@ SymbolTable Evaluator::populate_parameters(const Function& f, List& args, Symbol
     for (int i = 0; i < evalArgs.size(); ++i) {
         context.put(any_cast<Atom>(f.parameters[i]), evalArgs[i]);
     }
-    return context;
+    auto result = perform_list(f.body, context);
+    if (f.macro) {
+        // macros are post-evaluated
+        result = eval(result, a);
+    }
+    return result;
+}
+
+Expr Evaluator::backquote(Expr& s, SymbolTable& a)
+{
+    if (is_atomic(s)) {
+        return s;
+    }
+    if (is_a<List>(s)) {
+        List result;
+        List slist = any_cast<List>(s);
+        for (auto iter = slist.begin(); iter != slist.end(); ++iter) {
+            auto e = *iter;
+            if (is_a<Atom>(e)
+                && (any_cast<Atom>(e) == unquote_atom || any_cast<Atom>(e) == splice_unquote_atom)) {
+                if (iter + 1 != slist.end()) {
+                    auto res = eval(*(++iter), a);
+                    if (any_cast<Atom>(e) == unquote_atom) {
+                        result.push_back(res);
+                    } else {
+                        if (is_a<List>(res)) {
+                            for (auto x : any_cast<List>(res)) {
+                                result.push_back(x);
+                            }
+                        } else {
+                            result.push_back(res);
+                        }
+                    }
+                }
+            } else if (is_a<List>(e)) {
+                result.push_back(backquote(e, a));
+            } else {
+                result.push_back(e);
+            }
+        }
+        return result;
+    }
+    return s;
 }
 
 List Evaluator::eval_list(List& l, SymbolTable& a)
@@ -86,15 +135,18 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
             return sF;
         }
 
+        // backquote
+        if (name == backquote_atom) {
+            return backquote(e_list[1], a);
+        }
+
         // Lookup symbol table for function
         if (auto f = a.find(name)) {
             if (!is_a<Function>(*f)) {
                 throw EvalException("A non function in function location "s + to_string(*f));
             }
             Function fn = any_cast<Function>(*f);
-            List fn_args = List(e_list.begin() + 1, e_list.end());
-            SymbolTable context = populate_parameters(fn, fn_args, a);
-            return perform_list(fn.body, context);
+            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
         }
 
         // Lookup primitive table
@@ -108,6 +160,15 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
                 throw EvalException(*check);
             }
             return prim->second.pf(name, result, a);
+        }
+    } else if (is_a<List>(e_car)) {
+        // List in function position - eval and check for function object
+        Expr flist = any_cast<List>(e_car);
+        auto res = eval(flist, a);
+        if (is_a<Function>(res)) {
+            // perform function
+            Function fn = any_cast<Function>(res);
+            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
         }
     }
 

@@ -301,28 +301,46 @@ Expr prog1(const string& name, List& args, SymbolTable& a)
 // Function functions
 //
 
+Function createFunction(const string& name, List args)
+{
+    if (!is_a<List>(args[0])) {
+        throw EvalException(name + " needs a list of parameters");
+    }
+    for (auto p : any_cast<List>(args[0])) {
+        if (!is_a<Atom>(p)) {
+            throw EvalException(name + " parameter needs to be an atom :" + to_string(p));
+        }
+    }
+    Function f(name, any_cast<List>(args[0]));
+    if (args.size() > 1) {
+        f.body = List(args.begin() + 1, args.end());
+    } else {
+        f.body = List();
+    }
+    return f;
+}
+
 Expr defun(const string& name, List& args, SymbolTable& a)
 {
     if (!is_a<Atom>(args[0])) {
         throw EvalException(name + " function name needs to an atom");
     }
     auto fname = any_cast<Atom>(args[0]);
-    if (!is_a<List>(args[1])) {
-        throw EvalException(fname + " needs a list of parameters");
-    }
-    for (auto p : any_cast<List>(args[1])) {
-        if (!is_a<Atom>(p)) {
-            throw EvalException(fname + " parameter needs to be an atom :" + to_string(p));
-        }
-    }
-    Function f(fname, any_cast<List>(args[1]));
-    if (args.size() > 2) {
-        f.body = List(args.begin() + 2, args.end());
-    } else {
-        f.body = List();
+    Function f = createFunction(fname, List(args.begin() + 1, args.end()));
+    if (name == "defmacro") {
+        f.macro = true;
     }
     a.put(fname, f);
     return fname;
+}
+
+Expr lambda(const string& name, List& args, SymbolTable& a)
+{
+    auto f = createFunction(name, args);
+    if (name == "macro") {
+        f.macro = true;
+    }
+    return f;
 }
 
 //
@@ -504,6 +522,9 @@ void init_prims()
 
         // Function
         { "defun", &defun, min_two },
+        { "lambda", &lambda, min_one },
+        { "defmacro", &defun, min_one },
+        { "macro", &lambda, min_one },
 
         // Number functions
 

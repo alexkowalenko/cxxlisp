@@ -40,6 +40,30 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_backquote)
+{
+    vector<TestEval> tests = {
+        { "(backquote a)", "a" },
+        { "`a", "a" },
+
+        { "(backquote (a b))", "(a b)" },
+        { "`(a b)", "(a b)" },
+
+        // test comma
+        { "(defvar x 'test)", "x" },
+        { "`(this is a var)", "(this is a var)" },
+        { "`(this is a ,x)", "(this is a test)" },
+        { "`(this is a (,x ,x))", "(this is a (test test))" },
+
+        // test splice
+        { "(setq var '(more difficult test))", "(more difficult test)" },
+        { "`(this is a var)", "(this is a var)" },
+        { "`(this is a ,var)", "(this is a (more difficult test))" },
+        { "`(this is a ,@var)", "(this is a more difficult test)" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_atom)
 {
     vector<TestEval> tests = {
@@ -1057,11 +1081,11 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
         { "(rember 'x  '(b l a t))", "(b l a t)" },
 
         // The Little Lisper, pg. 48
-        // { R"( (defun firsts (x) 
-		// (cond
-		// 	((null x) nil)
-		// 	(t (cons (caar x)
-		// 			 (firsts (cdr x)))))) )",
+        // { R"( (defun firsts (x)
+        // (cond
+        // 	((null x) nil)
+        // 	(t (cons (caar x)
+        // 			 (firsts (cdr x)))))) )",
         //     "firsts" },
         // { "(firsts '())", "nil" },
         // { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
@@ -1131,6 +1155,88 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
         { "(eqlist '(a b c f g d) '(a b c f g d))", "t" },
         { "(eqlist '(a (b) c f g d) '(a (b) c f g d))", "t" },
         { "(eqlist '(a (b) c f g d) '(a (b) c c g d))", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_lambda)
+{
+    vector<TestEval> tests = {
+        { "((lambda (x) (cons x '(b))) 'a)", "(a b)" },
+        { "((lambda (x y) (cons x (cdr y))) 'z '(a b c))", "(z b c)" },
+        { "((lambda (x) (atom x)) 's)", "t" },
+
+        { R"( ((lambda (a b)
+			(list a b)) 'd 'g) )",
+            "(d g)" },
+        { R"( ((lambda (a b)
+			(list a b)) 's 'y) )",
+            "(s y)" },
+        // multi-expression lambdas
+        { R"( ((lambda (x) 
+			(cons x '(z))
+			(cons x '(y))
+			(cons x '(b))) 'a) )",
+            "(a b)" },
+        // lambda.2
+        { "((lambda))", "Eval error: lambda expecting at least 1 arguments" },
+        { "((lambda (x)) )", "Eval error: lambda: invalid number of arguments" },
+        { "((lambda (ss) ()))", "Eval error: lambda: invalid number of arguments" },
+        { "((lambda (x) (list x x)) 'a)", "(a a)" },
+
+        // { "(functionp (lambda (x)))", "t" },
+
+        // lambda.3
+        { "(lambda)", "Eval error: lambda expecting at least 1 arguments" },
+        { "(lambda x)", "Eval error: lambda needs a list of parameters" },
+        { "(lambda x 1)", "Eval error: lambda needs a list of parameters" },
+        { "((lambda nil 'hello))", "Eval error: lambda needs a list of parameters" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_defmacro)
+{
+    vector<TestEval> tests = {
+        { "(defmacro eight () (+ 3 5))", "eight" },
+        { "(eight)", "8" },
+
+        { "(defmacro if-x (x y z) `(cond (,x ,y) (t ,z)))", "if-x" },
+        { "(if-x (atom 'x) 1 2)", "1" },
+        { "(if-x (atom '(a b)) 1 2)", "2" },
+
+        { "(defmacro when-x (test expr) `(cond (,test ,expr) (t nil)))", "when-x" },
+        { "(when-x t 2)", "2" },
+        { "(when-x nil 2)", "nil" },
+        { "(when-x (atom '(a b)) 2)", "nil" },
+
+        { "(defmacro when-pos (num expr) `(if (> ,num 0) ,expr))", "when-pos" },
+        { "(when-pos 2 'positive)", "positive" },
+        { "(when-pos 0 'positive)", "nil" },
+        { "(when-pos -2 'positive)", "nil" },
+        { "(when-pos (+ -2 4) 'positive)", "positive" },
+
+        { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
+        { "(test3 'b)", "(a (quote b))" },
+
+        //{ "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
+        //{ "(m3 1)", "(1)" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_macro)
+{
+    vector<TestEval> tests = {
+        { "(defvar eight (macro () (+ 3 5)))", "eight" },
+        { "(eight)", "8" },
+
+        { "(defvar when-pos (macro (num expr) `(if (> ,num 0) ,expr)))", "when-pos" },
+        { "(when-pos 2 'positive)", "positive" },
+        { "(when-pos 0 'positive)", "nil" },
+        { "(when-pos -2 'positive)", "nil" },
+        { "(when-pos (+ -2 4) 'positive)", "positive" },
+
     };
     test_Evaluator(tests);
 }

@@ -22,6 +22,7 @@ public:
     Atom name;
     List parameters;
     List body;
+    bool macro = false;
 };
 }
 

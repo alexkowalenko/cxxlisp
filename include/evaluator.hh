@@ -23,7 +23,8 @@ public:
 
 private:
     static List eval_list(List& l, SymbolTable& a);
-    static SymbolTable populate_parameters(const Function& f, List& args, SymbolTable& a);
+    static Expr perform_function(Function& f, List args, SymbolTable& a);
+    static Expr backquote(Expr& s, SymbolTable& a);
 };
 }
 
