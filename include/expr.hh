@@ -62,6 +62,11 @@ Bool expr_eq(const Expr& x, const Expr&);
 Bool expr_eql(const Expr& x, const Expr&);
 Bool expr_equal(const Expr& x, const Expr&);
 
+class Keyword : public string {
+public:
+    Keyword(const string& s)
+        : string(s){};
+};
 } // namespace ax
 
 #endif

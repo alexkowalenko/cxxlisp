@@ -26,6 +26,7 @@ public:
 
 private:
     static List eval_list(List& l, SymbolTable& a);
+    static SymbolTable create_context(Function& f, List args, SymbolTable& a);
     static Expr perform_function(Function& f, List args, SymbolTable& a);
     static Expr backquote(Expr& s, SymbolTable& a);
 };

@@ -220,6 +220,15 @@ BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_keyword)
+{
+    vector<TestParser> tests = {
+        { ":keyword", ":keyword" },
+        { "&keyword", "&keyword" },
+    };
+    test_Parser(tests);
+}
+
 void test_Parser(const vector<TestParser>& tests)
 {
     for (auto test : tests) {

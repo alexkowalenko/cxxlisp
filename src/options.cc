@@ -27,7 +27,7 @@ Options getOptions(int argc, char* argv[])
         "silent,s", po::value<bool>(&(options.silent))->implicit_value(true), "silent, don't print the prompt")(
         "noreadline,r", po::value<bool>(&(options.readline))->implicit_value(false), "don't use readline for input")(
         "parseonly,p", po::value<bool>(&(options.parse_only))->implicit_value(true), "only parse the input and print result")(
-        "debug,D", po::value<string>(&debug)->implicit_value("", "debug options"));
+        "debug,D", po::value<string>(&debug)->implicit_value(""), "debug options: e");
 
     try {
         po::variables_map vm;
@@ -51,4 +51,23 @@ Options getOptions(int argc, char* argv[])
     return options;
 }
 
+void Options::push_options()
+{
+    saved_options.push(silent);
+    saved_options.push(readline);
+    saved_options.push(parse_only);
+    saved_options.push(debug_expr);
+};
+
+void Options::pop_options()
+{
+    debug_expr = saved_options.top();
+    saved_options.pop();
+    parse_only = saved_options.top();
+    saved_options.pop();
+    readline = saved_options.top();
+    saved_options.pop();
+    silent = saved_options.top();
+    saved_options.pop();
+}
 } // namespace ax

@@ -7,7 +7,11 @@
 #ifndef OPTIONS_HH
 #define OPTIONS_HH
 
+#include <stack>
+
 namespace ax {
+
+using namespace std;
 
 class Options {
 public:
@@ -17,6 +21,12 @@ public:
 
     // Debug options
     bool debug_expr = false;
+
+    void push_options();
+    void pop_options();
+
+private:
+    stack<bool> saved_options;
 };
 
 Options

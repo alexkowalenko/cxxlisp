@@ -22,6 +22,15 @@ BOOST_AUTO_TEST_CASE(test_eval)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_basic)
+{
+    vector<TestEval> tests = {
+        { ":keyword", ":keyword" },
+        { "&keyword", "&keyword" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_quote)
 {
     vector<TestEval> tests = {

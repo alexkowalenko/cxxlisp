@@ -423,6 +423,38 @@ BOOST_AUTO_TEST_CASE(test_eval_macro)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_optional)
+{
+    vector<TestEval> tests = {
+        { "(defun f (x y) (list x y))", "f" },
+        { "(f 1 2)", "(1 2)" },
+        { "(f 1)", "Eval error: f: invalid number of arguments" },
+
+        { "(defun g (x &optional y) (list x y))", "g" },
+        { "(g 1 2)", "(1 2)" },
+        { "(g 1)", "(1 nil)" },
+
+        { "(defun h (x &optional (y 777)) (list x y))", "h" },
+        { "(h 1 2)", "(1 2)" },
+        { "(h 1)", "(1 777)" },
+
+        { "(defun j (x y &optional z) (list x y z))", "j" },
+        { "(j 1 2 3)", "(1 2 3)" },
+        { "(j 1 2)", "(1 2 nil)" },
+        { "(j 1)", "Eval error: j: invalid number of arguments" },
+
+        { " (defvar l (lambda (x &optional y) (list x y)))", "l" },
+        { "(l 1)", "(1 nil)" },
+
+        { "(defun m (x &optional (1 1)) (list x y z))", "m" },
+        { "(m 1)", "Eval error: m: optional default argument is not an atom 1" },
+        { "(defun m (x &optional ()) (list x y z))", "m" },
+        { "(m 1)", "Eval error: m: default argument not 2 member list nil" },
+
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_function)
 {
     vector<TestEval> tests = {

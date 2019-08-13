@@ -313,7 +313,7 @@ Function createFunction(const string& name, List args)
         throw EvalException(name + " needs a list of parameters");
     }
     for (auto p : any_cast<List>(args[0])) {
-        if (!is_a<Atom>(p)) {
+        if (!(is_a<Atom>(p) || is_a<Keyword>(p) || is_a<List>(p))) {
             throw EvalException(name + " parameter needs to be an atom :" + to_string(p));
         }
     }

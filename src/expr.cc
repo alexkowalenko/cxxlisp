@@ -36,6 +36,8 @@ ostream& operator<<(ostream& os, const Expr& s)
         os << string(any_cast<Function>(s));
     } else if (s.type() == typeid(FunctionRef)) {
         os << "#'" << any_cast<FunctionRef>(s);
+    } else if (s.type() == typeid(Keyword)) {
+        os << any_cast<Keyword>(s);
     } else {
         os << "*Unprintable type*";
     }

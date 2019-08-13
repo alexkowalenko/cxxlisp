@@ -19,7 +19,9 @@ namespace ax {
 
 inline Options Evaluator::opt;
 
-Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
+const Keyword optional_atom = Keyword("&optional");
+
+SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
 {
     List evalArgs;
     if (f.macro) {
@@ -29,13 +31,56 @@ Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
         evalArgs = eval_list(args, a);
     }
 
-    if (f.parameters.size() != args.size()) {
-        throw EvalException(f.name + ": invalid number of arguments"s);
-    }
+    int arg_count = 0;
+    bool optional = false;
     SymbolTable context(&a);
-    for (int i = 0; i < evalArgs.size(); ++i) {
-        context.put(any_cast<Atom>(f.parameters[i]), evalArgs[i]);
+    for (int i = 0; i < f.parameters.size(); ++i) {
+        auto param = f.parameters[i];
+        if (is_a<Keyword>(param) && any_cast<Keyword>(param) == optional_atom) {
+            optional = true;
+            continue;
+        } else if (is_a<List>(param)) {
+            if (optional) {
+                // get symbol
+                if (any_cast<List>(param).size() != 2) {
+                    throw EvalException(f.name + ": default argument not 2 member list " + to_string(param));
+                }
+                auto pp = any_cast<List>(param)[0];
+                if (!is_a<Atom>(pp)) {
+                    throw EvalException(f.name + ": optional default argument is not an atom " + to_string(pp));
+                }
+                cout << "Args " << evalArgs.size() << " : " << i << endl;
+                if (evalArgs.size() < i) {
+                    context.put(any_cast<Atom>(pp), any_cast<List>(param)[1]);
+                } else {
+                    context.put(any_cast<Atom>(pp), evalArgs[arg_count]);
+                }
+            }
+        } else if (is_a<Atom>(param)) {
+            if (evalArgs.size() > arg_count) {
+                context.put(any_cast<Atom>(f.parameters[i]), evalArgs[arg_count]);
+            } else if (optional) {
+                context.put(any_cast<Atom>(f.parameters[i]), sF);
+            }
+        }
+        ++arg_count;
     }
+    cout << "Final Args " << f.parameters.size() - optional << " : " << evalArgs.size() << endl;
+    if (optional) {
+        if (!(f.parameters.size() - 1 == evalArgs.size() || f.parameters.size() - 2 == evalArgs.size())) {
+            throw EvalException(f.name + ": invalid number of arguments"s);
+        }
+    } else {
+        if (f.parameters.size() != evalArgs.size()) {
+            throw EvalException(f.name + ": invalid number of arguments"s);
+        }
+    }
+    return context;
+}
+
+Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
+{
+    SymbolTable context = create_context(f, args, a);
     auto result = perform_list(f.body, context);
     if (f.macro) {
         // macros are post-evaluated
@@ -115,6 +160,9 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
         throw EvalException("unbound variable: "s + to_string(e));
     }
     if (is_a<FunctionRef>(e)) {
+        return e;
+    }
+    if (is_a<Keyword>(e)) {
         return e;
     }
 

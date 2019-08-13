@@ -130,13 +130,11 @@ void Lisp::init()
     istringstream in(stdlib);
     NullBuffer null_buffer;
     std::ostream out(&null_buffer);
-    bool readline = opt.readline;
-    bool debug_expr = opt.debug_expr;
+    opt.push_options();
     opt.readline = false;
     opt.debug_expr = false;
     repl(in, out);
-    opt.readline = readline;
-    opt.debug_expr = debug_expr;
+    opt.pop_options();
 };
 
 void Lisp::repl(istream& istr, ostream& ostr)

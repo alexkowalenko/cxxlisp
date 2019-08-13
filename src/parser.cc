@@ -25,6 +25,9 @@ Expr mkSymbolInt(const string& atom)
     } else if (atom == "t") {
         return sT;
     }
+    if (atom[0] == '&' || atom[0] == ':') {
+        return Keyword(atom);
+    }
     try {
         return Int{ stol(atom) };
     } catch (invalid_argument) { //fallthrough to be an atom
