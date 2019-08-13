@@ -29,7 +29,12 @@ optional<Expr> SymbolTable::find(const string& name)
 
 void SymbolTable::remove(const string& name)
 {
-    table.erase(name);
+    if (auto x = table.find(name); x != table.end()) {
+        table.erase(name);
+        return;
+    } else if (next) {
+        next->remove(name);
+    }
 }
 
 void SymbolTable::dump(ostream& os)

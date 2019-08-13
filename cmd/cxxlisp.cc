@@ -39,11 +39,11 @@ void init_logging()
 
 int main(int argc, char* argv[])
 {
+    setlocale(LC_ALL, "en_US.utf8");
+    init_logging();
+
     // Get options
     ax::Options options = getOptions(argc, argv);
-    setlocale(LC_ALL, "en_US.utf8");
-
-    init_logging();
 
     Lisp lispInterp
         = Lisp(options);

@@ -10,6 +10,7 @@
 #include "expr.hh"
 
 #include "function.hh"
+#include "options.hh"
 #include "symboltable.hh"
 
 namespace ax {
@@ -20,6 +21,8 @@ public:
     static Expr eval(Expr& e, SymbolTable& a);
 
     static Expr perform_list(List& l, SymbolTable& a);
+
+    static Options opt;
 
 private:
     static List eval_list(List& l, SymbolTable& a);

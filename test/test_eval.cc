@@ -152,8 +152,8 @@ BOOST_AUTO_TEST_CASE(test_eval_and)
 
         { "(and (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(and (symbolp (quote x)) (symbolp (quote (y))))", "nil" },
-        //{ "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
-        //{ "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
+        { "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
+        { "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
         { "(and (= 2 2) (> 2 1))", "t" },
@@ -186,8 +186,8 @@ BOOST_AUTO_TEST_CASE(test_eval_or)
 
         { "(or (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(or (symbolp (quote x)) (symbolp (quote (y))))", "t" },
-        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
-        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
+        { "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
+        { "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
         { "(or (= 2 2) (> 2 1))", "t" },
@@ -343,13 +343,13 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 
         { "(rplaca '((a1 a2) b) 'x)", "(x b)" },
         { "(rplaca '(a b) '(c c))", "((c c) b)" },
-        //{"(setq x '(1 2))", "(1 2)"},
-        //{"x", "(1 2)"},
-        //{"(rplaca x 'x)", "(x 2)"},
-        //{"x", "(x 2)"},
+        { "(setq x '(1 2))", "(1 2)" },
+        { "x", "(1 2)" },
+        { "(rplaca x 'x)", "(x 2)" },
+        // { "x", "(x 2)" }, // destructive modify of things in the symbol table not supported
 
-        //{"(defun f (x) (rplaca x 'a))", "f"},
-        //{"(f '(1 2 3))", "(a 2 3)"},
+        { "(defun f (x) (rplaca x 'a))", "f" },
+        { "(f '(1 2 3))", "(a 2 3)" },
 
         // errors
         { "(rplaca '(a b))", "Eval error: rplaca expecting 2 arguments" },
@@ -373,8 +373,8 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
         //{ "(rplacd x 'x)", "(1 . x)" },
         // {"x", "(1 . x)"}, // this does not work, due to Go's immutable lists
 
-        //{ "(defun f (x) (rplacd x '(a b)))", "f" },
-        //{ "(f '(1 2 3))", "(1 a b)" },
+        { "(defun f (x) (rplacd x '(a b)))", "f" },
+        { "(f '(1 2 3))", "(1 a b)" },
     };
     test_Evaluator(tests);
 }
@@ -598,14 +598,14 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
 
         // globals - should not change
         { "(defvar xx 1)", "xx" },
-        //{"(defun f() (defvar xx 2))", "f"},
+        { "(defun f() (defvar xx 2))", "f" },
         { "xx", "1" },
-        //{"(f)", "xx"},
+        { "(f)", "xx" },
         { "xx", "1" },
 
         // locally defined
-        //{ "(defun g () (defvar y 1) y)", "g" },
-        //{ "(g)", "1" },
+        { "(defun g () (defvar y 1) y)", "g" },
+        { "(g)", "1" },
 
         // fail
         { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },
@@ -639,11 +639,11 @@ BOOST_AUTO_TEST_CASE(test_eval_setq)
 
         { "(setq w)", "Eval error: setq requires an even number of variables" },
 
-        // globals - should change
+        // should change
         { "(setq x '1)", "1" },
-        //{ "(defun f() (setq x '2))", "f" },
+        { "(defun f() (setq x '2))", "f" },
         { "x", "1" },
-        //{ "(f)", "2" },
+        { "(f)", "2" },
         //{ "x", "2" },
 
         // fail
@@ -668,8 +668,8 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
         { "n1", "100" },
         { "n2", "200" },
 
-        //{ "(setf)", "Eval error: setf expecting at least 2 argument(s)" },
-        //{ "(setf w)", "Eval error: setf expecting at least 2 argument(s)" },
+        { "(setf)", "nil" },
+        { "(setf w)", "Eval error: setf requires an even number of variables" },
 
         // fail
         { "(setf 1 'd)", "Eval error: setf requires a symbol as an argument" },

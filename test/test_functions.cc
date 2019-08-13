@@ -263,15 +263,15 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
         { "(rember 'x  '(b l a t))", "(b l a t)" },
 
         // The Little Lisper, pg. 48
-        // { R"( (defun firsts (x)
-        // (cond
-        // 	((null x) nil)
-        // 	(t (cons (caar x)
-        // 			 (firsts (cdr x)))))) )",
-        //     "firsts" },
-        // { "(firsts '())", "nil" },
-        // { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
-        // { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
+        { R"( (defun firsts (x)
+         (cond
+         	((null x) nil)
+         	(t (cons (caar x)
+         			 (firsts (cdr x)))))) )",
+            "firsts" },
+        { "(firsts '())", "nil" },
+        { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
+        { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
 
         // The Little Lisper, pg. 54
         { R"( (defun insertr (new old lat) 
@@ -434,7 +434,6 @@ BOOST_AUTO_TEST_CASE(test_eval_function)
 
         { "(function nil)", "Eval error: function function name needs to an atom" },
         { "(function atom atom)", "Eval error: function expecting an argument" },
-
     };
     test_Evaluator(tests);
 }
@@ -444,8 +443,8 @@ BOOST_AUTO_TEST_CASE(test_eval_functionp)
     vector<TestEval> tests = {
         { "(functionp #'+)", "t" },
         { "(functionp #'atom)", "t" },
-        // { "(functionp #'cadar)", "t" },
-        // { "(functionp #'caxar)", "Error: no function caxar\nnil" },
+        { "(functionp #'cadar)", "t" },
+        { "(functionp #'caxar)", "nil" },
 
         { "(functionp t)", "nil" },
         { "(functionp 1)", "nil" },
@@ -462,6 +461,45 @@ BOOST_AUTO_TEST_CASE(test_eval_functionp)
         { "(functionp 's)", "nil" },
         { "(functionp nil)", "nil" },
         { "(functionp)", "Eval error: functionp expecting at least 1 arguments" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_fboundp)
+{
+    vector<TestEval> tests = {
+        { "(defun f(x) x)", "f" },
+        //{ "(fboundp 'f)", "t" },
+        { "(fmakunbound 'f)", "f" },
+        //{ "(fboundp 'f)", "nil" },
+        //{ "(f 1)", "Error: Unbound function: f\nnil" },
+        { "(defmacro g(x) x)", "g" },
+        //{ "(fboundp 'g)", "t" },
+        { "(fmakunbound 'g)", "g" },
+        //{ "(fboundp 'g)", "nil" },
+        { "(g 1)", "Eval error: Can't evaluate (g 1)" },
+
+        { "(fmakunbound)", "Eval error: fmakunbound: invalid number of arguments" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_identity)
+{
+    vector<TestEval> tests = {
+        { "(identity 1)", "1" },
+        //{ "(funcall #'identity 1)", "1" },
+        //{ "(funcall #'identity 'x)", "x" },
+
+        //{ "(defvar c (constantly 17))", "c" },
+        //{ "(funcall c 1)", "17" },
+        //{ "(funcall c 's)", "17" },
+
+        //{ "(defvar d (complement #'atom))", "d" },
+        //{ "(funcall d 1)", "nil" },
+        //{ "(funcall d '(1 2))", "t" },
 
     };
     test_Evaluator(tests);

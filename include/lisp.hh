@@ -19,14 +19,14 @@ using namespace std;
 
 class Lisp {
 public:
-    Lisp(const Options& opt);
+    Lisp(Options& opt);
 
     void init();
     void repl(istream& in, ostream& os);
     void terminate();
 
 private:
-    const Options& opt;
+    Options& opt;
     SymbolTable symboltable;
 };
 }

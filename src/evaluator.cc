@@ -17,6 +17,8 @@
 
 namespace ax {
 
+inline Options Evaluator::opt;
+
 Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
 {
     List evalArgs;
@@ -95,7 +97,9 @@ Expr Evaluator::perform_list(List& l, SymbolTable& a)
 
 Expr Evaluator::eval(Expr& e, SymbolTable& a)
 {
-    BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
+    if (opt.debug_expr) {
+        BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
+    };
 
     // Eval basic types
     if (is_a<Bool>(e)) {
