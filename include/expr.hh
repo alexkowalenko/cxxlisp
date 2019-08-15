@@ -8,22 +8,21 @@
 #define EXPR_HH
 
 #include <iostream>
-#include <list>
 #include <string>
+#include <vector>
 
-#include <boost/any.hpp>
+#include <any>
 
 namespace ax {
 
 using namespace std;
 
-using Expr = boost::any;
-using boost::any_cast;
+using Expr = any;
 
 using Atom = string;
 using Bool = bool;
 using Int = long;
-using List = vector<boost::any>;
+using List = vector<any>;
 
 template <typename T>
 constexpr bool is_a(const Expr& s)
