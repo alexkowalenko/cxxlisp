@@ -17,9 +17,18 @@
 
 namespace ax {
 
-inline Options Evaluator::opt;
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+
+template <class... Ts>
+overloaded(Ts...)->overloaded<Ts...>;
 
 const Keyword optional_atom = Keyword("&optional");
+
+Evaluator::Evaluator(Options& o)
+    : opt(o){};
 
 SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
 {
@@ -214,7 +223,13 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
             if (check) {
                 throw EvalException(*check);
             }
-            return prim->second.pf(name, result, a);
+            return visit(overloaded{
+                             [&](PrimBasicFunct pf) -> Expr { return pf(result); },
+                             [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
+                             [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
+                             [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
+                         },
+                prim->second.pf);
         }
     } else if (is_a<List>(e_car)) {
         // List in function position - eval and check for function object

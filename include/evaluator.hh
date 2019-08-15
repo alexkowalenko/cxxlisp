@@ -16,19 +16,18 @@
 namespace ax {
 
 class Evaluator {
-
 public:
-    static Expr eval(Expr& e, SymbolTable& a);
+    Evaluator(Options& opt);
 
-    static Expr perform_list(List& l, SymbolTable& a);
-
-    static Options opt;
+    Expr eval(Expr& e, SymbolTable& a);
+    Expr perform_list(List& l, SymbolTable& a);
 
 private:
-    static List eval_list(List& l, SymbolTable& a);
-    static SymbolTable create_context(Function& f, List args, SymbolTable& a);
-    static Expr perform_function(Function& f, List args, SymbolTable& a);
-    static Expr backquote(Expr& s, SymbolTable& a);
+    Options opt;
+    List eval_list(List& l, SymbolTable& a);
+    SymbolTable create_context(Function& f, List args, SymbolTable& a);
+    Expr perform_function(Function& f, List args, SymbolTable& a);
+    Expr backquote(Expr& s, SymbolTable& a);
 };
 }
 

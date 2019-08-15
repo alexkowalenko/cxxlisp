@@ -20,12 +20,12 @@ namespace ax {
 
 map<string, Primitive> prim_table;
 
-Expr atom(const string&, List& args, SymbolTable&)
+Expr atom(List& args)
 {
     return is_atomic(args[0]) || is_false(args[0]);
 }
 
-Expr symbolp(const string&, List& args, SymbolTable&)
+Expr symbolp(List& args)
 {
     auto a = args.front();
     if (is_atomic(a)
@@ -39,24 +39,24 @@ Expr symbolp(const string&, List& args, SymbolTable&)
 }
 
 template <typename T>
-Expr typep(const string& name, List& args, SymbolTable&)
+Expr typep(List& args)
 {
     return is_a<T>(args[0]);
 }
 
-Expr null(const string&, List& args, SymbolTable&)
+Expr null(List& args)
 {
     return is_false(args.front());
 }
 
-Expr andor(const string& name, List& args, SymbolTable& a)
+Expr andor(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.empty()) {
         return name == "and";
     }
     Expr last = sF;
     for (auto& x : args) {
-        last = Evaluator::eval(x, a);
+        last = l.eval(x, a);
         if (name == "and") {
             // BOOST_LOG_TRIVIAL(trace) << "and: " << to_string(last) << " : " << is_false(last);
             if (is_false(last)) {
@@ -72,7 +72,7 @@ Expr andor(const string& name, List& args, SymbolTable& a)
     return name == "and" ? last : sF;
 }
 
-Expr carcdr(const string& name, List& args, SymbolTable&)
+Expr carcdr(const string& name, List& args)
 {
     auto res = args.front();
     if (is_a<List>(res)) {
@@ -93,20 +93,20 @@ Expr carcdr(const string& name, List& args, SymbolTable&)
     return sF;
 }
 
-Expr consp(const string& name, List& args, SymbolTable&)
+Expr consp(List& args)
 {
     auto res = args.front();
     return is_a<List>(res) && any_cast<List>(res).size() > 0;
 }
 
-Expr listp(const string& name, List& args, SymbolTable&)
+Expr listp(List& args)
 {
     auto res = args.front();
     return is_a<List>(res) || is_sF(res);
 }
 
 //   (cons 'a '(x y z)) --> (a x y z)
-Expr cons(const string& name, List& args, SymbolTable&)
+Expr cons(List& args)
 {
     if (is_a<List>(args[1])) {
         List list = any_cast<List>(args[1]);
@@ -122,7 +122,7 @@ Expr cons(const string& name, List& args, SymbolTable&)
     return sF;
 }
 
-Expr list(const string& name, List& args, SymbolTable&)
+Expr list(List& args)
 {
     if (args.empty()) {
         return sF;
@@ -130,7 +130,7 @@ Expr list(const string& name, List& args, SymbolTable&)
     return args;
 }
 
-Expr rplaca(const string& name, List& args, SymbolTable&)
+Expr rplaca(List& args)
 {
     if (is_a<List>(args[0])) {
         auto l = any_cast<List>(args[0]);
@@ -140,7 +140,7 @@ Expr rplaca(const string& name, List& args, SymbolTable&)
     throw EvalException("rplaca first argument not a list");
 }
 
-Expr rplacd(const string& name, List& args, SymbolTable&)
+Expr rplacd(List& args)
 {
     if (is_a<List>(args[0])) {
         if (is_a<List>(args[1])) {
@@ -153,24 +153,24 @@ Expr rplacd(const string& name, List& args, SymbolTable&)
             return l;
         }
     }
-    throw EvalException("rplaca first argument not a list");
+    throw EvalException("rplacd first argument not a list");
 }
 
 //
 // eq functions
 //
 
-Expr eq_p(const string& name, List& args, SymbolTable&)
+Expr eq_p(const string& name, List& args)
 {
     return expr_eq(args[0], args[1]);
 }
 
-Expr eql_p(const string& name, List& args, SymbolTable&)
+Expr eql_p(const string& name, List& args)
 {
     return expr_eql(args[0], args[1]);
 }
 
-Expr equal_p(const string& name, List& args, SymbolTable&)
+Expr equal_p(const string& name, List& args)
 {
     return expr_equal(args[0], args[1]);
 }
@@ -179,7 +179,7 @@ Expr equal_p(const string& name, List& args, SymbolTable&)
 // variable functions
 //
 
-Expr defvar(const string& name, List& args, SymbolTable& a)
+Expr defvar(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.empty()) {
         throw EvalException(name + " needs a name");
@@ -193,7 +193,7 @@ Expr defvar(const string& name, List& args, SymbolTable& a)
     }
     if (name == "defvar") {
         if (args.size() > 1) {
-            auto val = Evaluator::eval(args[1], a);
+            auto val = l.eval(args[1], a);
             a.put(any_cast<Atom>(n), val);
         } else {
             a.put(any_cast<Atom>(n), sF);
@@ -202,7 +202,7 @@ Expr defvar(const string& name, List& args, SymbolTable& a)
         if (args.size() == 1) {
             throw EvalException(name + " needs a value");
         }
-        auto val = Evaluator::eval(args[1], a);
+        auto val = l.eval(args[1], a);
         a.put(any_cast<Atom>(n), val); // should be global symbol table
     } else if (name == "defconstant") {
         if (args.size() == 1) {
@@ -211,13 +211,13 @@ Expr defvar(const string& name, List& args, SymbolTable& a)
         if (auto x = a.find(any_cast<Atom>(n))) {
             throw RuntimeException(name + " redefined const " + any_cast<Atom>(n));
         }
-        auto val = Evaluator::eval(args[1], a);
+        auto val = l.eval(args[1], a);
         a.put(any_cast<Atom>(n), val); // should be global symbol table
     }
     return n;
 }
 
-Expr setq(const string& name, List& args, SymbolTable& a)
+Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.size() % 2 != 0) {
         throw EvalException(name + " requires an even number of variables");
@@ -230,7 +230,7 @@ Expr setq(const string& name, List& args, SymbolTable& a)
         if (!is_a<Atom>(n)) {
             throw EvalException(name + " requires a symbol as an argument");
         }
-        val = Evaluator::eval(second, a);
+        val = l.eval(second, a);
         a.put(any_cast<Atom>(n), val);
     }
     return val;
@@ -248,31 +248,31 @@ Expr makunbound(const string& name, List& args, SymbolTable& a)
 // Program control
 //
 
-Expr ifFunc(const string& name, List& args, SymbolTable& a)
+Expr ifFunc(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.size() < 2) {
         throw EvalException("if requires 2 or 3 arguments");
     }
-    auto res = Evaluator::eval(args[0], a);
+    auto res = l.eval(args[0], a);
     if (is_false(res)) {
         if (args.size() < 3) {
             return sF;
         }
-        return Evaluator::eval(args[2], a);
+        return l.eval(args[2], a);
     }
     //
     if (args.size() < 2) {
         return sF;
     }
-    return Evaluator::eval(args[1], a);
+    return l.eval(args[1], a);
 }
 
-Expr cond(const string& name, List& args, SymbolTable& a)
+Expr cond(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     for (auto clause : args) {
         if (is_a<List>(clause)) {
             auto clauseList = any_cast<List>(clause);
-            auto first = Evaluator::eval(clauseList[0], a);
+            auto first = l.eval(clauseList[0], a);
             if (is_false(first)) {
                 continue;
             }
@@ -280,26 +280,26 @@ Expr cond(const string& name, List& args, SymbolTable& a)
                 return first;
             }
             auto stats = List(clauseList.begin() + 1, clauseList.end());
-            return Evaluator::perform_list(stats, a);
+            return l.perform_list(stats, a);
         }
         return EvalException("cond: clause " + to_string(clause) + "is not a list");
     }
     return sF;
 }
 
-Expr progn(const string& name, List& args, SymbolTable& a)
+Expr progn(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
-    return Evaluator::perform_list(args, a);
+    return l.perform_list(args, a);
 }
 
-Expr prog1(const string& name, List& args, SymbolTable& a)
+Expr prog1(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.empty()) {
         return sF;
     }
-    auto result = Evaluator::eval(args[0], a);
+    auto result = l.eval(args[0], a);
     auto rest = List(args.begin() + 1, args.end());
-    Evaluator::perform_list(rest, a);
+    l.perform_list(rest, a);
     return result;
 }
 
@@ -340,7 +340,7 @@ Expr defun(const string& name, List& args, SymbolTable& a)
     return fname;
 }
 
-Expr lambda(const string& name, List& args, SymbolTable& a)
+Expr lambda(const string& name, List& args)
 {
     auto f = createFunction(name, args);
     if (name == "macro") {
@@ -349,7 +349,7 @@ Expr lambda(const string& name, List& args, SymbolTable& a)
     return f;
 }
 
-Expr funct(const string& name, List& args, SymbolTable& a)
+Expr funct(const string& name, List& args)
 {
     if (is_a<Atom>(args[0])) {
         return FunctionRef(any_cast<Atom>(args[0]));
@@ -379,10 +379,10 @@ Expr functionp(const string& name, List& args, SymbolTable& a)
 // Number Functions
 //
 
-PrimFunct numeric_predicate0(const function<bool(Int, Int)>& f)
+PrimBasicFunct numeric_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](const string& name, List& args, SymbolTable&) {
+    return [&](List& args) {
         return f(any_cast<Int>(args[0]), 0);
     };
 }
@@ -394,31 +394,31 @@ static function<bool(Int, Int)> ge = greater_equal<Int>();
 static function<bool(Int, Int)> lt = less<Int>();
 static function<bool(Int, Int)> le = less_equal<Int>();
 
-static PrimFunct zerop = numeric_predicate0(eq);
-static PrimFunct plusp = numeric_predicate0(gt);
-static PrimFunct minusp = numeric_predicate0(lt);
+static PrimBasicFunct zerop = numeric_predicate0(eq);
+static PrimBasicFunct plusp = numeric_predicate0(gt);
+static PrimBasicFunct minusp = numeric_predicate0(lt);
 
 template <Int N>
-Expr nump(const string& name, List& args, SymbolTable&)
+Expr nump(List& args)
 // Generates a templated function which mods compared to N.
 {
     return abs(any_cast<Int>(args[0]) % 2) == N;
 }
 
-PrimFunct numeric_predicate(const function<bool(Int, Int)>& f)
+PrimBasicFunct numeric_predicate(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](const string& name, List& args, SymbolTable&) -> Expr {
+    return [&](List& args) -> Expr {
         return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
     };
 }
 
-static PrimFunct num_eq = numeric_predicate(eq);
-static PrimFunct num_neq = numeric_predicate(neq);
-static PrimFunct num_gt = numeric_predicate(gt);
-static PrimFunct num_ge = numeric_predicate(ge);
-static PrimFunct num_lt = numeric_predicate(lt);
-static PrimFunct num_le = numeric_predicate(le);
+static PrimBasicFunct num_eq = numeric_predicate(eq);
+static PrimBasicFunct num_neq = numeric_predicate(neq);
+static PrimBasicFunct num_gt = numeric_predicate(gt);
+static PrimBasicFunct num_ge = numeric_predicate(ge);
+static PrimBasicFunct num_lt = numeric_predicate(lt);
+static PrimBasicFunct num_le = numeric_predicate(le);
 
 static function<Int(Int, Int)> add = plus<Int>();
 static function<Int(Int, Int)> sub = minus<Int>();
@@ -426,10 +426,10 @@ static function<Int(Int, Int)> mult = multiplies<Int>();
 static function<Int(Int, Int)> div = divides<Int>();
 static function<Int(Int, Int)> mod = modulus<Int>();
 
-PrimFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
+PrimBasicFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
-    return [=](const string& name, List& args, SymbolTable&) -> Expr {
+    return [=](List& args) -> Expr {
         if (args.empty()) {
             return s;
         }
@@ -448,56 +448,56 @@ PrimFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
     };
 }
 
-static PrimFunct num_add = numeric_operation(add, 0);
-static PrimFunct num_sub = numeric_operation(sub, 0);
-static PrimFunct num_mult = numeric_operation(mult, 1);
-static PrimFunct num_div = numeric_operation(div, 1);
-static PrimFunct num_mod = numeric_operation(mod, 0);
+static PrimBasicFunct num_add = numeric_operation(add, 0);
+static PrimBasicFunct num_sub = numeric_operation(sub, 0);
+static PrimBasicFunct num_mult = numeric_operation(mult, 1);
+static PrimBasicFunct num_div = numeric_operation(div, 1);
+static PrimBasicFunct num_mod = numeric_operation(mod, 0);
 
-Expr num_sub_init(const string& name, List& args, SymbolTable& a)
+Expr num_sub_init(List& args)
 {
     if (args.size() == 1) {
         return -any_cast<Int>(args[0]);
     }
-    return num_sub(name, args, a);
+    return num_sub(args);
 }
 
-PrimFunct check_zeros(PrimFunct f)
+PrimBasicFunct check_zeros(PrimBasicFunct f)
 {
-    return [=](const string& name, List& args, SymbolTable& a) -> Expr {
+    return [=](List& args) -> Expr {
         for_each(args.begin() + 1,
             args.end(),
             [](Expr e) { if (any_cast<Int>(e) == 0) {
                 throw NumericException("divide by zero");
             } });
-        return f(name, args, a);
+        return f(args);
     };
 }
 
-static PrimFunct num_power = numeric_operation(
+static PrimBasicFunct num_power = numeric_operation(
     [](Int a, Int b) -> Int { return Int(pow(a, b)); },
     0);
 
-static PrimFunct num_max = numeric_operation(
+static PrimBasicFunct num_max = numeric_operation(
     [](Int a, Int b) -> Int { return Int(max<Int>(a, b)); },
     0);
-static PrimFunct num_min = numeric_operation(
+static PrimBasicFunct num_min = numeric_operation(
     [](Int a, Int b) -> Int { return Int(min<Int>(a, b)); },
     0);
 
-PrimFunct numeric_single(const function<Int(Int)>& f)
+PrimBasicFunct numeric_single(const function<Int(Int)>& f)
 // Returns a function implementing the function f on one argument.
 {
-    return [=](const string& name, List& args, SymbolTable&) -> Expr {
+    return [=](List& args) -> Expr {
         return f(any_cast<Int>(args[0]));
     };
 }
 
-static PrimFunct num_abs = numeric_single([](Int x) -> Int { return Int(abs(x)); });
-static PrimFunct num_floor = numeric_single([](Int x) -> Int { return Int(floor(x)); });
-static PrimFunct num_ceil = numeric_single([](Int x) -> Int { return Int(ceil(x)); });
-static PrimFunct num_round = numeric_single([](Int x) -> Int { return Int(round(x)); });
-static PrimFunct num_trunc = numeric_single([](Int x) -> Int { return Int(trunc(x)); });
+static PrimBasicFunct num_abs = numeric_single([](Int x) -> Int { return Int(abs(x)); });
+static PrimBasicFunct num_floor = numeric_single([](Int x) -> Int { return Int(floor(x)); });
+static PrimBasicFunct num_ceil = numeric_single([](Int x) -> Int { return Int(ceil(x)); });
+static PrimBasicFunct num_round = numeric_single([](Int x) -> Int { return Int(round(x)); });
+static PrimBasicFunct num_trunc = numeric_single([](Int x) -> Int { return Int(trunc(x)); });
 
 void init_prims()
 {

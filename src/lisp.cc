@@ -148,8 +148,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    Evaluator evaluator;
-    Evaluator::opt = opt;
+    Evaluator evaluator(opt);
 
     while (true) {
         ParserResult res;
