@@ -94,30 +94,3 @@ BOOST_AUTO_TEST_CASE(test_eval_plus1)
     };
     test_Evaluator(tests);
 }
-
-BOOST_AUTO_TEST_CASE(test_eval_map)
-{
-    vector<TestEval> tests = {
-        // {"(mapcar #'+ '(1 2 3) '(4 5 6))", "(5 7 9)"},
-		// {"(defun id(x) x)", "id"},
-		// {"(maplist #'id '(1 2 3) )", "((1 2 3) (2 3) (3))"},
-
-		// {"(mapcar (lambda (n) (^ n n)) '(1 2 3 4) )", "(1 4 27 256)"},
-		// {"(mapcar #'cadr '((a b) (d e) (g h)) )", "(b e h)"},
-
-		// {"(mapcar #'list '(1 2 3))", "((1) (2) (3))"},
-
-		// // Test mapcar called in function definition
-		// {"(defun f (a b) (mapcar a b))", "f"},
-		// {"(f #'1+ '(1 2 3))", "(2 3 4)"},
-
-		// {"(defun g (a b) (mapcar a b))", "g"},
-		// {"(g (lambda (n) (^ n n)) '(1 2 3))", "(1 4 27)"},
-
-		// // {"(mapcar #'+ '(s s s) '(a a a))", "Error: + arguments needs to be number\nnil"},
-
-		// {"(mapcar)", "Eval error: mapcar: invalid number of arguments"},
-		// {"(mapcar #'f)", "Eval error: mapcar: invalid number of arguments"},
-    };
-    test_Evaluator(tests);
-}

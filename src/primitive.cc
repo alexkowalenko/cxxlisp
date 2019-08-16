@@ -395,9 +395,9 @@ Expr fboundp(const string&, List& args, SymbolTable& a)
     return sF;
 }
 
-Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
+List get_function(Evaluator& l, const string& name, Expr& arg, SymbolTable& a)
 {
-    auto fn = l.eval(args[0], a);
+    auto fn = l.eval(arg, a);
     List ex;
     if (is_a<FunctionRef>(fn)) {
         ex.push_back(Atom(any_cast<FunctionRef>(fn)));
@@ -406,7 +406,12 @@ Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
     } else {
         throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
     }
+    return ex;
+}
 
+Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    List ex = get_function(l, name, args[0], a);
     auto res = l.eval(args[1], a);
     if (is_a<List>(res)) {
         for (auto x : any_cast<List>(res)) {
@@ -422,18 +427,45 @@ Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
 
 Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
-    auto fn = l.eval(args[0], a);
-    List ex;
-    if (is_a<FunctionRef>(fn)) {
-        ex.push_back(Atom(any_cast<FunctionRef>(fn)));
-    } else if (is_a<Function>(fn)) {
-        ex.push_back(fn);
-    } else {
-        throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
-    }
+    List ex = get_function(l, name, args[0], a);
     ex.insert(ex.end(), args.begin() + 1, args.end());
     Expr e{ ex };
     return l.eval(e, a);
+}
+
+Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    List ex = get_function(l, name, args[0], a);
+    List aargs = List(args.begin() + 1, args.end());
+    auto evalargs = l.eval_list(aargs, a);
+    for (auto x : evalargs) {
+        if (!is_a<List>(x)) {
+            throw EvalException(name + ": expecting list arguments " + to_string(x));
+        }
+    }
+    List result;
+    for (unsigned int i = 0;; ++i) {
+        List r = ex;
+        for (auto elem : evalargs) {
+            if (i >= any_cast<List>(elem).size()) {
+                goto end;
+            }
+            Expr val;
+            if (name == "mapcar") {
+                val = any_cast<List>(elem)[i];
+            } else {
+                List list = any_cast<List>(elem);
+                val = List(list.begin() + i, list.end());
+            }
+            List q = { quote_atom, val };
+            r.push_back(q);
+        }
+        Expr e{ r };
+        auto res = l.eval(e, a);
+        result.push_back(res);
+    }
+end:
+    return result;
 }
 
 //
@@ -619,6 +651,8 @@ void init_prims()
         { "function", &funct, one_arg },
         { "apply", &apply, min_two },
         { "funcall", &funcall, min_two },
+        { "mapcar", &mapcar, min_two },
+        { "maplist", &mapcar, min_two },
 
         // Number functions
 
