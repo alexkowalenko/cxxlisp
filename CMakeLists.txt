@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Change compiler here
-set(AX_BASE_CLANG /usr/local/Cellar/llvm/8.0.0_1/bin)
+set(AX_BASE_CLANG /usr/local/opt/llvm/bin)
 set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/clang++)
 
 project (cxxlisp LANGUAGES CXX)
@@ -47,6 +47,12 @@ set(ICU_LIBRARIES icuuc)
 include_directories(${ICU_INCLUDE_DIRS})
 link_directories(${ICU_LIBRARY_DIRS})
 
+set(GBEN_INCLUDE_DIRS /usr/local/opt/google-benchmark/include)
+set(GBEN_LIBRARY_DIRS /usr/local/opt/google-benchmark/lib)
+set(GBEN_LIBRARIES benchmark)
+include_directories(${GBEN_INCLUDE_DIRS})
+link_directories(${GBEN_LIBRARY_DIRS})
+
 # CXX Lisp build
 
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
@@ -80,3 +86,21 @@ foreach(testSrc ${test_src})
         add_test(NAME ${testName} 
                  COMMAND ${testName} )
 endforeach(testSrc)
+
+# Benchmark programs
+
+file(GLOB bench_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} benchmarks/bench_*.cc)
+
+foreach(benSrc ${bench_src})
+        #Extract the filename without an extension (NAME_WE)
+        get_filename_component(benName ${benSrc} NAME_WE)
+
+        #Add compile target
+        add_executable(${benName} ${benSrc})
+
+        #link to Boost libraries AND your targets and dependencies
+        target_link_libraries(${benName} libcxxlisp replxx ${ICU_LIBRARIES} ${GBEN_LIBRARIES})
+
+endforeach(benSrc)
+
+
