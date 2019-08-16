@@ -40,10 +40,10 @@ SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
         evalArgs = eval_list(args, a);
     }
 
-    int arg_count = 0;
+    unsigned int arg_count = 0;
     bool optional = false;
     SymbolTable context(&a);
-    for (int i = 0; i < f.parameters.size(); ++i) {
+    for (unsigned int i = 0; i < f.parameters.size(); ++i) {
         auto param = f.parameters[i];
         if (is_a<Keyword>(param) && any_cast<Keyword>(param) == optional_atom) {
             optional = true;
@@ -74,7 +74,7 @@ SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
         }
         ++arg_count;
     }
-    cout << "Final Args " << f.parameters.size() - optional << " : " << evalArgs.size() << endl;
+    // cout << "Final Args " << f.parameters.size() - optional << " : " << evalArgs.size() << endl;
     if (optional) {
         if (!(f.parameters.size() - 1 == evalArgs.size() || f.parameters.size() - 2 == evalArgs.size())) {
             throw EvalException(f.name + ": invalid number of arguments"s);
@@ -231,6 +231,10 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
                          },
                 prim->second.pf);
         }
+    } else if (is_a<Function>(e_car)) {
+        // compiled function in function position - out put of apply.
+        Function fn = any_cast<Function>(e_car);
+        return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
     } else if (is_a<List>(e_car)) {
         // List in function position - eval and check for function object
         Expr flist = any_cast<List>(e_car);

@@ -9,7 +9,8 @@ project (cxxlisp LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wall)
+#add_compile_options(-Wall -Wextra -Wshadow -Wpedantic)
+add_compile_options(-Wall -Wshadow -Wpedantic)
 
 enable_testing()
 

@@ -43,7 +43,7 @@ uint32_t LineReaderStream::peek_char()
     return utf8::peek_next(ptr, buf.end());
 }
 
-void LineReaderStream::push_char(uint32_t c)
+void LineReaderStream::push_char(uint32_t)
 {
     utf8::advance(ptr, -1, buf.end());
     return;

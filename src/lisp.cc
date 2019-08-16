@@ -106,7 +106,7 @@ inline const string stdlib = R"stdlib(
         (t (member a (cdr lat)))))
 
 ;(defun 1+ (x) (+ 1 x))
-;(defun 1- (x) (- x 1))
+;(defun 1- (x) (- x 1))            
 
 (defmacro when (cond result) 
 	`(if ,cond ,result)) 
@@ -115,7 +115,8 @@ inline const string stdlib = R"stdlib(
 	`(if (not ,cond) ,result)) 
 
 (defun identity (x) x)
-(defun fmakunbound (f) (makunbound f))
+(defmacro constantly (x) `(lambda (&optional s) ,x))
+;; (defmacro complement (x) `(lambda (&rest arguments) (not (apply ,x arguments))))
 
 )stdlib";
 

@@ -493,7 +493,24 @@ BOOST_AUTO_TEST_CASE(test_eval_functionp)
         { "(functionp 's)", "nil" },
         { "(functionp nil)", "nil" },
         { "(functionp)", "Eval error: functionp expecting at least 1 arguments" },
+    };
+    test_Evaluator(tests);
+}
 
+BOOST_AUTO_TEST_CASE(test_eval_fboundp2)
+{
+    vector<TestEval> tests = {
+        { "(fboundp 'atom)", "t" },
+        { "(fboundp 'caar)", "t" },
+        { "(fboundp '+)", "t" },
+        { "(defun f(x) x)", "f" },
+        { "(fboundp 'f)", "t" },
+        { "(defmacro g(x) x)", "g" },
+        { "(fboundp 'g)", "t" },
+        { "(fboundp 'h)", "nil" },
+
+        { "(fboundp)", "Eval error: fboundp expecting at least 1 arguments" },
+        { "(fboundp 1)", "nil" },
     };
     test_Evaluator(tests);
 }
@@ -502,17 +519,62 @@ BOOST_AUTO_TEST_CASE(test_eval_fboundp)
 {
     vector<TestEval> tests = {
         { "(defun f(x) x)", "f" },
-        //{ "(fboundp 'f)", "t" },
+        { "(fboundp 'f)", "t" },
         { "(fmakunbound 'f)", "f" },
-        //{ "(fboundp 'f)", "nil" },
-        //{ "(f 1)", "Error: Unbound function: f\nnil" },
+        { "(fboundp 'f)", "nil" },
+        { "(f 1)", "Eval error: Can't evaluate (f 1)" },
         { "(defmacro g(x) x)", "g" },
-        //{ "(fboundp 'g)", "t" },
+        { "(fboundp 'g)", "t" },
         { "(fmakunbound 'g)", "g" },
-        //{ "(fboundp 'g)", "nil" },
+        { "(fboundp 'g)", "nil" },
         { "(g 1)", "Eval error: Can't evaluate (g 1)" },
 
-        { "(fmakunbound)", "Eval error: fmakunbound: invalid number of arguments" },
+        { "(fmakunbound)", "Eval error: fmakunbound expecting an argument" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_funcall)
+{
+    vector<TestEval> tests = {
+        { "(funcall #'atom 1)", "t" },
+
+        { "(funcall #'+ 1 2 3)", "6" },
+        { "(funcall (lambda (x) (atom x)) 1)", "t" },
+        { "(funcall (lambda (x) (atom x)) '(a b))", "nil" },
+
+        { "(defun f(x) (zerop x))", "f" },
+        { "(funcall #'f 1)", "nil" },
+        { "(funcall #'f 0)", "t" },
+        { "(funcall #'f -1)", "nil" },
+
+        { "(funcall)", "Eval error: funcall expecting at least 2 arguments" },
+        { "(funcall f)", "Eval error: funcall expecting at least 2 arguments" },
+        { "(funcall 1 1)", "Eval error: funcall: Not function ref or lambda expression: 1" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_apply)
+{
+    vector<TestEval> tests = {
+        { "(apply #'atom '(s))", "t" },
+
+        { "(apply #'+ '(1 2 3))", "6" },
+        { "(apply #'list '(a b))", "(a b)" },
+
+        { "(apply (lambda (x) (atom x)) '(1))", "t" },
+
+        { "(defun f(x) (zerop x))", "f" },
+        { "(apply #'f '(1))", "nil" },
+        { "(apply #'f '(0))", "t" },
+        { "(apply #'f '(-1))", "nil" },
+
+        { "(apply)", "Eval error: apply expecting at least 2 arguments" },
+        { "(apply f)", "Eval error: apply expecting at least 2 arguments" },
+        { "(apply 1 1)", "Eval error: apply: Not function ref or lambda expression: 1" },
 
     };
     test_Evaluator(tests);
@@ -522,16 +584,16 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
 {
     vector<TestEval> tests = {
         { "(identity 1)", "1" },
-        //{ "(funcall #'identity 1)", "1" },
-        //{ "(funcall #'identity 'x)", "x" },
+        { "(funcall #'identity 1)", "1" },
+        { "(funcall #'identity 'x)", "x" },
 
-        //{ "(defvar c (constantly 17))", "c" },
-        //{ "(funcall c 1)", "17" },
-        //{ "(funcall c 's)", "17" },
+        { "(defvar c (constantly 17))", "c" },
+        { "(funcall c 1)", "17" },
+        { "(funcall c 's)", "17" },
 
-        //{ "(defvar d (complement #'atom))", "d" },
-        //{ "(funcall d 1)", "nil" },
-        //{ "(funcall d '(1 2))", "t" },
+        // { "(defvar d (complement #'atom))", "d" },
+        // { "(funcall d 1)", "nil" },
+        // { "(funcall d '(1 2))", "t" },
 
     };
     test_Evaluator(tests);

@@ -21,13 +21,14 @@ public:
 
     Expr eval(Expr& e, SymbolTable& a);
     Expr perform_list(List& l, SymbolTable& a);
-
+    
 private:
-    Options opt;
-    List eval_list(List& l, SymbolTable& a);
     SymbolTable create_context(Function& f, List args, SymbolTable& a);
+    List eval_list(List& l, SymbolTable& a);
     Expr perform_function(Function& f, List args, SymbolTable& a);
     Expr backquote(Expr& s, SymbolTable& a);
+
+    Options opt;
 };
 }
 

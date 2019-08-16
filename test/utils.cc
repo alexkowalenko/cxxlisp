@@ -25,6 +25,7 @@ void test_Evaluator(const vector<TestEval>& tests)
     Options options;
     options.silent = true;
     options.readline = false;
+    options.debug_expr = false;
 
     logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
     Lisp lisp(options);

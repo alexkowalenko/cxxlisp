@@ -15,6 +15,7 @@
 #include "evaluator.hh"
 #include "exceptions.hh"
 #include "function.hh"
+#include "parser.hh"
 
 namespace ax {
 
@@ -160,17 +161,17 @@ Expr rplacd(List& args)
 // eq functions
 //
 
-Expr eq_p(const string& name, List& args)
+Expr eq_p(List& args)
 {
     return expr_eq(args[0], args[1]);
 }
 
-Expr eql_p(const string& name, List& args)
+Expr eql_p(List& args)
 {
     return expr_eql(args[0], args[1]);
 }
 
-Expr equal_p(const string& name, List& args)
+Expr equal_p(List& args)
 {
     return expr_equal(args[0], args[1]);
 }
@@ -236,7 +237,7 @@ Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
     return val;
 }
 
-Expr makunbound(const string& name, List& args, SymbolTable& a)
+Expr makunbound(const string&, List& args, SymbolTable& a)
 {
     if (is_a<Atom>(args[0])) {
         a.remove(any_cast<Atom>(args[0]));
@@ -248,7 +249,7 @@ Expr makunbound(const string& name, List& args, SymbolTable& a)
 // Program control
 //
 
-Expr ifFunc(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr ifFunc(Evaluator& l, const string&, List& args, SymbolTable& a)
 {
     if (args.size() < 2) {
         throw EvalException("if requires 2 or 3 arguments");
@@ -267,7 +268,7 @@ Expr ifFunc(Evaluator& l, const string& name, List& args, SymbolTable& a)
     return l.eval(args[1], a);
 }
 
-Expr cond(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr cond(Evaluator& l, const string&, List& args, SymbolTable& a)
 {
     for (auto clause : args) {
         if (is_a<List>(clause)) {
@@ -287,12 +288,12 @@ Expr cond(Evaluator& l, const string& name, List& args, SymbolTable& a)
     return sF;
 }
 
-Expr progn(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr progn(Evaluator& l, const string&, List& args, SymbolTable& a)
 {
     return l.perform_list(args, a);
 }
 
-Expr prog1(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr prog1(Evaluator& l, const string&, List& args, SymbolTable& a)
 {
     if (args.empty()) {
         return sF;
@@ -357,22 +358,82 @@ Expr funct(const string& name, List& args)
     throw EvalException(name + " function name needs to an atom");
 }
 
-Expr functionp(const string& name, List& args, SymbolTable& a)
+template <typename T>
+Expr find_funct(const T& f, SymbolTable& a)
 {
-    auto f = args[0];
-    if (is_a<Function>(f)) {
+    if (auto p = prim_table.find(any_cast<T>(f)); p != prim_table.end()) {
         return sT;
-    } else if (is_a<FunctionRef>(f)) {
-        if (auto p = prim_table.find(any_cast<FunctionRef>(f)); p != prim_table.end()) {
+    }
+    if (auto fs = a.find(any_cast<T>(f))) {
+        if (is_a<Function>(*fs)) {
             return sT;
-        }
-        if (auto fs = a.find(any_cast<FunctionRef>(f))) {
-            if (is_a<Function>(*fs)) {
-                return sT;
-            }
         }
     }
     return sF;
+}
+
+Expr functionp(const string&, List& args, SymbolTable& a)
+{
+    auto f = args[0];
+    if (is_a<Function>(f)) { // This is the difference
+        return sT;
+    } else if (is_a<FunctionRef>(f)) {
+        return find_funct<FunctionRef>(any_cast<FunctionRef>(f), a);
+    }
+    return sF;
+}
+
+// Like functionp but works on atoms
+Expr fboundp(const string&, List& args, SymbolTable& a)
+{
+    auto f = args[0];
+    if (!is_a<Atom>(f)) {
+        return sF;
+    } else {
+        return find_funct<Atom>(any_cast<Atom>(f), a);
+    }
+    return sF;
+}
+
+Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    auto fn = l.eval(args[0], a);
+    List ex;
+    if (is_a<FunctionRef>(fn)) {
+        ex.push_back(Atom(any_cast<FunctionRef>(fn)));
+    } else if (is_a<Function>(fn)) {
+        ex.push_back(fn);
+    } else {
+        throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
+    }
+
+    auto res = l.eval(args[1], a);
+    if (is_a<List>(res)) {
+        for (auto x : any_cast<List>(res)) {
+            List elem{ quote_atom, x };
+            ex.push_back(elem);
+        }
+    } else {
+        ex.push_back(res);
+    }
+    Expr e{ ex };
+    return l.eval(e, a);
+}
+
+Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    auto fn = l.eval(args[0], a);
+    List ex;
+    if (is_a<FunctionRef>(fn)) {
+        ex.push_back(Atom(any_cast<FunctionRef>(fn)));
+    } else if (is_a<Function>(fn)) {
+        ex.push_back(fn);
+    } else {
+        throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
+    }
+    ex.insert(ex.end(), args.begin() + 1, args.end());
+    Expr e{ ex };
+    return l.eval(e, a);
 }
 
 //
@@ -553,7 +614,11 @@ void init_prims()
         { "defmacro", &defun, min_one },
         { "macro", &lambda, min_one },
         { "functionp", &functionp, min_one, preEvaluate },
+        { "fboundp", &fboundp, min_one, preEvaluate },
+        { "fmakunbound", makunbound, one_arg, preEvaluate },
         { "function", &funct, one_arg },
+        { "apply", &apply, min_two },
+        { "funcall", &funcall, min_two },
 
         // Number functions
 
