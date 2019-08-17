@@ -625,3 +625,45 @@ BOOST_AUTO_TEST_CASE(test_eval_map)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_dolist)
+{
+    vector<TestEval> tests = {
+        { "(dolist (n '(α β γ δ ε) r) (setq r n))", "ε" },
+        { "(dolist (n '() r) (setq r n))", "nil" },
+        { "n", "Eval error: unbound variable: n" },
+        { "r", "Eval error: unbound variable: r" },
+
+        { "(dolist)", "Eval error: dolist expecting at least 2 arguments" },
+        { "(dolist ())", "Eval error: dolist expecting at least 2 arguments" },
+        { "(dolist (n))", "Eval error: dolist expecting at least 2 arguments" },
+        { "(dolist (n 'a))", "Eval error: dolist expecting at least 2 arguments" },
+
+        { "(dolist () (atom 's))", "Eval error: dolist: not enough vars in parameter list" },
+        { "(dolist (n) (atom 's))", "Eval error: dolist: not enough vars in parameter list" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_dotimes)
+{
+    vector<TestEval> tests = {
+        { "(dotimes (n 10 r) (setq r n))", "9" },
+        { "(dotimes (n 23 r) (setq r (* n n)))", "484" },
+        { "n", "Eval error: unbound variable: n" },
+        { "r", "Eval error: unbound variable: r" },
+
+        { "(defvar xxx 1)", "xxx" },
+        { "(dotimes (n 6) (setq xxx (* n n)))", "nil" },
+        { "xxx", "25" },
+
+        { "(dotimes)", "Eval error: dotimes expecting at least 2 arguments" },
+        { "(dotimes ())", "Eval error: dotimes expecting at least 2 arguments" },
+        { "(dotimes (n))", "Eval error: dotimes expecting at least 2 arguments" },
+        { "(dotimes (n 'a))", "Eval error: dotimes expecting at least 2 arguments" },
+
+        { "(dotimes () (atom 's))", "Eval error: dotimes: not enough vars in parameter list" },
+        { "(dotimes (x) (atom 's))", "Eval error: dotimes: not enough vars in parameter list" },
+    };
+    test_Evaluator(tests);
+}

@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <string>
+#include <tuple>
 
 #include <benchmark/benchmark.h>
 #include <boost/log/trivial.hpp>
@@ -24,7 +25,7 @@ public:
     int overflow(int c) { return c; }
 };
 
-template <class... ExtraArgs>
+template <typename... ExtraArgs>
 static void BM_Test(benchmark::State& state, ExtraArgs&&... extra_args)
 {
     // Perform setup here
@@ -48,22 +49,22 @@ static void BM_Test(benchmark::State& state, ExtraArgs&&... extra_args)
     }
 }
 
-BENCHMARK_CAPTURE(BM_Test, atom, std::string("(atom 's)"));
+BENCHMARK_CAPTURE(BM_Test, atom, "(atom 's)"s);
 
-BENCHMARK_CAPTURE(BM_Test, plus, std::string("(+ 1 1)"));
+BENCHMARK_CAPTURE(BM_Test, plus, "(+ 1 1)"s);
 
-BENCHMARK_CAPTURE(BM_Test, defconstant, std::string("(defconstant a 10)"));
+BENCHMARK_CAPTURE(BM_Test, defconstant, "(defconstant a 10)"s);
 
-BENCHMARK_CAPTURE(BM_Test, fact_20, std::string("(defun fact (x) (if (<= x 0) 1 (* x (fact (- x 1))))) (fact 20)"));
+BENCHMARK_CAPTURE(BM_Test, fact_20, "(defun fact (x) (if (<= x 0) 1 (* x (fact (- x 1))))) (fact 20)"s);
 
-BENCHMARK_CAPTURE(BM_Test, fib_28, std::string(R"x( 
+BENCHMARK_CAPTURE(BM_Test, fib_28, string(R"x( 
     (defun fib (n)
 	 		(if (<= n 1)
 	 			1
 	 			(+ (fib (- n 1)) (fib (- n 2)))))
 	(fib 28) )x"));
 
-BENCHMARK_CAPTURE(BM_Test, subst, std::string(R"x( 
+BENCHMARK_CAPTURE(BM_Test, subst, string(R"x( 
     (defun subst (x y z)
 	(cond 
 		((atom z)
@@ -73,7 +74,7 @@ BENCHMARK_CAPTURE(BM_Test, subst, std::string(R"x(
 			 (subst x y (cdr z))))))
 	(subst 'm 'b '(a b (a b (a b c) c) d a b (a b (a b c) c) c)) )x"));
 
-BENCHMARK_CAPTURE(BM_Test, tak, std::string(R"x( 
+BENCHMARK_CAPTURE(BM_Test, tak, string(R"x( 
     (defun tak (x y z)
 		(if (not (< y x))
 			z
@@ -82,7 +83,7 @@ BENCHMARK_CAPTURE(BM_Test, tak, std::string(R"x(
 				 (tak (- z 1) x y))))
 	(tak 18 12 6) )x"));
 
-BENCHMARK_CAPTURE(BM_Test, change, std::string(R"x( 
+BENCHMARK_CAPTURE(BM_Test, change, string(R"x( 
     (defun firstdenomination (kindsofcoins)
 		(cond ((= kindsofcoins 1) 1)
 			  ((= kindsofcoins 2) 2)

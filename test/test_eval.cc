@@ -653,7 +653,7 @@ BOOST_AUTO_TEST_CASE(test_eval_setq)
         { "(defun f() (setq x '2))", "f" },
         { "x", "1" },
         { "(f)", "2" },
-        //{ "x", "2" },
+        { "x", "2" },
 
         // fail
         { "(setq 1 'd)", "Eval error: setq requires a symbol as an argument" },

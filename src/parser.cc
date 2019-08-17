@@ -61,7 +61,7 @@ Expr Parser::parse_hash(const Token& tok)
 
 ParserResult Parser::parse_quote(Token& tok)
 {
-    auto x = List{};
+    List x;
     if (tok.type == TokenType::quote) {
         x.push_back(quote_atom);
     } else {
@@ -75,7 +75,7 @@ ParserResult Parser::parse_quote(Token& tok)
 ParserResult Parser::parse_list()
 {
     bool eof = false;
-    List top = List{};
+    List top;
     while (true) {
         try {
             auto res = parse();

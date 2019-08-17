@@ -100,3 +100,40 @@ BOOST_AUTO_TEST_CASE(symboltable_nested)
         BOOST_FAIL("d should not be found");
     };
 }
+
+BOOST_AUTO_TEST_CASE(symboltable_set)
+{
+    SymbolTable tab(nullptr);
+
+    tab.put("a", Atom("hello"));
+    tab.put("b", Int(3));
+    tab.put("c", sF);
+
+    SymbolTable tab2(&tab);
+    tab2.put("d", Atom("bonjour"));
+
+    if (auto x = tab2.find("a")) {
+        cout << to_string(*x) << " ";
+        BOOST_REQUIRE_EQUAL(to_string(*x), "hello");
+    } else {
+        BOOST_FAIL("a not found");
+    }
+
+    tab2.set("a", Atom("bonjour"));
+
+    //  Find in second
+    if (auto x = tab2.find("a")) {
+        cout << to_string(*x) << " ";
+        BOOST_REQUIRE_EQUAL(to_string(*x), "bonjour");
+    } else {
+        BOOST_FAIL("a not found");
+    }
+
+    // Find in first
+    if (auto x = tab.find("a")) {
+        cout << to_string(*x) << " ";
+        BOOST_REQUIRE_EQUAL(to_string(*x), "bonjour");
+    } else {
+        BOOST_FAIL("a not found");
+    }
+}

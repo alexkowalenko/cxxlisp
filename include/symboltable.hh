@@ -19,10 +19,16 @@ using namespace std;
 
 class SymbolTable {
 public:
-    SymbolTable(SymbolTable* s);
+    SymbolTable(SymbolTable* s)
+        : next(s){};
 
-    void put(const string& name, const Expr& val);
+    inline void put(const string& name, const Expr& val)
+    {
+        table[name] = val;
+    };
+
     optional<Expr> find(const string& name);
+    bool set(const string& name, const Expr& val);
     void remove(const string& name);
 
     void dump(ostream& os);

@@ -232,7 +232,9 @@ Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
             throw EvalException(name + " requires a symbol as an argument");
         }
         val = l.eval(second, a);
-        a.put(any_cast<Atom>(n), val);
+        if (!a.set(any_cast<Atom>(n), val)) {
+            a.put(any_cast<Atom>(n), val);
+        }
     }
     return val;
 }
@@ -280,7 +282,7 @@ Expr cond(Evaluator& l, const string&, List& args, SymbolTable& a)
             if (clauseList.size() == 1) {
                 return first;
             }
-            auto stats = List(clauseList.begin() + 1, clauseList.end());
+            List stats(clauseList.begin() + 1, clauseList.end());
             return l.perform_list(stats, a);
         }
         return EvalException("cond: clause " + to_string(clause) + "is not a list");
@@ -299,172 +301,8 @@ Expr prog1(Evaluator& l, const string&, List& args, SymbolTable& a)
         return sF;
     }
     auto result = l.eval(args[0], a);
-    auto rest = List(args.begin() + 1, args.end());
+    List rest(args.begin() + 1, args.end());
     l.perform_list(rest, a);
-    return result;
-}
-
-//
-// Function functions
-//
-
-Function createFunction(const string& name, List args)
-{
-    if (!is_a<List>(args[0])) {
-        throw EvalException(name + " needs a list of parameters");
-    }
-    for (auto p : any_cast<List>(args[0])) {
-        if (!(is_a<Atom>(p) || is_a<Keyword>(p) || is_a<List>(p))) {
-            throw EvalException(name + " parameter needs to be an atom :" + to_string(p));
-        }
-    }
-    Function f(name, any_cast<List>(args[0]));
-    if (args.size() > 1) {
-        f.body = List(args.begin() + 1, args.end());
-    } else {
-        f.body = List();
-    }
-    return f;
-}
-
-Expr defun(const string& name, List& args, SymbolTable& a)
-{
-    if (!is_a<Atom>(args[0])) {
-        throw EvalException(name + " function name needs to an atom");
-    }
-    auto fname = any_cast<Atom>(args[0]);
-    Function f = createFunction(fname, List(args.begin() + 1, args.end()));
-    if (name == "defmacro") {
-        f.macro = true;
-    }
-    a.put(fname, f);
-    return fname;
-}
-
-Expr lambda(const string& name, List& args)
-{
-    auto f = createFunction(name, args);
-    if (name == "macro") {
-        f.macro = true;
-    }
-    return f;
-}
-
-Expr funct(const string& name, List& args)
-{
-    if (is_a<Atom>(args[0])) {
-        return FunctionRef(any_cast<Atom>(args[0]));
-    }
-    throw EvalException(name + " function name needs to an atom");
-}
-
-template <typename T>
-Expr find_funct(const T& f, SymbolTable& a)
-{
-    if (auto p = prim_table.find(any_cast<T>(f)); p != prim_table.end()) {
-        return sT;
-    }
-    if (auto fs = a.find(any_cast<T>(f))) {
-        if (is_a<Function>(*fs)) {
-            return sT;
-        }
-    }
-    return sF;
-}
-
-Expr functionp(const string&, List& args, SymbolTable& a)
-{
-    auto f = args[0];
-    if (is_a<Function>(f)) { // This is the difference
-        return sT;
-    } else if (is_a<FunctionRef>(f)) {
-        return find_funct<FunctionRef>(any_cast<FunctionRef>(f), a);
-    }
-    return sF;
-}
-
-// Like functionp but works on atoms
-Expr fboundp(const string&, List& args, SymbolTable& a)
-{
-    auto f = args[0];
-    if (!is_a<Atom>(f)) {
-        return sF;
-    } else {
-        return find_funct<Atom>(any_cast<Atom>(f), a);
-    }
-    return sF;
-}
-
-List get_function(Evaluator& l, const string& name, Expr& arg, SymbolTable& a)
-{
-    auto fn = l.eval(arg, a);
-    List ex;
-    if (is_a<FunctionRef>(fn)) {
-        ex.push_back(Atom(any_cast<FunctionRef>(fn)));
-    } else if (is_a<Function>(fn)) {
-        ex.push_back(fn);
-    } else {
-        throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
-    }
-    return ex;
-}
-
-Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
-{
-    List ex = get_function(l, name, args[0], a);
-    auto res = l.eval(args[1], a);
-    if (is_a<List>(res)) {
-        for (auto x : any_cast<List>(res)) {
-            List elem{ quote_atom, x };
-            ex.push_back(elem);
-        }
-    } else {
-        ex.push_back(res);
-    }
-    Expr e{ ex };
-    return l.eval(e, a);
-}
-
-Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a)
-{
-    List ex = get_function(l, name, args[0], a);
-    ex.insert(ex.end(), args.begin() + 1, args.end());
-    Expr e{ ex };
-    return l.eval(e, a);
-}
-
-Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a)
-{
-    List ex = get_function(l, name, args[0], a);
-    List aargs = List(args.begin() + 1, args.end());
-    auto evalargs = l.eval_list(aargs, a);
-    for (auto x : evalargs) {
-        if (!is_a<List>(x)) {
-            throw EvalException(name + ": expecting list arguments " + to_string(x));
-        }
-    }
-    List result;
-    for (unsigned int i = 0;; ++i) {
-        List r = ex;
-        for (auto elem : evalargs) {
-            if (i >= any_cast<List>(elem).size()) {
-                goto end;
-            }
-            Expr val;
-            if (name == "mapcar") {
-                val = any_cast<List>(elem)[i];
-            } else {
-                List list = any_cast<List>(elem);
-                val = List(list.begin() + i, list.end());
-            }
-            List q = { quote_atom, val };
-            r.push_back(q);
-        }
-        Expr e{ r };
-        auto res = l.eval(e, a);
-        result.push_back(res);
-    }
-end:
     return result;
 }
 
@@ -526,12 +364,6 @@ PrimBasicFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
         if (args.empty()) {
             return s;
         }
-        // auto iter = args.begin();
-        // auto acc = any_cast<Int>(*iter);
-        // for (iter++; iter != args.end(); iter++) {
-        //     acc = f(acc, any_cast<Int>(*iter));
-        // }
-        // return acc;
         return accumulate(args.begin() + 1,
             args.end(),
             any_cast<Int>(*args.begin()),
@@ -653,6 +485,8 @@ void init_prims()
         { "funcall", &funcall, min_two },
         { "mapcar", &mapcar, min_two },
         { "maplist", &mapcar, min_two },
+        { "dotimes", &doFuncs, min_two },
+        { "dolist", &doFuncs, min_two },
 
         // Number functions
 

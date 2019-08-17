@@ -8,14 +8,6 @@
 
 namespace ax {
 
-SymbolTable::SymbolTable(SymbolTable* s)
-    : next(s){};
-
-void SymbolTable::put(const string& name, const Expr& val)
-{
-    table[name] = val;
-};
-
 optional<Expr> SymbolTable::find(const string& name)
 {
     if (auto x = table.find(name); x != table.end()) {
@@ -26,6 +18,20 @@ optional<Expr> SymbolTable::find(const string& name)
     }
     return {};
 }
+
+bool SymbolTable::set(const string& name, const Expr& val)
+{
+    if (auto x = table.find(name); x != table.end()) {
+        put(name, val);
+        return true;
+    } else {
+        // not found, check above
+        if (next) {
+            return next->set(name, val);
+        }
+        return false;
+    }
+};
 
 void SymbolTable::remove(const string& name)
 {
