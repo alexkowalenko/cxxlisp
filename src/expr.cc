@@ -8,6 +8,8 @@
 
 #include <sstream>
 
+#include <utf8.h>
+
 #include "function.hh"
 
 namespace ax {
@@ -41,6 +43,19 @@ string to_string(const Expr& s)
         return str;
     } else if (s.type() == typeid(String)) {
         return "\"" + any_cast<String>(s) + "\"";
+    } else if (s.type() == typeid(Char)) {
+        string str("#\\");
+        switch (any_cast<Char>(s)) {
+        case ' ':
+            str += "space";
+            break;
+        case '\n':
+            str += "newline";
+            break;
+        default:
+            utf8::append(any_cast<Char>(s), str);
+        }
+        return str;
     } else if (s.type() == typeid(Function)) {
         return any_cast<Function>(s);
     } else if (s.type() == typeid(FunctionRef)) {

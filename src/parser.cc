@@ -6,10 +6,12 @@
 
 #include "parser.hh"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/log/trivial.hpp>
+#include <utf8.h>
+
 #include "exceptions.hh"
 #include "function.hh"
-
-#include <boost/log/trivial.hpp>
 
 namespace ax {
 
@@ -47,7 +49,32 @@ Expr Parser::parse_comma()
 
 Expr Parser::parse_hash(const Token& tok)
 {
-    if (tok.val == "'") {
+    if (tok.val == "\\") {
+        // character
+        auto t = lexer.peek();
+        if (!iswspace(t)) {
+            switch (t) {
+            case 's':
+            case 'S':
+            case 'n':
+            case 'N': {
+                Token newTok = lexer.get_token();
+                auto val = boost::algorithm::to_lower_copy(newTok.val);
+                if (val == "newline") {
+                    return Char('\n');
+                } else if (val == "space") {
+                    return Char(' ');
+                }
+                t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
+                return Char(wchar_t(t));
+            }
+            default:
+                lexer.scan();
+                return Char(wchar_t(t));
+            }
+        }
+        throw ParseException("#\\ expecting a character");
+    } else if (tok.val == "'") {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {

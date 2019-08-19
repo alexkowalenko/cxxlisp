@@ -238,6 +238,33 @@ BOOST_AUTO_TEST_CASE(test_parser_strings)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_char)
+{
+    vector<TestParser> tests = {
+        { "#\\a", "#\\a" },
+        { "#\\1", "#\\1" },
+        { "#\\A", "#\\A" },
+        { "#\\.", "#\\." },
+        { "#\\;", "#\\;" },
+        { "#\\(", "#\\(" },
+        { "#\\)", "#\\)" },
+        { "#\\#", "#\\#" },
+        { "#\\\\", "#\\\\" },
+        { "#\\ἄ", "#\\ἄ" },
+        { "#\\七", "#\\七" },
+        { "#\\👾", "#\\👾" },
+        { "#\\space", "#\\space" },
+        { "#\\newline", "#\\newline" },
+        { "#\\SPACE", "#\\space" },
+        { "#\\NeWlInE", "#\\newline" },
+
+        { "(#\\A #\\ἄ #\\七)", "(#\\A #\\ἄ #\\七)" },
+
+        { "#\\abc", "#\\a" }, // this is not really correct
+    };
+    test_Parser(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
 {
     vector<TestParser> tests = {
@@ -273,18 +300,18 @@ void test_Parser(const vector<TestParser>& tests)
             outStr << val;
             cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << endl;
             if (test.output != outStr.str()) {
-                BOOST_FAIL(boost::format("%1% should be %3%, not %2%") % test.input % outStr.str() % test.output);
+                BOOST_ERROR(boost::format("%1% should be %3%, not %2%") % test.input % outStr.str() % test.output);
             }
         } catch (UnknownToken& e) {
-            BOOST_FAIL("Unknown token: " << e.tok);
+            BOOST_ERROR("Unknown token: " << e.tok);
         } catch (ParseException& e) {
-            BOOST_FAIL("Parse error: " << e.what());
+            BOOST_ERROR("Parse error: " << e.what());
         } catch (EOFException&) {
-            BOOST_FAIL("EOF: ");
+            BOOST_ERROR("EOF: ");
         } catch (exception& e) {
-            BOOST_FAIL(boost::format("Exception thrown %1%") % e.what());
+            BOOST_ERROR(boost::format("Exception thrown %1%") % e.what());
         } catch (...) {
-            BOOST_FAIL("Unknown exception thrown on : " << test.input);
+            BOOST_ERROR("Unknown exception thrown on : " << test.input);
         }
     }
 }

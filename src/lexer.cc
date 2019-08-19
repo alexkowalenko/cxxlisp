@@ -13,7 +13,7 @@
 #include <boost/log/trivial.hpp>
 #include <unicode/uchar.h>
 
-#include "utf8.h"
+#include <utf8.h>
 
 #include "exceptions.hh"
 #include "linereaderRL.hh"
@@ -41,13 +41,22 @@ namespace {
     const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
     const string hashChars = "\\('+-";
 
-    inline
-    bool isID(uint32_t c)
+    inline bool isID(uint32_t c)
     {
         // BOOST_LOG_TRIVIAL(trace) << "idID char " << char(c);
         return u_isalnum(c) || lispIdentifiers.find(c) != string::npos || is_emoji(c);
     }
 }
+
+// avoid recreating standard tokens
+static const Token open_token(TokenType::open);
+static const Token close_token(TokenType::close);
+static const Token quote_token(TokenType::quote);
+static const Token backquote_token(TokenType::backquote);
+static const Token comma_token(TokenType::comma);
+static const Token at_token(TokenType::at);
+static const Token dot_token(TokenType::dot);
+static const Token null_token = Token();
 
 Lexer::Lexer(LineReader& r)
     : lineReader(r)
@@ -62,17 +71,17 @@ Token Lexer::get_token()
         lineReader >> c;
         switch (c) {
         case '(':
-            return Token(TokenType::open);
+            return open_token;
         case ')':
-            return Token(TokenType::close);
+            return close_token;
         case '\'':
-            return Token(TokenType::quote);
+            return quote_token;
         case '`':
-            return Token(TokenType::backquote);
+            return backquote_token;
         case ',':
-            return Token(TokenType::comma);
+            return comma_token;
         case '@':
-            return Token(TokenType::at);
+            return at_token;
 
         case ';': {
             // comment
@@ -105,7 +114,7 @@ Token Lexer::get_token()
                 if (prev == '\\' && r == '\"') {
                     str.pop_back();
                 }
-                utf8::append(char32_t(r), str);
+                utf8::append(wchar_t(r), str);
                 prev = r;
             }
             return Token(TokenType::string, str);
@@ -113,17 +122,17 @@ Token Lexer::get_token()
         case '.':
             auto n = lineReader.peek_char();
             if (isspace(n) || n == char_traits<char>::eof()) {
-                return Token(TokenType::dot);
+                return dot_token;
             }
             // fallthrough to get the atom
         };
         // BOOST_LOG_TRIVIAL(trace) << "lexer char " << c;
         if (isID(c)) {
             string id;
-            utf8::append(char32_t(c), id);
+            utf8::append(wchar_t(c), id);
             for (auto r = lineReader.peek_char(); isID(r); r = lineReader.peek_char()) {
                 lineReader.get_char();
-                utf8::append(char32_t(r), id);
+                utf8::append(wchar_t(r), id);
             }
             // BOOST_LOG_TRIVIAL(trace) << "lexer token " << id;
             return Token(TokenType::atom, id);
@@ -133,7 +142,7 @@ Token Lexer::get_token()
         }
         throw UnknownToken(c);
     } catch (EOFException& e) {
-        return Token();
+        return null_token;
     };
 };
 

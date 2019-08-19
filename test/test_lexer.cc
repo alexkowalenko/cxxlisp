@@ -110,11 +110,13 @@ BOOST_AUTO_TEST_CASE(test_lexer_comments)
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_3)
+BOOST_AUTO_TEST_CASE(test_lexer_hash)
 {
     vector<TestLexer> tests = {
         // hash function ref
         { "#'", TokenType::hash, "'" },
+        // hash char
+        { "#\\", TokenType::hash, "\\" },
     };
 
     test_Lexer(tests);
