@@ -846,3 +846,61 @@ BOOST_AUTO_TEST_CASE(test_eval_prog1)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_let)
+{
+    vector<TestEval> tests = {
+        { "(let ((x 2) ) (+ x x))", "4" },
+        { "(let ((x 2) (y 3)) (* x y))", "6" },
+        { "(let ((x 2) (y 3)) (* x y) (* x x))", "4" },
+        { "(let () (defvar zzz 6) zzz)", "6" },
+
+        { "(let  ((x 1) (y (+ x 1))) y)", "Eval error: unbound variable: x" },
+        { "(let* ((x 1) (y (+ x 1))) y)", "2" },
+        { "(let  ((x 1)) y)", "Eval error: unbound variable: y" },
+
+        { "(let () 1)", "1" },
+        { "(let () 1 2 3)", "3" },
+        { "(let () 1)", "1" },
+        { "(let ((x 1) (y 2) (z 3)) (list x y z))", "(1 2 3)" },
+
+        { R"( (let ((x 0))
+                (let ((x 1)
+                     (y (* x 1)))
+                  y)) )",
+            "0" },
+        { R"( (let ((x 0))
+                (let ((x 1))
+                    (let ((y (* x 1)))
+                y))) )",
+            "1" },
+
+        { "(let* () 1)", "1" },
+        { "(let* () 1 2 3)", "3" },
+        { "(let* ((x 'first)) x)", "first" },
+        { "(let* ((x 'first) (y 'second) (z 'third)) (list x y z))", "(first second third)" },
+
+        { R"( (let* ((x 0))
+                (let* ((x 1)
+                    (y (* x 5)))
+                y)) )",
+            "5" },
+
+        { R"( (let* ((even? (lambda (n) 
+							(if (zerop n) 
+								t
+								(oddp (- n 1)))))
+					(odd? (lambda (n) 
+							(if (zerop n) 
+								nil
+								(evenp (- n 1))))))
+					(even? 88)) )",
+            "t" },
+
+        { "(let)", "Eval error: let expecting at least 2 arguments" },
+        { "(let 1)", "Eval error: let expecting at least 2 arguments" },
+        { "(let 1 2)", "Eval error: let: expecting a list of bindings" },
+        { "(let (1 2) 1)", "Eval error: let: expecting a binding 1" },
+    };
+    test_Evaluator(tests);
+}

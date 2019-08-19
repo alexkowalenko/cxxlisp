@@ -306,11 +306,39 @@ Expr prog1(Evaluator& l, const string&, List& args, SymbolTable& a)
     return result;
 }
 
+Expr let(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    if (!is_a<List>(args[0])) {
+        throw EvalException(name + ": expecting a list of bindings");
+    }
+    SymbolTable context(&a);
+    for (auto b : any_cast<List>(args[0])) {
+        if (!is_a<List>(b)) {
+            throw EvalException(name + ": expecting a binding " + to_string(b));
+        }
+        Expr sym = any_cast<List>(b)[0];
+        if (!is_a<Atom>(sym)) {
+            throw EvalException(name + ": expecting a symbol for the binding - " + to_string(sym));
+        }
+        Expr val;
+        if (name == "let") {
+            val = l.eval(any_cast<List>(b)[1], a);
+        } else {
+            // let*
+            val = l.eval(any_cast<List>(b)[1], context);
+        }
+        context.put(any_cast<Atom>(sym), val);
+    }
+    List code(args.begin() + 1, args.end());
+    return l.perform_list(code, context);
+}
+
 //
 // Number Functions
 //
 
-PrimBasicFunct numeric_predicate0(const function<bool(Int, Int)>& f)
+PrimBasicFunct
+numeric_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](List& args) {
@@ -471,6 +499,9 @@ void init_prims()
 
         { "progn", &progn, no_check },
         { "prog1", &prog1, no_check },
+
+        { "let", &let, min_two },
+        { "let*", &let, min_two },
 
         // Function
         { "defun", &defun, min_two },

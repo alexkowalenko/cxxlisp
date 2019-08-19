@@ -564,6 +564,10 @@ BOOST_AUTO_TEST_CASE(test_eval_apply)
 
         { "(apply #'+ '(1 2 3))", "6" },
         { "(apply #'list '(a b))", "(a b)" },
+        { "(apply #'and '(t t t))", "t" },
+        { "(apply #'and '(t t t nil))", "nil" },
+        { "(apply #'or '(nil nil nil 2))", "2" },
+        { "(apply #'or '(nil 3 nil 2))", "3" },
 
         { "(apply (lambda (x) (atom x)) '(1))", "t" },
 

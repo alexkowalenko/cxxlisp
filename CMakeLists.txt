@@ -12,9 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #add_compile_options(-Wall -Wextra -Wshadow -Wpedantic)
 add_compile_options(-Wall -Wshadow -Wpedantic)
 
+
 enable_testing()
 
-#set(CMAKE_CXX_CLANG_TIDY "/Users/alex/Development/lisp-proj/cxxlisp/build/clang-tidy;-checks=*")
 
 # Add custom Find cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -30,6 +30,7 @@ add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
 find_package(readline REQUIRED)
 include_directories(${Readline_INCLUDE_DIR})
 link_libraries(${Readline_LIBRARY})
+
 
 include_directories(include)
 
@@ -55,11 +56,26 @@ link_directories(${GBEN_LIBRARY_DIRS})
 
 # CXX Lisp build
 
+# options that work on macOs address, undefined
+#add_compile_options (-fsanitize=address)
+#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=address)
+#set(CMAKE_LINKER ${AX_BASE_CLANG}/clang++)
+
+find_program(CLANG_TIDY_PROGRAM NAMES "clang-tidy" DOC ${AX_BASE_CLANG}/clang-tidy)
+if (CLANG_TIDY_PROGRAM)
+        set(CLANG_TIDY_OPTIONS "-warnings-as-errors=*")
+        set(RUN_CLANG_TIDY "${CLANG_TIDY_PROGRAM}" "${CLANG_TIDY_OPTIONS}")
+endif()
+
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 add_library(libcxxlisp STATIC ${source_files})
 
 add_executable(cxxlisp cmd/cxxlisp.cc)
 target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES})
+
+if (CLANG_TIDY_PROGRAM)
+        set_target_properties(cxxlisp PROPERTIES CXX_CLANG_TIDY "${RUN_CLANG_TIDY}")
+endif()
 
 # Test programs build
 
