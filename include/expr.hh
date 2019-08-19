@@ -66,6 +66,15 @@ public:
     Keyword(const string& s)
         : string(s){};
 };
+
+class String : public string {
+public:
+    String(const string& s)
+        : string(s){};
+};
+
+using Char = wchar_t;
+
 } // namespace ax
 
 #endif

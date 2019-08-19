@@ -104,6 +104,9 @@ ParserResult Parser::parse()
     case TokenType::atom:
         return { mkSymbolInt(tok.val), false };
 
+    case TokenType::string:
+        return { String(tok.val), false };
+
     case TokenType::quote:
     case TokenType::backquote:
         return parse_quote(tok);

@@ -44,6 +44,13 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "(quote)", "nil" },
         { "(quote (a b))", "(a b)" },
 
+        { "'a", "a" },
+        { "'λ", "λ" },
+        { "'א", "א" },
+        { "'七", "七" },
+        { "'👾", "👾" },
+        { "'🍊🍎🍉🍌", "🍊🍎🍉🍌" },
+
         { "a", "Eval error: unbound variable: a" },
     };
     test_Evaluator(tests);
@@ -829,6 +836,7 @@ BOOST_AUTO_TEST_CASE(test_eval_progn)
 {
     vector<TestEval> tests = {
         { "(progn 'α 'β 'γ 'δ)", "δ" },
+        { "(progn '🍎 '🍐 '🍊 '🍌)", "🍌" },
         { "(progn 4)", "4" },
         { "(progn (atom 'a) (atom '(a v)))", "nil" },
         { "(progn)", "nil" },
@@ -840,6 +848,7 @@ BOOST_AUTO_TEST_CASE(test_eval_prog1)
 {
     vector<TestEval> tests = {
         { "(prog1'α 'β 'γ 'δ)", "α" },
+        { "(prog1 '🍎 '🍐 '🍊 '🍌)", "🍎" },
         { "(prog1 4)", "4" },
         { "(prog1 (atom 'a) (atom '(a v)))", "t" },
         { "(prog1)", "nil" },

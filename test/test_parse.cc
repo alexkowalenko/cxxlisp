@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_parser)
         { "nil", "nil" },
         { "a", "a" },
         { "(t)", "(t)" },
-        //{ "()", "nil" },
+        { "()", "nil" },
         { "(a)", "(a)" },
         { "", "" },
 
@@ -207,6 +207,33 @@ BOOST_AUTO_TEST_CASE(test_parser_numbers)
         { to_string(numeric_limits<long>::max() - 1), "9223372036854775806" },
 
         { "(42 7)", "(42 7)" },
+    };
+    test_Parser(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_atoms)
+{
+    vector<TestParser> tests = {
+        // unicode and emoji
+        { "one", "one" },
+        { "κὀσμος", "κὀσμος" },
+        { "👾", "👾" },
+        { "🍊🍎🍌", "🍊🍎🍌" },
+        { "😀", "😀" },
+    };
+    test_Parser(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_strings)
+{
+    vector<TestParser> tests = {
+        { R"("one")", R"("one")" },
+        { R"("κὀσμος")", R"("κὀσμος")" },
+
+        { R"("👾")", R"("👾")" },
+        { R"("🇵🇹")", R"("🇵🇹")" },
+        { R"("🏄🏻‍🏖")", R"("🏄🏻‍🏖")" },
+        { R"("")", R"("")" },
     };
     test_Parser(tests);
 }

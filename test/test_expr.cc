@@ -44,6 +44,10 @@ BOOST_AUTO_TEST_CASE(expr_is)
     Expr e = FunctionRef("atom");
     BOOST_TEST(is_a<Atom>(e) == false);
     BOOST_TEST(is_a<FunctionRef>(e) == true);
+
+    Expr f = String("Olá!");
+    BOOST_TEST(is_a<Atom>(f) == false);
+    BOOST_TEST(is_a<String>(f) == true);
 }
 
 BOOST_AUTO_TEST_CASE(expr_as)
@@ -56,14 +60,22 @@ BOOST_AUTO_TEST_CASE(expr_print)
 {
     stringstream ss;
     Expr a = List();
+    BOOST_REQUIRE_EQUAL(to_string(a), "nil");
     ss << a;
     BOOST_REQUIRE_EQUAL(ss.str(), "nil");
 
     Expr c = List({ Atom("hello"), Int(1) });
+    BOOST_REQUIRE_EQUAL(to_string(c), "(hello 1)");
     (ss = stringstream()) << c;
     BOOST_REQUIRE_EQUAL(ss.str(), "(hello 1)");
 
     Expr d = List({ Atom("hello"), Int(1), c });
+    BOOST_REQUIRE_EQUAL(to_string(d), "(hello 1 (hello 1))");
     (ss = stringstream()) << d;
     BOOST_REQUIRE_EQUAL(ss.str(), "(hello 1 (hello 1))");
+
+    Expr f = String("Olá!");
+    BOOST_REQUIRE_EQUAL(to_string(f), "\"Olá!\"");
+    (ss = stringstream()) << f;
+    BOOST_REQUIRE_EQUAL(ss.str(), "\"Olá!\"");
 }

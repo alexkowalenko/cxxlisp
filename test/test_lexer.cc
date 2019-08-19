@@ -50,12 +50,6 @@ BOOST_AUTO_TEST_CASE(test_lexer_1)
         { "a34kTMNs", TokenType::atom, "a34kTMNs" },
         { "the-word-recursion-has-many-meanings", TokenType::atom, "the-word-recursion-has-many-meanings" },
 
-        // unicode identifiers
-        { "estação", TokenType::atom, "estação" },
-        { "λὀγος", TokenType::atom, "λὀγος" },
-        { "ἄλφα", TokenType::atom, "ἄλφα" },
-        { "👾", TokenType::atom, "👾" },
-
         { "format.^.\\:{.1", TokenType::atom, "format.^.\\:{.1" }, // In common lisp tests
 
         { "+", TokenType::atom, "+" }, // R4RS Identifiers in r4rstest.scm
@@ -126,6 +120,46 @@ BOOST_AUTO_TEST_CASE(test_lexer_3)
     test_Lexer(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_lexer_atoms)
+{
+    vector<TestLexer> tests = {
+        // unicode identifiers
+        { "estação", TokenType::atom, "estação" },
+        { "λὀγος", TokenType::atom, "λὀγος" },
+        { "ἄλφα", TokenType::atom, "ἄλφα" },
+        { "一二三四五六七", TokenType::atom, "一二三四五六七" },
+
+        // emoji identifiers
+        { "🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒", TokenType::atom, "🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒" },
+        { "😀", TokenType::atom, "😀" },
+        { "👾", TokenType::atom, "👾" },
+
+    };
+
+    test_Lexer(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_lexer_strings)
+{
+    vector<TestLexer> tests = {
+        // hash function ref
+        { R"("abc")", TokenType::string, R"(abc)" },
+        { R"("a b c")", TokenType::string, R"(a b c)" },
+
+        { R"("ἄλφα")", TokenType::string, R"(ἄλφα)" },
+        { R"("一二三四五六七")", TokenType::string, R"(一二三四五六七)" },
+        { R"("👾")", TokenType::string, R"(👾)" },
+        { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")", TokenType::string, R"(🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒)" },
+
+        { R"("alpha\"test")", TokenType::string, R"(alpha"test)" },
+        { R"("")", TokenType::string, R"()" },
+        //{ R"(")", TokenType::string, "" },
+        //{ R"("alpha)", TokenType::string, "alpha" },
+    };
+
+    test_Lexer(tests);
+}
+
 void test_Lexer(const vector<TestLexer>& tests)
 {
     for (auto test : tests) {
@@ -137,7 +171,7 @@ void test_Lexer(const vector<TestLexer>& tests)
             cout << "type " << tok.type << " wanted " << test.tok << endl;
             BOOST_REQUIRE_EQUAL(tok.type, test.tok);
             if (tok.type == TokenType::atom || tok.type == TokenType::string) {
-                cout << "  atom " << tok.val << " wanted " << test.atom << endl;
+                cout << "  got " << tok.val << " wanted " << test.atom << endl;
                 BOOST_REQUIRE_EQUAL(tok.val, test.atom);
             }
         } catch (exception& e) {

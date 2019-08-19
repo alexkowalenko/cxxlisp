@@ -14,41 +14,42 @@ namespace ax {
 
 ostream& operator<<(ostream& os, const Expr& s)
 {
+    return os << to_string(s);
+}
+
+string to_string(const Expr& s)
+{
     if (s.type() == typeid(Atom)) {
-        os << any_cast<Atom>(s);
+        return any_cast<Atom>(s);
     } else if (s.type() == typeid(Int)) {
-        os << any_cast<Int>(s);
+        return std::to_string(any_cast<Int>(s));
     } else if (s.type() == typeid(Bool)) {
-        os << (any_cast<Bool>(s) ? "t" : "nil");
+        return any_cast<Bool>(s) ? "t" : "nil";
     } else if (s.type() == typeid(List)) {
         auto l = any_cast<List>(s);
         if (l.empty()) {
-            return os << "nil";
+            return "nil";
         }
-        os << '(';
+        string str;
+        str += '(';
         for (auto i = l.begin(); i != l.end(); i++) {
-            os << *i;
+            str += to_string(*i);
             if (i != l.end() - 1)
-                os << ' ';
+                str += ' ';
         }
-        os << ')';
+        str += ')';
+        return str;
+    } else if (s.type() == typeid(String)) {
+        return "\"" + any_cast<String>(s) + "\"";
     } else if (s.type() == typeid(Function)) {
-        os << string(any_cast<Function>(s));
+        return any_cast<Function>(s);
     } else if (s.type() == typeid(FunctionRef)) {
-        os << "#'" << any_cast<FunctionRef>(s);
+        return "#'" + any_cast<FunctionRef>(s);
     } else if (s.type() == typeid(Keyword)) {
-        os << any_cast<Keyword>(s);
+        return any_cast<Keyword>(s);
     } else {
-        os << "*Unprintable type*";
+        return "*Unprintable type*";
     }
-    return os;
-}
-
-string to_string(const Expr& e)
-{
-    stringstream ss;
-    ss << e;
-    return ss.str();
 }
 
 Bool expr_eq(const Expr& x, const Expr& y)
