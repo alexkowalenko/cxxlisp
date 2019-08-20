@@ -10,6 +10,24 @@
 #include <sstream>
 
 namespace ax {
+
+template <typename T>
+optional<string> checkType(const string& name, const List& args, const string& tname)
+{
+    if (args.size() == 1) {
+        if (!is_a<T>(args[0])) {
+            return name + " argument needs to be a " + tname;
+        }
+    } else {
+        for (auto x : args) {
+            if (!is_a<T>(x)) {
+                return name + " arguments needs to be a " + tname;
+            }
+        }
+    }
+    return {};
+}
+
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const List& args)
 {
     switch (cons.constraint) {
@@ -48,17 +66,11 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
     case ArgConstraintType::no_check:;
     }
     if (cons.argType == ArgType::numeric) {
-        if (args.size() == 1) {
-            if (!is_a<Int>(args[0])) {
-                return name + " argument needs to be number";
-            }
-        } else {
-            for (auto x : args) {
-                if (!is_a<Int>(x)) {
-                    return name + " arguments needs to be number";
-                }
-            }
-        }
+        return checkType<Int>(name, args, "number");
+    } else if (cons.argType == ArgType::string) {
+        return checkType<String>(name, args, "string");
+    } else if (cons.argType == ArgType::character) {
+        return checkType<Char>(name, args, "character");
     }
     return {};
 }

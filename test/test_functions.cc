@@ -622,7 +622,7 @@ BOOST_AUTO_TEST_CASE(test_eval_map)
         { "(defun g (a b) (mapcar a b))", "g" },
         { "(g (lambda (n) (^ n n)) '(1 2 3))", "(1 4 27)" },
 
-        { "(mapcar #'+ '(s s s) '(a a a))", "Eval error: + arguments needs to be number" },
+        { "(mapcar #'+ '(s s s) '(a a a))", "Eval error: + arguments needs to be a number" },
 
         { "(mapcar)", "Eval error: mapcar expecting at least 2 arguments" },
         { "(mapcar #'f)", "Eval error: mapcar expecting at least 2 arguments" },

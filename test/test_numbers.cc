@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_zerop)
         //{ "(zerop #C(0 0))", "t" },
         //{ "(zerop #C(0 1))", "nil" },
 
-        { "(zerop 'a)", "Eval error: zerop argument needs to be number" },
+        { "(zerop 'a)", "Eval error: zerop argument needs to be a number" },
         { "(zerop)", "Eval error: zerop expecting an argument" },
         { "(zerop 1 0)", "Eval error: zerop expecting an argument" },
     };
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(test_plusp)
         //{ fmt.Sprintf("(plusp %g)", math.SmallestNonzeroFloat32), "t" },
         //{ fmt.Sprintf("(plusp %g)", math.SmallestNonzeroFloat64), "t" },
 
-        { "(plusp 'a)", "Eval error: plusp argument needs to be number" },
+        { "(plusp 'a)", "Eval error: plusp argument needs to be a number" },
         { "(plusp)", "Eval error: plusp expecting an argument" },
         { "(plusp 1 0)", "Eval error: plusp expecting an argument" },
     };
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_minusp)
         //{ fmt.Sprintf("(minusp %g)", -math.SmallestNonzeroFloat32), "t" },
         //{ fmt.Sprintf("(minusp %g)", -math.SmallestNonzeroFloat64), "t" },
 
-        { "(minusp 'a)", "Eval error: minusp argument needs to be number" },
+        { "(minusp 'a)", "Eval error: minusp argument needs to be a number" },
         { "(minusp)", "Eval error: minusp expecting an argument" },
         { "(minusp 1 0)", "Eval error: minusp expecting an argument" },
     };
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_evenp)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         //{ "(evenp 3.145926536)", "Eval error: evenp argument needs to be integer\nnil" },
-        { "(evenp 'a)", "Eval error: evenp argument needs to be number" },
+        { "(evenp 'a)", "Eval error: evenp argument needs to be a number" },
         { "(evenp)", "Eval error: evenp expecting an argument" },
         { "(evenp 1 0)", "Eval error: evenp expecting an argument" },
     };
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_oddp)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
 
         //{ "(oddp 3.145926536)", "Error: oddp argument needs to be integer\nnil" },
-        { "(oddp 'a)", "Eval error: oddp argument needs to be number" },
+        { "(oddp 'a)", "Eval error: oddp argument needs to be a number" },
         { "(oddp)", "Eval error: oddp expecting an argument" },
         { "(oddp 1 0)", "Eval error: oddp expecting an argument" },
     };
@@ -291,8 +291,8 @@ BOOST_AUTO_TEST_CASE(test_equal)
         // { "(= 17 17.0s0)", "t" },
         // { "(= 17.0f0 17.0d0)", "t" },
 
-        { "(= 's 0)", "Eval error: = arguments needs to be number" },
-        { "(= 234 'q)", "Eval error: = arguments needs to be number" },
+        { "(= 's 0)", "Eval error: = arguments needs to be a number" },
+        { "(= 234 'q)", "Eval error: = arguments needs to be a number" },
         { "(=)", "Eval error: = expecting 2 arguments" },
         { "(= 1)", "Eval error: = expecting 2 arguments" },
     };
@@ -334,8 +334,8 @@ BOOST_AUTO_TEST_CASE(test_less)
         // { "(<= 17 17.0s0)", "t" },
         // { "(<= 17.0f0 17.0d0)", "t" },
 
-        { "(< 's 0)", "Eval error: < arguments needs to be number" },
-        { "(<= 234 'dois)", "Eval error: <= arguments needs to be number" },
+        { "(< 's 0)", "Eval error: < arguments needs to be a number" },
+        { "(<= 234 'dois)", "Eval error: <= arguments needs to be a number" },
         { "(<)", "Eval error: < expecting 2 arguments" },
         { "(<= 1)", "Eval error: <= expecting 2 arguments" }
     };
@@ -369,8 +369,8 @@ BOOST_AUTO_TEST_CASE(test_greater)
         // { fmt.Sprintf("(>= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "t" },
         // { fmt.Sprintf("(>= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "t" },
 
-        { "(> 's 0)", "Eval error: > arguments needs to be number" },
-        { "(>= 234 'dois)", "Eval error: >= arguments needs to be number" },
+        { "(> 's 0)", "Eval error: > arguments needs to be a number" },
+        { "(>= 234 'dois)", "Eval error: >= arguments needs to be a number" },
         { "(>)", "Eval error: > expecting 2 arguments" },
         { "(>= 1)", "Eval error: >= expecting 2 arguments" }
     };
@@ -402,8 +402,8 @@ BOOST_AUTO_TEST_CASE(test_notequals)
         // { fmt.Sprintf("(/= %[1]g %[1]g)", math.SmallestNonzeroFloat32), "nil" },
         // { fmt.Sprintf("(/= %[1]g %[1]g)", math.SmallestNonzeroFloat64), "nil" },
 
-        { "(/= 's 0)", "Eval error: /= arguments needs to be number" },
-        { "(/= 234 'dois)", "Eval error: /= arguments needs to be number" },
+        { "(/= 's 0)", "Eval error: /= arguments needs to be a number" },
+        { "(/= 234 'dois)", "Eval error: /= arguments needs to be a number" },
         { "(/=)", "Eval error: /= expecting 2 arguments" },
         { "(/= 1)", "Eval error: /= expecting 2 arguments" }
 
@@ -433,7 +433,7 @@ BOOST_AUTO_TEST_CASE(test_add)
         // { "(+ 1 #C(0 1))", "#C(1 1)" },
         // { "(+ #C(0 1) 1.5)", "#C(1.5 1)" },
 
-        { "(+ 1 'jones)", "Eval error: + arguments needs to be number" },
+        { "(+ 1 'jones)", "Eval error: + arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE(test_mult)
         // Complex
         //{ "(* #C(0 1) #C(0 1))", "#C(-1 0)" },
 
-        { "(* 1 'jones)", "Eval error: * arguments needs to be number" },
+        { "(* 1 'jones)", "Eval error: * arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(test_sub)
         // // Complex
         // { "(- #C(1 3) #C(3 1))", "#C(-2 2)" },
 
-        { "(- 1 'jones)", "Eval error: - arguments needs to be number" },
+        { "(- 1 'jones)", "Eval error: - arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(test_div)
         { "(/ 66433345534 34684)", "1915388" },
         //{ "(/ 3.0 4 5)", "0.15" },
 
-        { "(/ 1 'jones)", "Eval error: / arguments needs to be number" },
+        { "(/ 1 'jones)", "Eval error: / arguments needs to be a number" },
 
         // floats
         // { "(/ 0.5 2)", "0.25" },
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE(test_div)
         { "(mod 3 -1)", "0" },
         { "(mod 66433345534 28142)", "17660" },
         { "(mod 12)", "Eval error: mod expecting 2 arguments" },
-        { "(mod 1 'jones)", "Eval error: mod arguments needs to be number" },
+        { "(mod 1 'jones)", "Eval error: mod arguments needs to be a number" },
 
         { "(mod 13 4)", "1" },
         //{ "(rem 13 4)", "1" },
@@ -562,7 +562,7 @@ BOOST_AUTO_TEST_CASE(test_power)
         // Complex
         //{ "(^ #C(0 1) #C(0 1))", "#C(0.20787957635076193 0)" },
 
-        { "(^ 1 'jones)", "Eval error: ^ arguments needs to be number" },
+        { "(^ 1 'jones)", "Eval error: ^ arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -581,7 +581,7 @@ BOOST_AUTO_TEST_CASE(test_max)
 
         //{ "(max 1.2 2.4)", "2.4" },
 
-        { "(max 1 'jones)", "Eval error: max arguments needs to be number" },
+        { "(max 1 'jones)", "Eval error: max arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(test_min)
 
         //{ "(min 1.2 2.4)", "1.2" },
 
-        { "(min 1 'jones)", "Eval error: min arguments needs to be number" },
+        { "(min 1 'jones)", "Eval error: min arguments needs to be a number" },
     };
     test_Evaluator(tests);
 }
@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_abs)
         { "(abs 0)", "0" },
 
         { "(abs)", "Eval error: abs expecting an argument" },
-        { "(abs 'jones)", "Eval error: abs argument needs to be number" },
+        { "(abs 'jones)", "Eval error: abs argument needs to be a number" },
 
         { "(floor 12)", "12" },
         { "(ceiling 12)", "12" },

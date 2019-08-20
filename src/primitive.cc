@@ -10,6 +10,7 @@
 #include <numeric>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/log/trivial.hpp>
 
 #include "evaluator.hh"
@@ -338,7 +339,7 @@ Expr let(Evaluator& l, const string& name, List& args, SymbolTable& a)
 //
 
 PrimBasicFunct
-numeric_predicate0(const function<bool(Int, Int)>& f)
+num_predicate0(const function<bool(Int, Int)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](List& args) {
@@ -353,9 +354,9 @@ static function<bool(Int, Int)> ge = greater_equal<Int>();
 static function<bool(Int, Int)> lt = less<Int>();
 static function<bool(Int, Int)> le = less_equal<Int>();
 
-static PrimBasicFunct zerop = numeric_predicate0(eq);
-static PrimBasicFunct plusp = numeric_predicate0(gt);
-static PrimBasicFunct minusp = numeric_predicate0(lt);
+static PrimBasicFunct zerop = num_predicate0(eq);
+static PrimBasicFunct plusp = num_predicate0(gt);
+static PrimBasicFunct minusp = num_predicate0(lt);
 
 template <Int N>
 Expr nump(List& args)
@@ -364,20 +365,21 @@ Expr nump(List& args)
     return abs(any_cast<Int>(args[0]) % 2) == N;
 }
 
-PrimBasicFunct numeric_predicate(const function<bool(Int, Int)>& f)
+template <typename T>
+PrimBasicFunct predicate(const function<bool(T, T)>& f)
 // Returns a function with compare the first element to zero.
 {
     return [&](List& args) -> Expr {
-        return f(any_cast<Int>(args[0]), any_cast<Int>(args[1]));
+        return f(any_cast<T>(args[0]), any_cast<T>(args[1]));
     };
 }
 
-static PrimBasicFunct num_eq = numeric_predicate(eq);
-static PrimBasicFunct num_neq = numeric_predicate(neq);
-static PrimBasicFunct num_gt = numeric_predicate(gt);
-static PrimBasicFunct num_ge = numeric_predicate(ge);
-static PrimBasicFunct num_lt = numeric_predicate(lt);
-static PrimBasicFunct num_le = numeric_predicate(le);
+static PrimBasicFunct num_eq = predicate<Int>(eq);
+static PrimBasicFunct num_neq = predicate<Int>(neq);
+static PrimBasicFunct num_gt = predicate<Int>(gt);
+static PrimBasicFunct num_ge = predicate<Int>(ge);
+static PrimBasicFunct num_lt = predicate<Int>(lt);
+static PrimBasicFunct num_le = predicate<Int>(le);
 
 static function<Int(Int, Int)> add = plus<Int>();
 static function<Int(Int, Int)> sub = minus<Int>();
@@ -451,6 +453,59 @@ static PrimBasicFunct num_floor = numeric_single([](Int x) -> Int { return Int(f
 static PrimBasicFunct num_ceil = numeric_single([](Int x) -> Int { return Int(ceil(x)); });
 static PrimBasicFunct num_round = numeric_single([](Int x) -> Int { return Int(round(x)); });
 static PrimBasicFunct num_trunc = numeric_single([](Int x) -> Int { return Int(trunc(x)); });
+
+// Strings
+
+PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans)
+{
+    return [=](List& args) -> Expr {
+        List nargs;
+        for (auto x : args) {
+            nargs.push_back(trans(x));
+        }
+        return f(nargs);
+    };
+}
+
+static function<bool(String, String)> eq_str = equal_to<String>();
+static function<bool(String, String)> neq_str = not_equal_to<String>();
+static function<bool(String, String)> gt_str = greater<String>();
+static function<bool(String, String)> ge_str = greater_equal<String>();
+static function<bool(String, String)> lt_str = less<String>();
+static function<bool(String, String)> le_str = less_equal<String>();
+
+static PrimBasicFunct str_eq = predicate<String>(eq_str);
+static PrimBasicFunct str_neq = predicate<String>(neq_str);
+static PrimBasicFunct str_gt = predicate<String>(gt_str);
+static PrimBasicFunct str_ge = predicate<String>(ge_str);
+static PrimBasicFunct str_lt = predicate<String>(lt_str);
+static PrimBasicFunct str_le = predicate<String>(le_str);
+
+static Expr to_lower_str(const Expr s)
+{
+    return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s))));
+}
+
+// Chars
+
+static function<bool(Char, Char)> eq_char = equal_to<Char>();
+static function<bool(Char, Char)> neq_char = not_equal_to<Char>();
+static function<bool(Char, Char)> gt_char = greater<Char>();
+static function<bool(Char, Char)> ge_char = greater_equal<Char>();
+static function<bool(Char, Char)> lt_char = less<Char>();
+static function<bool(Char, Char)> le_char = less_equal<Char>();
+
+static PrimBasicFunct char_eq = predicate<Char>(eq_char);
+static PrimBasicFunct char_neq = predicate<Char>(neq_char);
+static PrimBasicFunct char_gt = predicate<Char>(gt_char);
+static PrimBasicFunct char_ge = predicate<Char>(ge_char);
+static PrimBasicFunct char_lt = predicate<Char>(lt_char);
+static PrimBasicFunct char_le = predicate<Char>(le_char);
+
+static Expr to_lower_char(const Expr c)
+{
+    return Char(tolower(any_cast<Char>(c)));
+}
 
 void init_prims()
 {
@@ -552,6 +607,49 @@ void init_prims()
         { "ceiling", num_ceil, one_num, preEvaluate },
         { "round", num_round, one_num, preEvaluate },
         { "truncate", num_trunc, one_num, preEvaluate },
+
+        // String functions
+        { "stringp", &typep<String>, one_arg, preEvaluate },
+        { "string=", str_eq, two_str, preEvaluate },
+        { "string-equal", str_eq, two_str, preEvaluate },
+        { "string/=", str_neq, two_str, preEvaluate },
+        { "string-not-equal", str_neq, two_str, preEvaluate },
+        { "string<", str_lt, two_str, preEvaluate },
+        { "string-lessp", str_lt, two_str, preEvaluate },
+        { "string>", str_gt, two_str, preEvaluate },
+        { "string-greaterp", str_gt, two_str, preEvaluate },
+        { "string<=", str_le, two_str, preEvaluate },
+        { "string-not-greaterp", str_le, two_str, preEvaluate },
+        { "string>=", str_ge, two_str, preEvaluate },
+        { "string-not-lessp", str_ge, two_str, preEvaluate },
+
+        { "string-ci=", funct_ci(str_eq, to_lower_str), two_str, preEvaluate },
+        { "string-ci/=", funct_ci(str_neq, to_lower_str), two_str, preEvaluate },
+        { "string-ci<", funct_ci(str_lt, to_lower_str), two_str, preEvaluate },
+        { "string-ci>", funct_ci(str_gt, to_lower_str), two_str, preEvaluate },
+        { "string-ci<=", funct_ci(str_le, to_lower_str), two_str, preEvaluate },
+        { "string-ci>=", funct_ci(str_ge, to_lower_str), two_str, preEvaluate },
+
+        // Character functions
+        { "characterp", &typep<Char>, one_arg, preEvaluate },
+        { "char=", char_eq, two_char, preEvaluate },
+        { "char-equal", char_eq, two_char, preEvaluate },
+        { "char/=", char_neq, two_char, preEvaluate },
+        { "char-not-equal", char_neq, two_char, preEvaluate },
+        { "char<", char_lt, two_char, preEvaluate },
+        { "char-lessp", char_lt, two_char, preEvaluate },
+        { "char>", char_gt, two_char, preEvaluate },
+        { "char-greaterp", char_gt, two_char, preEvaluate },
+        { "char<=", char_le, two_char, preEvaluate },
+        { "char-not-greaterp", char_le, two_char, preEvaluate },
+        { "char>=", char_ge, two_char, preEvaluate },
+        { "char-not-lessp", char_ge, two_char, preEvaluate },
+
+        { "char-ci=", funct_ci(char_eq, to_lower_char), two_char, preEvaluate },
+        { "char-ci<", funct_ci(char_lt, to_lower_char), two_char, preEvaluate },
+        { "char-ci>", funct_ci(char_gt, to_lower_char), two_char, preEvaluate },
+        { "char-ci<=", funct_ci(char_le, to_lower_char), two_char, preEvaluate },
+        { "char-ci>=", funct_ci(char_ge, to_lower_char), two_char, preEvaluate },
 
     };
 
