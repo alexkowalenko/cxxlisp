@@ -50,11 +50,13 @@ Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a);
 
 // Strings
 
+PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans);
 Expr string_fnct(const string& name, List& args);
 
 // I/O
 
 Expr throw_error(List& args);
+Expr quit(List& args);
 }
 
 #endif

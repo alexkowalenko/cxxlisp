@@ -351,6 +351,49 @@ BOOST_AUTO_TEST_CASE(test_eval_list)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_reverse)
+{
+    vector<TestEval> tests = {
+        { "(reverse)", "Eval error: reverse expecting an argument" },
+        { "(reverse 'a)", "Eval error: reverse: argument not a list" },
+        { "(reverse '(a ))", "(a)" },
+        { "(reverse '(a b))", "(b a)" },
+        { "(reverse '(a b c))", "(c b a)" },
+        { "(reverse '(a b c d))", "(d c b a)" },
+        { "(reverse '(a b (c1 2) d e))", "(e d (c1 2) b a)" },
+        { "(reverse '())", "nil" },
+        { "(reverse nil)", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_append)
+{
+    vector<TestEval> tests = {
+        { "(append)", "nil" },
+        { "(append '())", "nil" },
+        { "(append '(a))", "(a)" },
+        { "(append '(a) '(b))", "(a b)" },
+        { "(append '(a b) '(c))", "(a b c)" },
+        { "(append '(a b) '(c) '(d))", "(a b c d)" },
+        { "(append '(a) '(b (c1 2)) '(d) '(e))", "(a b (c1 2) d e)" },
+        // { "(append '(a b) '(c . d))", "(a b c . d)" },
+        { "(append 'a)", "(a)" },
+
+        { "(append 'a nil)", "(a)" },
+        { "(append 'a '())", "(a)" },
+
+        { "(append nil '(a))", "(a)" },
+        { "(append '() '(a))", "(a)" },
+
+        { "(append '(a) '() '(b))", "(a b)" },
+        { "(append '(a) nil '(b))", "(a b)" },
+
+        { "(append '() '())", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 {
     vector<TestEval> tests = {

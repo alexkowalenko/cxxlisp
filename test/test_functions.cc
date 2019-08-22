@@ -671,3 +671,12 @@ BOOST_AUTO_TEST_CASE(test_eval_dotimes)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_keywordp)
+{
+    vector<TestEval> tests = {
+        { "(keywordp 1)", "nil" },
+        { "(keywordp :hello)", "t" },
+    };
+    test_Evaluator(tests);
+}

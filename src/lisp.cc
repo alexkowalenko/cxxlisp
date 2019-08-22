@@ -106,7 +106,44 @@ inline const string stdlib = R"stdlib(
         (t (member a (cdr lat)))))
 
 ;(defun 1+ (x) (+ 1 x))
-;(defun 1- (x) (- x 1))            
+;(defun 1- (x) (- x 1))
+
+(defun gcd (x y)
+  (defun gcd (x y)
+    (cond ((= 0 x) y)
+          ((= 0 y) x)
+          ((< x y) (gcd x (rem y x)))
+          (else    (gcd y (rem x y)))))
+    (gcd (abs x) (abs y)))
+
+(defun lcm (x y)
+  (let ((cd (gcd x y)))
+    (abs (* cd (div x cd) (div y cd)))))
+
+(defun length (ls)
+  (defun len (a n)
+    (cond ((null a) n)
+          ((consp a) (len (cdr a) (+ 1 n)))
+          (t (error "length: improper list" ls))))
+  (len ls 0))
+
+(defun nth-tail (n a)
+  (if (= 0 n)
+      a
+      (nth-tail (- n 1) (cdr a))))
+
+(defun nth (n a) (car (nth-tail n a)))
+
+(defun list-length (x) 
+	(length x))
+
+(defun fold (f b a)
+  (defun fl (a r)
+    (if (null a)
+        r
+        (fl (cdr a)
+            (funcall f r (car a)))))
+  (fl a b))
 
 (defmacro when (cond result) 
 	`(if ,cond ,result)) 
@@ -181,6 +218,8 @@ void Lisp::repl(istream& istr, ostream& ostr)
             ostr << "Numeric exception: " << e.what() << endl;
         } catch (RuntimeException& e) {
             ostr << "Runtime exception: " << e.what() << endl;
+        } catch (ExceptionQuit& e) {
+            break;
         } catch (exception& e) {
             ostr << "Exception: " << e.what() << endl;
             continue;

@@ -70,5 +70,12 @@ public:
     {
     }
 };
+
+class ExceptionQuit : public exception {
+public:
+    ExceptionQuit(long v)
+        : val(v){};
+    long val = 0;
+};
 }
 #endif

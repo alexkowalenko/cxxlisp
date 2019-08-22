@@ -14,6 +14,17 @@ namespace ax {
 // String functions
 //
 
+PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans)
+{
+    return [=](List& args) -> Expr {
+        List nargs;
+        for (auto x : args) {
+            nargs.push_back(trans(x));
+        }
+        return f(nargs);
+    };
+}
+
 Expr string_fnct(const string& name, List& args)
 {
     string s;

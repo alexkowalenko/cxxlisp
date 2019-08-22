@@ -158,6 +158,36 @@ Expr rplacd(List& args)
     throw EvalException("rplacd first argument not a list");
 }
 
+Expr reverse(List& args)
+{
+    if (is_false(args[0])) {
+        return sF;
+    }
+    if (is_a<List>(args[0])) {
+        List l = any_cast<List>(args[0]);
+        reverse(l.begin(), l.end());
+        return l;
+    }
+    throw EvalException("reverse: argument not a list");
+}
+
+Expr append(List& args)
+{
+    if (args.empty()) {
+        return sF;
+    }
+    List l;
+    for (auto a : args) {
+        if (is_a<List>(a)) {
+            List x = any_cast<List>(a);
+            l.insert(l.end(), x.begin(), x.end());
+        } else if (!is_false(a)) {
+            l.push_back(a);
+        }
+    }
+    return l;
+}
+
 //
 // eq functions
 //
@@ -456,17 +486,6 @@ static PrimBasicFunct num_trunc = numeric_single([](Int x) -> Int { return Int(t
 
 // Strings
 
-PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans)
-{
-    return [=](List& args) -> Expr {
-        List nargs;
-        for (auto x : args) {
-            nargs.push_back(trans(x));
-        }
-        return f(nargs);
-    };
-}
-
 static function<bool(String, String)> eq_str = equal_to<String>();
 static function<bool(String, String)> neq_str = not_equal_to<String>();
 static function<bool(String, String)> gt_str = greater<String>();
@@ -502,6 +521,7 @@ void init_prims()
     vector<Primitive> defs{
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
+        { "keywordp", &typep<Keyword>, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
         { "not", &null, one_arg, preEvaluate },
@@ -522,6 +542,8 @@ void init_prims()
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
 
+        { "reverse", &reverse, one_arg, preEvaluate },
+        { "append", &append, no_check, preEvaluate },
         // eq
 
         { "eq", &eq_p, two_args, preEvaluate },
@@ -659,6 +681,7 @@ void init_prims()
 
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },
+         { "quit", &quit, no_check, preEvaluate },
 
     };
 

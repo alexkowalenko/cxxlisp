@@ -86,11 +86,77 @@ BOOST_AUTO_TEST_CASE(test_eval_member)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_length)
+{
+    vector<TestEval> tests = {
+        // { "(length \"123\")", "3" },
+        { "(length '(1 2 3 4))", "4" },
+        //{ "(length #(1 2 3.5))", "3" },
+
+        //{ "(length #())", "0" },
+        { "(length '())", "0" },
+        //{ "(length \"\")", "0" },
+        { "(length nil)", "0" },
+
+        { "(length)", "Eval error: length: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_plus1)
 {
     vector<TestEval> tests = {
         //{ "(1+ 1)", "2" },
         //{ "(1- 2)", "1" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_nth)
+{
+    vector<TestEval> tests = {
+        { "(nth)", "Eval error: nth: invalid number of arguments" },
+        { "(nth '())", "Eval error: nth: invalid number of arguments" },
+        { "(nth 'a '(a b))", "Eval error: = arguments needs to be a number" },
+
+        { "(nth 1 'a)", "nil" },
+        { "(nth 0 '(a))", "a" },
+        { "(nth 1 '(a b))", "b" },
+        { "(nth 2 '(a b c))", "c" },
+        { "(nth 2 '(a b c d))", "c" },
+        { "(nth 2 '(a b (c1 2) d e))", "(c1 2)" },
+        { "(nth 6 '(a b (c1 2) d e))", "nil" }
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_nth_tail)
+{
+    vector<TestEval> tests = {
+        { "(nth-tail)", "Eval error: nth-tail: invalid number of arguments" },
+        { "(nth-tail '())", "Eval error: nth-tail: invalid number of arguments" },
+        { "(nth-tail 'a '(a b))", "Eval error: = arguments needs to be a number" },
+
+        { "(nth-tail 1 'a)", "nil" },
+        { "(nth-tail 0 '(a))", "(a)" },
+        { "(nth-tail 1 '(a b))", "(b)" },
+        { "(nth-tail 2 '(a b c))", "(c)" },
+        { "(nth-tail 2 '(a b c d))", "(c d)" },
+        { "(nth-tail 2 '(a b (c1 2) d e))", "((c1 2) d e)" },
+        { "(nth-tail 6 '(a b (c1 2) d e))", "nil" }
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_fold)
+{
+    vector<TestEval> tests = {
+        { "(fold #'+ 0 '(1 1))", "2" },
+        { "(fold #'+ 0 '(1 1 1))", "3" },
+        { "(fold #'+ 0 '(1 2 3))", "6" },
+        { "(fold #'+ 0 '())", "0" },
+
+        { "(fold 'a 0 '( 1))", "Eval error: funcall: Not function ref or lambda expression: a" },
     };
     test_Evaluator(tests);
 }
