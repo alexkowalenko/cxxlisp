@@ -47,6 +47,14 @@ Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a);
 Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a);
 Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a);
 Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a);
+
+// Strings
+
+Expr string_fnct(const string& name, List& args);
+
+// I/O
+
+Expr throw_error(List& args);
 }
 
 #endif

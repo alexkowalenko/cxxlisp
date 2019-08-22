@@ -481,11 +481,6 @@ static PrimBasicFunct str_ge = predicate<String>(ge_str);
 static PrimBasicFunct str_lt = predicate<String>(lt_str);
 static PrimBasicFunct str_le = predicate<String>(le_str);
 
-static Expr to_lower_str(const Expr s)
-{
-    return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s))));
-}
-
 // Chars
 
 static function<bool(Char, Char)> eq_char = equal_to<Char>();
@@ -501,11 +496,6 @@ static PrimBasicFunct char_gt = predicate<Char>(gt_char);
 static PrimBasicFunct char_ge = predicate<Char>(ge_char);
 static PrimBasicFunct char_lt = predicate<Char>(lt_char);
 static PrimBasicFunct char_le = predicate<Char>(le_char);
-
-static Expr to_lower_char(const Expr c)
-{
-    return Char(tolower(any_cast<Char>(c)));
-}
 
 void init_prims()
 {
@@ -623,12 +613,27 @@ void init_prims()
         { "string>=", str_ge, two_str, preEvaluate },
         { "string-not-lessp", str_ge, two_str, preEvaluate },
 
-        { "string-ci=", funct_ci(str_eq, to_lower_str), two_str, preEvaluate },
-        { "string-ci/=", funct_ci(str_neq, to_lower_str), two_str, preEvaluate },
-        { "string-ci<", funct_ci(str_lt, to_lower_str), two_str, preEvaluate },
-        { "string-ci>", funct_ci(str_gt, to_lower_str), two_str, preEvaluate },
-        { "string-ci<=", funct_ci(str_le, to_lower_str), two_str, preEvaluate },
-        { "string-ci>=", funct_ci(str_ge, to_lower_str), two_str, preEvaluate },
+        { "string-ci=",
+            funct_ci(str_eq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }), two_str, preEvaluate },
+        { "string-ci/=",
+            funct_ci(str_neq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }),
+            two_str, preEvaluate },
+        { "string-ci<",
+            funct_ci(str_lt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }),
+            two_str, preEvaluate },
+        { "string-ci>",
+            funct_ci(str_gt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }),
+            two_str, preEvaluate },
+        { "string-ci<=",
+            funct_ci(str_le, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }),
+            two_str, preEvaluate },
+        { "string-ci>=",
+            funct_ci(str_ge, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(string(any_cast<String>(s)))); }),
+            two_str, preEvaluate },
+
+        { "string", &string_fnct, one_arg, preEvaluate },
+        { "string-upcase", &string_fnct, one_arg, preEvaluate },
+        { "string-downcase", &string_fnct, one_arg, preEvaluate },
 
         // Character functions
         { "characterp", &typep<Char>, one_arg, preEvaluate },
@@ -645,11 +650,15 @@ void init_prims()
         { "char>=", char_ge, two_char, preEvaluate },
         { "char-not-lessp", char_ge, two_char, preEvaluate },
 
-        { "char-ci=", funct_ci(char_eq, to_lower_char), two_char, preEvaluate },
-        { "char-ci<", funct_ci(char_lt, to_lower_char), two_char, preEvaluate },
-        { "char-ci>", funct_ci(char_gt, to_lower_char), two_char, preEvaluate },
-        { "char-ci<=", funct_ci(char_le, to_lower_char), two_char, preEvaluate },
-        { "char-ci>=", funct_ci(char_ge, to_lower_char), two_char, preEvaluate },
+        { "char-ci=",
+            funct_ci(char_eq, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        { "char-ci<", funct_ci(char_lt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        { "char-ci>", funct_ci(char_gt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        { "char-ci<=", funct_ci(char_le, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        { "char-ci>=", funct_ci(char_ge, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+
+        // I/O
+        { "error", &throw_error, one_arg, preEvaluate },
 
     };
 

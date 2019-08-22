@@ -205,3 +205,28 @@ BOOST_AUTO_TEST_CASE(test_eval_string_ge_ci)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_string_string)
+{
+    vector<TestEval> tests = {
+        { R"((string "one"))", R"("one")" },
+        { R"((string 'one))", R"("one")" },
+        { R"((string #\a))", R"("a")" },
+        { R"((string 123))", R"("123")" },
+
+        // { R"((string-capitalize "one"))", R"("One")" },
+        // { R"((string-capitalize 'one))", R"("One")" },
+        // { R"((string-capitalize #\a))", R"("A")" },
+
+        { R"((string-upcase "one"))", R"("ONE")" },
+        { R"((string-upcase 'one))", R"("ONE")" },
+        { R"((string-upcase #\a))", R"("A")" },
+
+        { R"((string-downcase "one"))", R"("one")" },
+        { R"((string-downcase 'oNe))", R"("one")" },
+        { R"((string-downcase #\a))", R"("a")" },
+
+        { R"((string))", "Eval error: string expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
