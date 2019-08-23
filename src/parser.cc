@@ -30,6 +30,14 @@ Expr mkSymbolInt(const string& atom)
     if (atom[0] == '&' || atom[0] == ':') {
         return Keyword(atom);
     }
+    if (atom.find('.') != string::npos) {
+        try {
+            return Float(stod(atom));
+        } catch (invalid_argument) {
+        } catch (out_of_range) {
+        };
+        // fallthrough to Int.
+    }
     try {
         return Int{ stol(atom) };
     } catch (invalid_argument) { //fallthrough to be an atom

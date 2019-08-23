@@ -74,6 +74,7 @@ public:
 };
 
 using Char = wchar_t;
+using Float = double;
 
 } // namespace ax
 

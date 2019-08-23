@@ -6,7 +6,10 @@
 
 #include "expr.hh"
 
+#include <array>
 #include <sstream>
+
+#include <stdio.h>
 
 #include <utf8.h>
 
@@ -25,6 +28,10 @@ string to_string(const Expr& s)
         return any_cast<Atom>(s);
     } else if (s.type() == typeid(Int)) {
         return std::to_string(any_cast<Int>(s));
+    } else if (s.type() == typeid(Float)) {
+        array<char, 80> buf;
+        sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
+        return string(buf.data());
     } else if (s.type() == typeid(Bool)) {
         return any_cast<Bool>(s) ? "t" : "nil";
     } else if (s.type() == typeid(List)) {

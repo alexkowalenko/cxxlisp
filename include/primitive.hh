@@ -37,7 +37,57 @@ extern map<string, Primitive> prim_table;
 
 void init_prims();
 
-// Functions defined outside primitive.cc
+// Numbers
+
+extern PrimBasicFunct zerop;
+extern PrimBasicFunct plusp;
+extern PrimBasicFunct minusp;
+
+template <Int N>
+Expr nump(List& args)
+// Generates a templated function which mods compared to N.
+{
+    return abs(any_cast<Int>(args[0]) % 2) == N;
+}
+
+template <typename T>
+PrimBasicFunct predicate(const function<bool(T, T)>& f)
+// Returns a function with compare the first element to zero.
+{
+    return [&](List& args) -> Expr {
+        return f(any_cast<T>(args[0]), any_cast<T>(args[1]));
+    };
+}
+
+extern PrimBasicFunct num_eq;
+extern PrimBasicFunct num_neq;
+extern PrimBasicFunct num_gt;
+extern PrimBasicFunct num_ge;
+extern PrimBasicFunct num_lt;
+extern PrimBasicFunct num_le;
+
+extern PrimBasicFunct num_add;
+extern PrimBasicFunct num_sub;
+extern PrimBasicFunct num_mult;
+extern PrimBasicFunct num_div;
+extern PrimBasicFunct num_mod;
+
+Expr num_sub_init(List& args);
+PrimBasicFunct check_zeros(PrimBasicFunct f);
+
+extern PrimBasicFunct num_power;
+
+extern PrimBasicFunct num_max;
+extern PrimBasicFunct num_min;
+
+extern PrimBasicFunct num_abs;
+extern PrimBasicFunct num_floor;
+extern PrimBasicFunct num_ceil;
+extern PrimBasicFunct num_round;
+extern PrimBasicFunct num_trunc;
+
+// Functions
+
 Expr defun(const string& name, List& args, SymbolTable& a);
 Expr lambda(const string& name, List& args);
 Expr funct(const string& name, List& args);

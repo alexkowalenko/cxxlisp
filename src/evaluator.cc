@@ -159,7 +159,7 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
     if (is_a<Bool>(e)) {
         return e;
     }
-    if (is_a<Int>(e)) {
+    if (is_a<Int>(e) || is_a<Float>(e)) {
         return e;
     }
     if (is_a<Atom>(e)) {
