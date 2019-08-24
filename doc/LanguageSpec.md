@@ -44,7 +44,9 @@ Symbol `t` is defined as the standard true value, and `nil` is defined as the nu
 
 * Integers - i.e., `1`, `-2`, `0`. All integers are 64-bit integers.
 
-* Strings - i.e., `"this string"`.
+* Floats - i.e. 1.2, 1.2345e-08. All floats are  
+
+* Strings - i.e., `"this string"`. All floats are 64-bit floating-points.
 
 * Characters - i.e., `#\a`, `#\newline`, `#\space`
 
@@ -88,6 +90,10 @@ Supported number types are integers and reals (same as floats).
 
 `(integerp n)` - returns `t` is `n` a integer.
 
+`(floatp n) (realp n)` - returns `t` is `n` a float.
+
+`pi` - the value π.
+
 ### Predicate Functions
 
 `(= n m)` `(/= n m)` - returns `t` or `nil` if `n` and `m` are equal, not equal.
@@ -128,6 +134,17 @@ Supported number types are integers and reals (same as floats).
 
 `(abs n)`- returns the absolute of `n`.
 
+`(incf n [interval]) (decf n [interval])` increments or decrements the value represented by the symbol `n`, by the value `interval` or 1 if not present. `n` has to be predefined.
+
+### Floating point functions
+
+`(log n) (exp n)`- returns the natural log of `n`, returns e to the power of `n`.
+
+`(sin n) (cos n) (tan n) (asin n) (acos) (atan)`- returns the trigonometric functions of `n`, based on radians.
+
+`(sqrt n)`- returns the square root of `n`.
+
+
 ## String Types
 
 Supported unicode strings.
@@ -146,7 +163,9 @@ Supported unicode strings.
 
 ### String Functions
 
-`(string s)` - convert `s` from a string, symbol, char into a string.
+`(string s)` - convert `s` into a string.
+
+`(string-upcase s) (string-downcase s)` - convert `s` into a string, and apply the transformation.
 
 ## Character Type
 
@@ -198,6 +217,8 @@ Supported unicode characters.
 
 `(nth n list)` - return the nth element of the `list`. Indexing starts at 0.
 
+`(nth-tail n list)` - return the nth last element of the `list`. Indexing starts at 0.
+
 `(reverse list)` - returns the list in reverse order. (Not in standard common lisp.)
 
 `(append [list]* x)` - appends the lists together, and if x is an atom, adds it to the list.
@@ -207,6 +228,8 @@ Supported unicode characters.
 `(replacd cons x)` - replace the cdr of `cons` with `x`.
 
 `(mapcar f list...)`  `(maplist f list...)` - apply the function `f` to the lists `list...`, return as list. `f` is a function or a lambda expression.
+
+`(fold f list a)` - apply the function `f` (taking two elements), to the values of `list`, with initial value `a`.
 
 # Functions
 
@@ -251,6 +274,8 @@ Function parameter definitions
 ## Macro generation
 
 `(demacro f (args ...) body)` - define a macro `f` with `args` and the `body`. Returns the macro expansion and then evaluation of `body` or `nil` if not present.
+
+`(macro (args ...) body)` - return a anonymous macro with `args` and the `body`.
 
 # Program Control
 
