@@ -28,6 +28,22 @@ optional<string> checkType(const string& name, const List& args, const string& t
     return {};
 }
 
+optional<string> checkTypeNumeric(const string& name, const List& args, const string& tname)
+{
+    if (args.size() == 1) {
+        if (!(is_a<Int>(args[0]) || is_a<Float>(args[0]))) {
+            return name + " argument needs to be a " + tname;
+        }
+    } else {
+        for (auto x : args) {
+            if (!(is_a<Int>(x) || is_a<Float>(x))) {
+                return name + " arguments needs to be a " + tname;
+            }
+        }
+    }
+    return {};
+}
+
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const List& args)
 {
     switch (cons.constraint) {
@@ -66,7 +82,9 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
     case ArgConstraintType::no_check:;
     }
     if (cons.argType == ArgType::numeric) {
-        return checkType<Int>(name, args, "number");
+        return checkTypeNumeric(name, args, "number");
+    } else if (cons.argType == ArgType::integer) {
+        return checkType<Int>(name, args, "integer");
     } else if (cons.argType == ArgType::string) {
         return checkType<String>(name, args, "string");
     } else if (cons.argType == ArgType::character) {

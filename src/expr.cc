@@ -13,6 +13,7 @@
 
 #include <utf8.h>
 
+#include "exceptions.hh"
 #include "function.hh"
 
 namespace ax {
@@ -115,5 +116,15 @@ Bool expr_equal(const Expr& x, const Expr& y)
         return sT;
     }
     return sF;
+}
+
+Float as_Float(const Expr& s)
+{
+    if (is_a<Float>(s)) {
+        return any_cast<Float>(s);
+    } else if (is_a<Int>(s)) {
+        return Float(any_cast<Int>(s));
+    } else
+        throw EvalException("Not number");
 }
 }

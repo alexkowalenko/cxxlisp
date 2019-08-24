@@ -76,6 +76,8 @@ public:
 using Char = wchar_t;
 using Float = double;
 
+Float as_Float(const Expr& s);
+
 } // namespace ax
 
 #endif

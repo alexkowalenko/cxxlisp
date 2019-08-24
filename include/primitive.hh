@@ -39,6 +39,8 @@ void init_prims();
 
 // Numbers
 
+Expr numberp(List& args);
+
 extern PrimBasicFunct zerop;
 extern PrimBasicFunct plusp;
 extern PrimBasicFunct minusp;
@@ -71,6 +73,7 @@ extern PrimBasicFunct num_sub;
 extern PrimBasicFunct num_mult;
 extern PrimBasicFunct num_div;
 extern PrimBasicFunct num_mod;
+extern PrimBasicFunct num_rem;
 
 Expr num_sub_init(List& args);
 PrimBasicFunct check_zeros(PrimBasicFunct f);

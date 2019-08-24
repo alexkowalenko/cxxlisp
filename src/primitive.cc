@@ -466,12 +466,14 @@ void init_prims()
 
         // Number functions
 
-        { "numberp", &typep<Int>, one_arg, preEvaluate },
+        { "numberp", &numberp, one_arg, preEvaluate },
         { "integerp", &typep<Int>, one_arg, preEvaluate },
+        { "realp", &typep<Float>, one_arg, preEvaluate },
+        { "floatp", &typep<Float>, one_arg, preEvaluate },
 
         { "zerop", zerop, one_num, preEvaluate },
-        { "oddp", &nump<1>, one_num, preEvaluate },
-        { "evenp", &nump<0>, one_num, preEvaluate },
+        { "oddp", &nump<1>, one_int, preEvaluate },
+        { "evenp", &nump<0>, one_int, preEvaluate },
         { "plusp", plusp, one_num, preEvaluate },
         { "minusp", minusp, one_num, preEvaluate },
 
@@ -485,8 +487,9 @@ void init_prims()
         { "+", num_add, any_num, preEvaluate },
         { "-", &num_sub_init, any_num, preEvaluate },
         { "*", num_mult, any_num, preEvaluate },
-        { "/", check_zeros(num_div), any_num, preEvaluate },
+        { "/", check_zeros(num_div), min_one_num, preEvaluate },
         { "mod", check_zeros(num_mod), two_num, preEvaluate },
+        { "rem", check_zeros(num_rem), two_num, preEvaluate },
         { "^", num_power, min_one_num, preEvaluate },
         { "expt", num_power, min_one_num, preEvaluate },
         { "max", num_max, min_one_num, preEvaluate },

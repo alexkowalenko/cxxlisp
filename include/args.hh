@@ -27,6 +27,7 @@ enum class ArgConstraintType {
 enum class ArgType {
     any,
     numeric,
+    integer,
     string,
     character,
 };
@@ -53,6 +54,9 @@ const ArgConstraint one_num = { ArgConstraintType::eq, 1, ArgType::numeric };
 const ArgConstraint two_num = { ArgConstraintType::eq, 2, ArgType::numeric };
 const ArgConstraint min_one_num = { ArgConstraintType::min, 1, ArgType::numeric };
 const ArgConstraint any_num = { ArgConstraintType::no_check, 0, ArgType::numeric };
+
+const ArgConstraint one_int = { ArgConstraintType::eq, 1, ArgType::integer };
+const ArgConstraint two_int = { ArgConstraintType::eq, 2, ArgType::integer };
 
 const ArgConstraint two_str = { ArgConstraintType::eq, 2, ArgType::string };
 const ArgConstraint two_char = { ArgConstraintType::eq, 2, ArgType::character };
