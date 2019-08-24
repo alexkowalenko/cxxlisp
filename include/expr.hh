@@ -78,6 +78,11 @@ using Float = double;
 
 Float as_Float(const Expr& s);
 
+constexpr bool is_Num(const Expr& n)
+{
+    return is_a<Int>(n) || is_a<Float>(n);
+}
+
 } // namespace ax
 
 #endif

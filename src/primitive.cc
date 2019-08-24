@@ -501,6 +501,19 @@ void init_prims()
         { "round", num_round, one_num, preEvaluate },
         { "truncate", num_trunc, one_num, preEvaluate },
 
+        { "log", num_log, one_num, preEvaluate },
+        { "exp", num_exp, one_num, preEvaluate },
+        { "sin", num_sin, one_num, preEvaluate },
+        { "cos", num_cos, one_num, preEvaluate },
+        { "tan", num_tan, one_num, preEvaluate },
+        { "asin", num_asin, one_num, preEvaluate },
+        { "acos", num_acos, one_num, preEvaluate },
+        { "atan", num_atan, one_num, preEvaluate },
+        { "sqrt", num_sqrt, one_num, preEvaluate },
+
+        { "incf", &incf, min_one },
+        { "decf", &incf, min_one },
+
         // String functions
         { "stringp", &typep<String>, one_arg, preEvaluate },
         { "string=", str_eq, two_str, preEvaluate },

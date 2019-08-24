@@ -89,6 +89,18 @@ extern PrimBasicFunct num_ceil;
 extern PrimBasicFunct num_round;
 extern PrimBasicFunct num_trunc;
 
+extern PrimBasicFunct num_log;
+extern PrimBasicFunct num_exp;
+extern PrimBasicFunct num_sin;
+extern PrimBasicFunct num_cos;
+extern PrimBasicFunct num_tan;
+extern PrimBasicFunct num_asin;
+extern PrimBasicFunct num_acos;
+extern PrimBasicFunct num_atan;
+extern PrimBasicFunct num_sqrt;
+
+Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a);
+
 // Functions
 
 Expr defun(const string& name, List& args, SymbolTable& a);

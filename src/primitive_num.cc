@@ -6,6 +6,7 @@
 
 #include "primitive.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <numeric>
 
@@ -159,28 +160,66 @@ PrimBasicFunct check_zeros(PrimBasicFunct f)
     };
 }
 
-PrimBasicFunct num_power = numeric_operation(
-    [](Int a, Int b) -> Int { return Int(pow(a, b)); },
+PrimBasicFunct num_power = numeric_operation_float(
+    [](Int a, Int b) -> Float { return Float(pow(as_Float(a), as_Float(b))); },
+    [](Float a, Float b) -> Float { return Float(pow(a, b)); },
     0);
 
-PrimBasicFunct num_max = numeric_operation(
+PrimBasicFunct num_max = numeric_operation_float(
     [](Int a, Int b) -> Int { return Int(max<Int>(a, b)); },
-    0);
-PrimBasicFunct num_min = numeric_operation(
-    [](Int a, Int b) -> Int { return Int(min<Int>(a, b)); },
+    [](Float a, Float b) -> Float { return Float(max<Float>(a, b)); },
     0);
 
-PrimBasicFunct numeric_single(const function<Int(Int)>& f)
+PrimBasicFunct num_min = numeric_operation_float(
+    [](Int a, Int b) -> Int { return Int(min<Int>(a, b)); },
+    [](Float a, Float b) -> Float { return Float(min<Float>(a, b)); },
+    0);
+
+PrimBasicFunct numeric_single(const function<Float(Float)>& f)
 // Returns a function implementing the function f on one argument.
 {
     return [=](List& args) -> Expr {
-        return f(any_cast<Int>(args[0]));
+        return f(as_Float(args[0]));
     };
 }
 
-PrimBasicFunct num_abs = numeric_single([](Int x) -> Int { return Int(abs(x)); });
-PrimBasicFunct num_floor = numeric_single([](Int x) -> Int { return Int(floor(x)); });
-PrimBasicFunct num_ceil = numeric_single([](Int x) -> Int { return Int(ceil(x)); });
-PrimBasicFunct num_round = numeric_single([](Int x) -> Int { return Int(round(x)); });
-PrimBasicFunct num_trunc = numeric_single([](Int x) -> Int { return Int(trunc(x)); });
+PrimBasicFunct num_abs = numeric_single([](Float x) -> Float { return Float(abs(x)); });
+PrimBasicFunct num_floor = numeric_single([](Float x) -> Float { return Float(floor(x)); });
+PrimBasicFunct num_ceil = numeric_single([](Float x) -> Float { return Float(ceil(x)); });
+PrimBasicFunct num_round = numeric_single([](Float x) -> Float { return Float(round(x)); });
+PrimBasicFunct num_trunc = numeric_single([](Float x) -> Float { return Float(trunc(x)); });
+
+PrimBasicFunct num_log = numeric_single([](Float x) -> Float { return Float(log(x)); });
+PrimBasicFunct num_exp = numeric_single([](Float x) -> Float { return Float(exp(x)); });
+PrimBasicFunct num_sin = numeric_single([](Float x) -> Float { return Float(sin(x)); });
+PrimBasicFunct num_cos = numeric_single([](Float x) -> Float { return Float(cos(x)); });
+PrimBasicFunct num_tan = numeric_single([](Float x) -> Float { return Float(tan(x)); });
+PrimBasicFunct num_asin = numeric_single([](Float x) -> Float { return Float(asin(x)); });
+PrimBasicFunct num_acos = numeric_single([](Float x) -> Float { return Float(acos(x)); });
+PrimBasicFunct num_atan = numeric_single([](Float x) -> Float { return Float(atan(x)); });
+PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqrt(x)); });
+
+Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a)
+{
+    if (!is_a<Atom>(args[0])) {
+        throw EvalException(name + ": argument needs to be symbol");
+    }
+    Expr incr = Int{ 1 };
+    if (args.size() > 1) {
+        incr = l.eval(args[1], a);
+        if (!is_Num(incr)) {
+            throw EvalException(name + ": increment is not number");
+        }
+    }
+    if (auto val = a.find(any_cast<Atom>(args[0]))) {
+        if (!is_Num(*val)) {
+            throw EvalException(name + ": value is not a number " + to_string(*val));
+        }
+        Expr result = Float(as_Float(*val) + (as_Float(incr)) * (name == "incf" ? 1 : -1));
+        a.set(any_cast<Atom>(args[0]), result);
+        return result;
+    } else {
+        throw EvalException(name + ": undefined variable " + to_string(args[0]));
+    }
+}
 };

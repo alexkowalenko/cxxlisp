@@ -586,9 +586,12 @@ BOOST_AUTO_TEST_CASE(test_power)
     vector<TestEval> tests = {
         { "(^ 12)", "12" },
         { "(expt 2 3)", "8" },
-        // { "(^ 3 -3)", "0.037037037037037035" },
+        //{ "(^ 3 -3)", "0.037037037037037035" },
+        { "(^ 3 -3.0)", "0.037037037037" },
         { "(expt 0 0)", "1" },
         { "(^ 0 2)", "0" },
+
+        { "(^ 1.1 1.1)", "1.11053424105" },
 
         // Complex
         //{ "(^ #C(0 1) #C(0 1))", "#C(0.20787957635076193 0)" },
@@ -610,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_max)
         { "(max 66433534 345847684)", "345847684" },
         { "(max 2)", "2" },
 
-        //{ "(max 1.2 2.4)", "2.4" },
+        { "(max 1.2 2.4)", "2.4" },
 
         { "(max 1 'jones)", "Eval error: max arguments needs to be a number" },
     };
@@ -629,7 +632,7 @@ BOOST_AUTO_TEST_CASE(test_min)
         { "(min 66433534 345847684)", "66433534" },
         { "(min 2)", "2" },
 
-        //{ "(min 1.2 2.4)", "1.2" },
+        { "(min 1.2 2.4)", "1.2" },
 
         { "(min 1 'jones)", "Eval error: min arguments needs to be a number" },
     };
@@ -652,7 +655,7 @@ BOOST_AUTO_TEST_CASE(test_abs)
         { "(round 12)", "12" },
 
         // floats
-        /*  { "(abs 12.0)", "12" },
+        { "(abs 12.0)", "12" },
         { "(abs -12.0)", "12" },
         { "(abs 0.0)", "0" },
 
@@ -664,12 +667,69 @@ BOOST_AUTO_TEST_CASE(test_abs)
         { "(floor -12.7)", "-13" },
         { "(ceiling -12.7)", "-12" },
         { "(truncate -12.7)", "-12" },
-        { "(round -12.7)", "-12" },
+        { "(round -12.7)", "-13" },
 
         { "(floor 0.0)", "0" },
         { "(ceiling 0.0)", "0" },
         { "(truncate 0.0)", "0" },
-        { "(round 0.0)", "0" }, */
+        { "(round 0.0)", "0" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_real_funcs)
+{
+    vector<TestEval> tests = {
+        { "(log 1.2)", "0.182321556794" },
+        { "(exp 1.2)", "3.32011692274" },
+        { "(sin 0)", "0" },
+        { "(cos 1)", "0.540302305868" },
+        { "(tan 1)", "1.55740772465" },
+        { "(asin 1)", "1.57079632679" },
+        { "(acos 1)", "0" },
+        { "(atan 1.2)", "0.876058050598" },
+        { "(sqrt 2)", "1.41421356237" },
+        { "(sqrt 1)", "1" },
+        { "pi", "3.14159265359" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_real_incf)
+{
+    vector<TestEval> tests = {
+        { "(defvar x 1)", "x" },
+        { "(incf x)", "2" },
+        { "(incf x)", "3" },
+        { "(incf x 3)", "6" },
+        { "(incf x)", "7" },
+        { "x", "7" },
+
+        { "(decf x)", "6" },
+        { "(decf x 2)", "4" },
+        { "(decf x)", "3" },
+        { "(decf x 7)", "-4" },
+        { "x", "-4" },
+
+        { "(defvar x 1.2)", "x" },
+        { "(incf x)", "2.2" },
+        { "(incf x)", "3.2" },
+        { "(incf x 3)", "6.2" },
+        { "(incf x)", "7.2" },
+        { "x", "7.2" },
+
+        { "(decf x)", "6.2" },
+        { "(decf x 2.2)", "4" },
+        { "(decf x)", "3" },
+        { "(decf x 7)", "-4" },
+        { "x", "-4" },
+
+        { "(incf)", "Eval error: incf expecting at least 1 arguments" },
+        { "(incf 1)", "Eval error: incf: argument needs to be symbol" },
+        { "(decf y)", "Eval error: decf: undefined variable y" },
+
+        { "(defvar z '(1 2))", "z" },
+        { "(incf z)", "Eval error: incf: value is not a number (1 2)" },
     };
     test_Evaluator(tests);
 }
