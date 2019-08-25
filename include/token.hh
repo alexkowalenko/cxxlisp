@@ -8,6 +8,7 @@
 #define TOKEN_HH
 
 #include <string>
+#include <variant>
 
 namespace ax {
 
@@ -36,12 +37,15 @@ public:
     Token(TokenType t, string s)
         : type(t)
         , val(s){};
+    Token(TokenType t, wstring ws)
+        : type(t)
+        , val(ws){};
 
     explicit operator string() const;
     friend ostream& operator<<(ostream& os, const Token& t);
 
     TokenType type;
-    string val;
+    variant<string, wstring> val;
 };
 
 ostream& operator<<(ostream& os, const Token& t);

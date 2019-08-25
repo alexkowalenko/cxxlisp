@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "exceptions.hh"
+#include "expr.hh"
 #include "lexer.hh"
 #include "linereaderStream.hh"
 
@@ -22,7 +23,14 @@ struct TestLexer {
     string atom;
 };
 
+struct TestLexer_ws {
+    string input;
+    TokenType tok;
+    wstring atom;
+};
+
 void test_Lexer(const vector<TestLexer>& tests);
+void test_Lexer_wstr(const vector<TestLexer_ws>& tests);
 
 BOOST_AUTO_TEST_CASE(test_lexer_1)
 {
@@ -141,27 +149,6 @@ BOOST_AUTO_TEST_CASE(test_lexer_atoms)
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_strings)
-{
-    vector<TestLexer> tests = {
-        // hash function ref
-        { R"("abc")", TokenType::string, R"(abc)" },
-        { R"("a b c")", TokenType::string, R"(a b c)" },
-
-        { R"("ἄλφα")", TokenType::string, R"(ἄλφα)" },
-        { R"("一二三四五六七")", TokenType::string, R"(一二三四五六七)" },
-        { R"("👾")", TokenType::string, R"(👾)" },
-        { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")", TokenType::string, R"(🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒)" },
-
-        { R"("alpha\"test")", TokenType::string, R"(alpha"test)" },
-        { R"("")", TokenType::string, R"()" },
-        //{ R"(")", TokenType::string, "" },
-        //{ R"("alpha)", TokenType::string, "alpha" },
-    };
-
-    test_Lexer(tests);
-}
-
 void test_Lexer(const vector<TestLexer>& tests)
 {
     for (auto test : tests) {
@@ -171,12 +158,51 @@ void test_Lexer(const vector<TestLexer>& tests)
         try {
             auto tok = lex.get_token();
             cout << "type " << tok.type << " wanted " << test.tok << endl;
-            BOOST_REQUIRE_EQUAL(tok.type, test.tok);
-            if (tok.type == TokenType::atom || tok.type == TokenType::string) {
-                cout << "  got " << tok.val << " wanted " << test.atom << endl;
-                BOOST_REQUIRE_EQUAL(tok.val, test.atom);
+            BOOST_CHECK_EQUAL(tok.type, test.tok);
+            if (tok.type == TokenType::atom) {
+                cout << "  got " << get<string>(tok.val) << " wanted " << test.atom << endl;
+                BOOST_CHECK_EQUAL(get<string>(tok.val), test.atom);
             }
         } catch (exception& e) {
+            BOOST_FAIL("Exception thrown!");
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_lexer_strings)
+{
+    vector<TestLexer_ws> tests = {
+        { R"("abc")", TokenType::string, s2ws(R"(abc)") },
+        { R"("a b c")"s, TokenType::string, s2ws(R"(a b c)") },
+
+        { R"("ἄλφα")"s, TokenType::string, s2ws(R"(ἄλφα)") },
+        { R"("一二三四五六七")"s, TokenType::string, s2ws(R"(一二三四五六七)") },
+        { R"("👾")"s, TokenType::string, s2ws(R"(👾)") },
+        { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")"s, TokenType::string, s2ws(R"(🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒)") },
+
+        { R"("alpha\"test")"s, TokenType::string, s2ws(R"(alpha"test)") },
+        { R"("")", TokenType::string, s2ws(R"()") }, // lexer is supposed to return empty string
+    };
+
+    test_Lexer_wstr(tests);
+}
+
+void test_Lexer_wstr(const vector<TestLexer_ws>& tests)
+{
+    for (auto test : tests) {
+        istringstream is(test.input);
+        LineReaderStream r(is);
+        Lexer lex(r);
+        try {
+            auto tok = lex.get_token();
+            cout << "type[s] " << tok.type << " wanted " << test.tok << endl;
+            BOOST_CHECK_EQUAL(tok.type, test.tok);
+            if (tok.type == TokenType::string) {
+                cout << "  got " << ws2s(get<wstring>(tok.val)) << " wanted " << ws2s(test.atom) << endl;
+                BOOST_CHECK_EQUAL(ws2s(get<wstring>(tok.val)), ws2s(test.atom));
+            }
+        } catch (exception& e) {
+            cout << "Exception : " << e.what() << endl;
             BOOST_FAIL("Exception thrown!");
         }
     }

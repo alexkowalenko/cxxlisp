@@ -5,6 +5,7 @@
 //
 
 #include "token.hh"
+#include "expr.hh"
 
 #include <iostream>
 
@@ -30,11 +31,11 @@ Token::operator string() const
     case TokenType::at:
         return "@"s;
     case TokenType::hash:
-        return "#"s + val;
+        return "#"s + get<string>(val);
     case TokenType::atom:
-        return val;
+        return get<string>(val);
     case TokenType::string:
-        return "\"" + val + "\"";
+        return "\"" + get<string>(val) + "\"";
     case TokenType::eof:
         return "eof"s;
     default:

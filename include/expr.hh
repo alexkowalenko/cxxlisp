@@ -7,7 +7,9 @@
 #ifndef EXPR_HH
 #define EXPR_HH
 
+#include <codecvt>
 #include <iostream>
+#include <locale>
 #include <string>
 #include <vector>
 
@@ -32,7 +34,6 @@ constexpr bool is_a(const Expr& s)
 
 // Output
 
-ostream& operator<<(ostream& os, const Expr& e);
 string to_string(const Expr& e);
 
 // Bool
@@ -63,19 +64,19 @@ public:
 };
 
 using Char = wchar_t;
+using String = wstring;
 
-class String : public string {
-public:
-    String()
-        : string(){};
-    String(const string& s)
-        : string(s){};
+inline wstring s2ws(const std::string& str)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    return converterX.from_bytes(str);
+}
 
-    size_type size();
-
-    Char operator[](size_type pos);
-    // void push_back(Char c);
-};
+inline string ws2s(const std::wstring& wstr)
+{
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
+    return converterX.to_bytes(wstr);
+}
 
 using Float = double;
 

@@ -50,7 +50,7 @@ string to_string(const Expr& s)
         str += ')';
         return str;
     } else if (s.type() == typeid(String)) {
-        return "\"" + any_cast<String>(s) + "\"";
+        return "\"" + ws2s(any_cast<String>(s)) + "\"";
     } else if (s.type() == typeid(Char)) {
         string str("#\\");
         switch (any_cast<Char>(s)) {
@@ -146,29 +146,4 @@ Float as_Float(const Expr& s)
     } else
         throw EvalException("Not number");
 }
-
-size_t String::size()
-{
-    return utf8::distance(this->begin(), this->end());
-}
-
-Char String::operator[](size_type pos)
-{
-    auto iter = this->begin();
-    utf8::advance(iter, pos, this->end());
-    return Char(utf8::peek_next(iter, this->end()));
-}
-
-/* void String::push_back(Char c)
-{
-    if (c <= 0xff) {
-        string::push_back(c);
-    } else if (c <= 0xffff) {
-        unsigned char c1 = (unsigned char)((0x00ff & c));
-        unsigned char c2 = (unsigned char)((0xff00 & c) >> 8);
-        cout << hex << uint(c) << "| " << ushort(c2) << " : " << ushort(c1) << endl;
-        string::push_back(c2);
-        string::push_back(c1);
-    }
-} */
 }

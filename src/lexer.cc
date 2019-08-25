@@ -107,14 +107,14 @@ Token Lexer::get_token()
             throw UnknownToken(c);
         case '"': {
             // build string
-            string str;
+            wstring str;
             uint32_t r;
             auto prev = c;
             for (lineReader >> r; !(r == '\"' && prev != '\\'); lineReader >> r) {
                 if (prev == '\\' && r == '\"') {
                     str.pop_back();
                 }
-                utf8::append(wchar_t(r), str);
+                str.push_back(r);
                 prev = r;
             }
             return Token(TokenType::string, str);

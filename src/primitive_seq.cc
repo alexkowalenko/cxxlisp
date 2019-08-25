@@ -100,15 +100,7 @@ Expr subseq(List& args)
     }
     if (is_Seq(args[0])) {
         if (is_a<String>(args[0])) {
-            string sub;
-            auto seq = any_cast<String>(args[0]);
-            if (length == 0) {
-                length = seq.size() - index;
-            }
-            for (size_t i = index; i < index + length; i++) {
-                utf8::append(seq[i], sub); // can't work this into String
-            }
-            return String(sub);
+            return seq_subseq<String>(args[0], index, length);
         } else {
             return seq_subseq<List>(args[0], index, length);
         }

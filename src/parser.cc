@@ -57,7 +57,7 @@ Expr Parser::parse_comma()
 
 Expr Parser::parse_hash(const Token& tok)
 {
-    if (tok.val == "\\") {
+    if (get<string>(tok.val) == "\\") {
         // character
         auto t = lexer.peek();
         if (!iswspace(t)) {
@@ -67,7 +67,7 @@ Expr Parser::parse_hash(const Token& tok)
             case 'n':
             case 'N': {
                 Token newTok = lexer.get_token();
-                auto val = boost::algorithm::to_lower_copy(newTok.val);
+                auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
                 if (val == "newline") {
                     return Char('\n');
                 } else if (val == "space") {
@@ -82,11 +82,11 @@ Expr Parser::parse_hash(const Token& tok)
             }
         }
         throw ParseException("#\\ expecting a character");
-    } else if (tok.val == "'") {
+    } else if (get<string>(tok.val) == "'") {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
-            return FunctionRef(t.val);
+            return FunctionRef(get<string>(t.val));
         } else {
             throw ParseException("#' function ref unknown token "s + string(t));
         }
@@ -137,10 +137,10 @@ ParserResult Parser::parse()
         throw EndBracketException();
 
     case TokenType::atom:
-        return { mkSymbolInt(tok.val), false };
+        return { mkSymbolInt(get<string>(tok.val)), false };
 
     case TokenType::string:
-        return { String(tok.val), false };
+        return { String(get<wstring>(tok.val)), false };
 
     case TokenType::quote:
     case TokenType::backquote:

@@ -232,12 +232,12 @@ void Lisp::repl(istream& istr, ostream& ostr)
                 break;
             }
             if (opt.parse_only) {
-                cout << res.val << endl;
+                cout << to_string(res.val) << endl;
                 continue;
             }
 
             auto ex = evaluator.eval(res.val, symboltable);
-            ostr << ex << endl;
+            ostr << to_string(ex) << endl;
 
         } catch (UnknownToken& e) {
             ostr << "Unknown token: " << e.tok << endl;

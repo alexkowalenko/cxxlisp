@@ -47,7 +47,7 @@ void SymbolTable::dump(ostream& os)
 {
     os << "Dump symbol table: " << endl;
     for (auto x : table) {
-        os << x.first << " -> " << x.second << endl;
+        os << x.first << " -> " << to_string(x.second) << endl;
     }
     if (next) {
         next->dump(os);

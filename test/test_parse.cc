@@ -306,7 +306,7 @@ void test_Parser(const vector<TestParser>& tests)
                 continue;
             }
             ostringstream outStr;
-            outStr << val;
+            outStr << to_string(val);
             cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << endl;
             if (test.output != outStr.str()) {
                 BOOST_ERROR(boost::format("%1% should be %3%, not %2%") % test.input % outStr.str() % test.output);
