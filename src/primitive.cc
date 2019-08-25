@@ -117,7 +117,7 @@ Expr cons(List& args)
         return res;
 
     } else if (is_sF(args[1])) {
-        return List(1, args[0]);
+        return List{ args[0] };
     }
     return sF;
 }
@@ -572,6 +572,12 @@ void init_prims()
         { "char-ci>", funct_ci(char_gt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
         { "char-ci<=", funct_ci(char_le, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
         { "char-ci>=", funct_ci(char_ge, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+
+        // Sequence
+
+        { "length", &length, one_arg, preEvaluate },
+        { "elt", &elt, two_args, preEvaluate },
+        { "subseq", &subseq, min_two, preEvaluate },
 
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },

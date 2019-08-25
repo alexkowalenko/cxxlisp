@@ -75,14 +75,30 @@ string to_string(const Expr& s)
     }
 }
 
+template <typename T>
+constexpr bool same_type(const Expr& x, const Expr& y)
+{
+    return is_a<T>(x) && is_a<T>(y);
+}
+
+template <typename T>
+constexpr bool eq_any(const Expr& x, const Expr& y)
+{
+    return same_type<T>(x, y) && any_cast<T>(x) == any_cast<T>(y);
+}
+
 Bool expr_eq(const Expr& x, const Expr& y)
 {
     if (is_atomic(x) && is_atomic(y)) {
-        if (is_a<Atom>(x) && is_a<Atom>(y) && any_cast<Atom>(x) == any_cast<Atom>(y)) {
+        if (eq_any<Atom>(x, y)) {
             return sT;
-        } else if (is_a<Int>(x) && is_a<Int>(y) && any_cast<Int>(x) == any_cast<Int>(y)) {
+        } else if (eq_any<Int>(x, y)) {
             return sT;
-        } else if (is_a<Bool>(x) && is_a<Bool>(y) && any_cast<Bool>(x) == any_cast<Bool>(y)) {
+        } else if (eq_any<Bool>(x, y)) {
+            return sT;
+        } else if (eq_any<Char>(x, y)) {
+            return sT;
+        } else if (eq_any<Float>(x, y)) {
             return sT;
         }
         return sF;
@@ -100,7 +116,7 @@ Bool expr_equal(const Expr& x, const Expr& y)
     if (expr_eql(x, y)) {
         return sT;
     }
-    if (is_a<List>(x) && is_a<List>(y)) {
+    if (same_type<List>(x, y)) {
         auto xx = any_cast<List>(x);
         auto yy = any_cast<List>(y);
         if (xx.size() != yy.size()) {
@@ -115,6 +131,9 @@ Bool expr_equal(const Expr& x, const Expr& y)
         }
         return sT;
     }
+    if (eq_any<String>(x, y)) {
+        return sT;
+    }
     return sF;
 }
 
@@ -127,4 +146,29 @@ Float as_Float(const Expr& s)
     } else
         throw EvalException("Not number");
 }
+
+size_t String::size()
+{
+    return utf8::distance(this->begin(), this->end());
+}
+
+Char String::operator[](size_type pos)
+{
+    auto iter = this->begin();
+    utf8::advance(iter, pos, this->end());
+    return Char(utf8::peek_next(iter, this->end()));
+}
+
+/* void String::push_back(Char c)
+{
+    if (c <= 0xff) {
+        string::push_back(c);
+    } else if (c <= 0xffff) {
+        unsigned char c1 = (unsigned char)((0x00ff & c));
+        unsigned char c2 = (unsigned char)((0xff00 & c) >> 8);
+        cout << hex << uint(c) << "| " << ushort(c2) << " : " << ushort(c1) << endl;
+        string::push_back(c2);
+        string::push_back(c1);
+    }
+} */
 }

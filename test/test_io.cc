@@ -13,8 +13,6 @@
 #include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "expr.hh"
-
 using namespace std;
 
 struct TestEval;

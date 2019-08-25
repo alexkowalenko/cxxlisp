@@ -118,6 +118,13 @@ Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a);
 PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans);
 Expr string_fnct(const string& name, List& args);
 
+// Sequences
+
+Expr length(List& args);
+Expr elt(List& args);
+Expr subseq(List& args);
+Expr fill(List& args);
+
 // I/O
 
 Expr throw_error(List& args);

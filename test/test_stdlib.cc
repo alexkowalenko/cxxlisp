@@ -13,8 +13,6 @@
 #include <boost/format.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include "expr.hh"
-
 using namespace std;
 
 struct TestEval;
@@ -98,7 +96,7 @@ BOOST_AUTO_TEST_CASE(test_eval_length)
         //{ "(length \"\")", "0" },
         { "(length nil)", "0" },
 
-        { "(length)", "Eval error: length: invalid number of arguments" },
+        { "(length)", "Eval error: length expecting an argument" },
     };
     test_Evaluator(tests);
 }

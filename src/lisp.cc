@@ -122,13 +122,6 @@ inline const string stdlib = R"stdlib(
   (let ((cd (gcd x y)))
     (abs (* cd (div x cd) (div y cd)))))
 
-(defun length (ls)
-  (defun len (a n)
-    (cond ((null a) n)
-          ((consp a) (len (cdr a) (+ 1 n)))
-          (t (error "length: improper list" ls))))
-  (len ls 0))
-
 (defun nth-tail (n a)
   (if (= 0 n)
       a
@@ -156,6 +149,47 @@ inline const string stdlib = R"stdlib(
 (defun identity (x) x)
 (defmacro constantly (x) `(lambda (&optional s) ,x))
 ;; (defmacro complement (x) `(lambda (&rest arguments) (not (apply ,x arguments))))
+
+(defun copy-seq (s)
+    (subseq s 0))
+
+(defun find (x seq)
+    (cond
+         ((eq (length seq) 0) nil)
+         ((equal x (elt seq 0)) (elt seq 0))
+		 (t (find x (subseq seq 1)))))
+
+(defun find-if (fn seq)
+    (cond
+         ((eq (length seq) 0) nil)
+         ((funcall fn (elt seq 0)) (elt seq 0))
+		 (t (find-if fn (subseq seq 1)))))
+		 
+(defun find-if-not (fn seq)
+	(cond
+	  ((eq (length seq) 0) nil)
+	  ((not (funcall fn (elt seq 0))) (elt seq 0))
+	  (t (find-if-not fn (subseq seq 1)))))
+
+(defun position (x seq)
+  (defun my-pos (x seq c)
+    (cond
+         ((eq (length seq) 0) nil)
+         ((equal x (elt seq 0)) c)
+		 (t (my-pos x (subseq seq 1) (+ c 1)))))
+  (my-pos x seq 0))
+
+(defun position-if-support (fn seq count)
+	(cond
+		((null seq) nil)
+		((funcall fn (elt seq 0)) count)
+		(t (position-if-support fn (subseq seq 1) (1+ count)))))
+
+(defun position-if (fn seq)
+	(position-if-support fn seq 0))
+
+;(defun position-if-not (fn seq)
+;	(position-if-support (complement fn) seq 0))
 
 )stdlib";
 

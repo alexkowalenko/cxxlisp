@@ -93,7 +93,11 @@ BOOST_AUTO_TEST_CASE(test_eval_atom)
         { "(atom (cdr '(a)))", "t" },
         { "(atom (cdr '(a b)))", "nil" },
 
+        { "(atom #\\c)", "t" },
+
         { "(atom 1)", "t" },
+        { "(atom 1.273)", "t" },
+
     };
     test_Evaluator(tests);
 }
@@ -456,11 +460,11 @@ BOOST_AUTO_TEST_CASE(test_eval_eq)
         { "(eq 'a '(a b))", "nil" },
 
         // Characters
-        // {`(eq #\a #\a)`, "t" },
-        // {`(eq #\a #\A)`, "nil" },
-        // {`(eq #\α #\α)`, "t" },
-        // {`(eq #\β #\α)`, "nil" },
-        // {`(eq #\a 1)`, "nil" },
+        { "(eq #\\a #\\a)", "t" },
+        { "(eq #\\a #\\A)", "nil" },
+        { "(eq #\\α #\\α)", "t" },
+        { "(eq #\\β #\\α)", "nil" },
+        { "(eq #\\a 1)", "nil" },
 
         // Int
         { "(eq 1 1)", "t" },
@@ -474,10 +478,10 @@ BOOST_AUTO_TEST_CASE(test_eval_eq)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
-        // {`(eq 1.1 1.1)`, "t" },
-        // {`(eq 1.1 2.1)`, "nil" },
-        // {`(eq 0.0 - 0.0)`, "t" },
-        // {`(eq - 0.9 0.09)`, "nil" },
+        { "(eq 1.1 1.1)", "t" },
+        { "(eq 1.1 2.1)", "nil" },
+        { "(eq 0.0 -0.0)", "t" },
+        { "(eq -0.9 0.09)", "nil" },
 
         // Errors
         { "(eq)", "Eval error: eq expecting 2 arguments" },
@@ -494,11 +498,11 @@ BOOST_AUTO_TEST_CASE(test_eval_eql)
         { "(eql '(a) '(b))", "nil" },
 
         // Characters
-        // {`(eql #\a #\a)`, "t" },
-        // {`(eql #\a #\A)`, "nil" },
-        // {`(eql #\α #\α)`, "t" },
-        // {`(eql #\β #\α)`, "nil" },
-        // {`(eql #\a 1)`, "nil" },
+        { "(eql #\\a #\\a)", "t" },
+        { "(eql #\\a #\\A)", "nil" },
+        { "(eql #\\α #\\α)", "t" },
+        { "(eql #\\β #\\α)", "nil" },
+        { "(eql #\\a 1)", "nil" },
 
         // Int
         { "(eql 1 1)", "t" },
@@ -512,10 +516,10 @@ BOOST_AUTO_TEST_CASE(test_eval_eql)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
-        // {`(eql 1.1 1.1)`, "t" },
-        // {`(eql 1.1 2.1)`, "nil" },
-        // {`(eql 0.0 - 0.0)`, "t" },
-        // {`(eql - 0.9 0.09)`, "nil" },
+        { "(eql 1.1 1.1)", "t" },
+        { "(eql 1.1 2.1)", "nil" },
+        { "(eql 0.0 -0.0)", "t" },
+        { "(eql -0.9 0.09)", "nil" },
 
         // Errors
         { "(eql)", "Eval error: eql expecting 2 arguments" },
@@ -551,17 +555,17 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Characters
-        // {`(equal #\a #\a)`, "t"},
-        // {`(equal #\a #\A)`, "nil"},
-        // {`(equal #\α #\α)`, "t"},
-        // {`(equal #\β #\α)`, "nil"},
-        // {`(equal #\a 1)`, "nil"},
+        { "(equal #\\a #\\a)", "t" },
+        { "(equal #\\a #\\A)", "nil" },
+        { "(equal #\\α #\\α)", "t" },
+        { "(equal #\\β #\\α)", "nil" },
+        { "(equal #\\a 1)", "nil" },
 
         // Real
-        // {`(equal 1.1 1.1)`, "t"},
-        // {`(equal 1.1 2.1)`, "nil"},
-        // {`(equal 0.0 -0.0)`, "t"},
-        // {`(equal -0.9 0.09)`, "nil"},
+        { "(equal 1.1 1.1)", "t" },
+        { "(equal 1.1 2.1)", "nil" },
+        { "(equal 0.0 -0.0)", "t" },
+        { "(equal -0.9 0.09)", "nil" },
 
         // changes from eql
         { "(equal '(a b) '(a b))", "t" },
@@ -573,10 +577,10 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { "(equal (quote a) (quote (a b)))", "nil" },
 
         // Strings
-        // {`(equal "cat" "cat")`, "t"},
-        // {`(equal "cat" "dog")`, "nil"},
-        // {`(equal "" "")`, "t"},
-        // {`(equal "cat" 'cat)`, "nil"},
+        { "(equal \"cat\" \"cat\")", "t" },
+        { "(equal \"cat\" \"dog\")", "nil" },
+        { "(equal \"\" \"\")", "t" },
+        { "(equal \"cat\" 'cat)", "nil" },
 
         // Errors
         { "(equal)", "Eval error: equal expecting 2 arguments" },
