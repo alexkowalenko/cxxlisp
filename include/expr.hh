@@ -46,7 +46,7 @@ constexpr bool is_sF(const Expr& e)
     return is_a<Bool>(e) && !any_cast<Bool>(e);
 }
 
-constexpr bool is_false(Expr& s)
+constexpr bool is_false(const Expr& s)
 // Is the Bool sF, or is the empty list
 {
     return (s.type() == typeid(Bool) && !any_cast<Bool>(s))

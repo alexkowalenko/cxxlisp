@@ -181,3 +181,28 @@ BOOST_AUTO_TEST_CASE(test_eval_position_if)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_setf)
+{
+    vector<TestEval> tests = {
+        { "(defvar x '(1 2 3))", "x" },
+        { "(setf (elt x 1) #\\b)", "(1 #\\b 3)" },
+        { "x", "(1 #\\b 3)" },
+        { "(setf (elt x 0) #\\a)", "(#\\a #\\b 3)" },
+        { "(setf (elt x 2) #\\c)", "(#\\a #\\b #\\c)" },
+        { "x", "(#\\a #\\b #\\c)" },
+        { "(defvar x \"αβγ\")", "x" },
+        { "(setf (elt x 1) #\\b)", "\"αbγ\"" },
+        { "x", "\"αbγ\"" },
+        { "(setf (elt x 0) #\\a)", "\"abγ\"" },
+        { "(setf (elt x 2) #\\c)", "\"abc\"" },
+        { "x", "\"abc\"" },
+
+        { "(setf (elt x 4) #\\a )", "Eval error: setf elt: index out of bounds" },
+        { "(setf (elt x ) #\\a )", "Eval error: setf elt: incorrect number of arguments" },
+        { "(setf (elt y 4) #\\a)", "Eval error: setf elt: must be a reference" },
+        { "(setf (elt y 4))", "Eval error: setf requires an even number of variables" },
+        { "(setf (elt y))", "Eval error: setf requires an even number of variables" },
+        { "(setf 1)", "Eval error: setf requires an even number of variables" },
+    };
+    test_Evaluator(tests);
+}

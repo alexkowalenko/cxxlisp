@@ -172,16 +172,16 @@ void test_Lexer(const vector<TestLexer>& tests)
 BOOST_AUTO_TEST_CASE(test_lexer_strings)
 {
     vector<TestLexer_ws> tests = {
-        { R"("abc")", TokenType::string, s2ws(R"(abc)") },
-        { R"("a b c")"s, TokenType::string, s2ws(R"(a b c)") },
+        { R"("abc")", TokenType::string, LR"(abc)" },
+        { R"("a b c")"s, TokenType::string, LR"(a b c)" },
 
-        { R"("ἄλφα")"s, TokenType::string, s2ws(R"(ἄλφα)") },
-        { R"("一二三四五六七")"s, TokenType::string, s2ws(R"(一二三四五六七)") },
-        { R"("👾")"s, TokenType::string, s2ws(R"(👾)") },
-        { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")"s, TokenType::string, s2ws(R"(🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒)") },
+        { R"("ἄλφα")"s, TokenType::string, LR"(ἄλφα)" },
+        { R"("一二三四五六七")"s, TokenType::string, LR"(一二三四五六七)" },
+        { R"("👾")"s, TokenType::string, LR"(👾)" },
+        { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")"s, TokenType::string, LR"(🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒)" },
 
-        { R"("alpha\"test")"s, TokenType::string, s2ws(R"(alpha"test)") },
-        { R"("")", TokenType::string, s2ws(R"()") }, // lexer is supposed to return empty string
+        { R"("alpha\"test")"s, TokenType::string, LR"(alpha"test)" },
+        { R"("")", TokenType::string, LR"()" }, // lexer is supposed to return empty string
     };
 
     test_Lexer_wstr(tests);

@@ -19,6 +19,7 @@
 namespace ax {
 
 map<string, Primitive> prim_table;
+map<Atom, AccessorFunct> setf_accessors;
 
 Expr atom(List& args)
 {
@@ -257,12 +258,24 @@ Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
         auto n = *x;
         x++;
         auto second = *x;
-        if (!is_a<Atom>(n)) {
-            throw EvalException(name + " requires a symbol as an argument");
-        }
         val = l.eval(second, a);
-        if (!a.set(any_cast<Atom>(n), val)) {
-            a.put(any_cast<Atom>(n), val);
+        if (is_a<Atom>(n)) {
+            if (!a.set(any_cast<Atom>(n), val)) {
+                a.put(any_cast<Atom>(n), val);
+            }
+        } else if (is_a<List>(n) && name == "setf") {
+            List accessor = any_cast<List>(n);
+            if (accessor.size() < 1 && is_a<Atom>(accessor[0])) {
+                throw EvalException(name + " expecting accessor name");
+            }
+            List aargs(accessor.begin() + 1, accessor.end());
+            if (auto setf = setf_accessors.find(any_cast<Atom>(accessor[0])); setf != setf_accessors.end()) {
+                val = setf->second(aargs, val, a);
+            } else {
+                throw EvalException(name + " accessor not found: " + any_cast<Atom>(accessor[0]));
+            }
+        } else {
+            throw EvalException(name + " requires a symbol as an argument");
         }
     }
     return val;
@@ -588,5 +601,7 @@ void init_prims()
     for (auto p : defs) {
         prim_table[p.name] = p;
     }
+
+    setf_accessors[Atom("elt")] = &setf_elt;
 }
 }

@@ -112,4 +112,47 @@ Expr fill(List& args)
 {
     return sF;
 };
+
+template <typename T, typename S>
+Expr seq_setelt(Expr& s, size_t index, const S& r)
+{
+    if (index >= any_cast<T>(s).size()) {
+        throw EvalException("setf elt: index out of bounds");
+    }
+    any_cast<T&>(s)[index] = r;
+    return s;
+}
+
+Expr setf_elt(List& args, const Expr& r, SymbolTable& a)
+{
+    if (args.size() != 2) {
+        throw EvalException("setf elt: incorrect number of arguments");
+    }
+    auto var = args[0];
+    if (!is_a<Atom>(var)) {
+        throw EvalException("setf elt: must be a reference");
+    }
+    if (auto seq = a.find(any_cast<Atom>(var))) {
+        if (!is_Seq(*seq)) {
+            throw EvalException("setf elt: needs sequence argument");
+        }
+        if (!is_a<Int>(args[1])) {
+            throw EvalException("setf elt: needs integer index");
+        }
+        size_t index = any_cast<Int>(args[1]);
+        Expr res;
+        if (is_a<String>(*seq)) {
+            if (!is_a<Char>(r)) {
+                throw EvalException("setf elt: strings need char replacement");
+            }
+            res = seq_setelt<String, Char>(*seq, index, any_cast<Char>(r));
+        } else {
+            res = seq_setelt<List, Expr>(*seq, index, r);
+        }
+        a.set(any_cast<Atom>(var), res);
+        return res;
+    } else {
+        throw EvalException("setf elt: must be a reference");
+    }
+}
 }

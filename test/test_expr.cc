@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(expr_is)
     BOOST_TEST(is_a<Atom>(e) == false);
     BOOST_TEST(is_a<FunctionRef>(e) == true);
 
-    Expr f = String(s2ws("Olá!"s));
+    Expr f = String(L"Olá!");
     BOOST_TEST(is_a<Atom>(f) == false);
     BOOST_TEST(is_a<String>(f) == true);
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(expr_print)
     (ss = stringstream()) << d;
     BOOST_CHECK_EQUAL(ss.str(), "(hello 1 (hello 1))");
 
-    Expr f = String(s2ws("Olá!"s));
+    Expr f = String(L"Olá!"s);
     BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");
     (ss = stringstream()) << f;
     BOOST_CHECK_EQUAL(ss.str(), "\"Olá!\"");
