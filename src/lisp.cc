@@ -191,6 +191,12 @@ inline const string stdlib = R"stdlib(
 ;(defun position-if-not (fn seq)
 ;	(position-if-support (complement fn) seq 0))
 
+(defun fill (seq x)
+    (let ((s seq))
+      (dotimes (n (length s))
+        (setq s (set-elt s n x)))
+      s))
+
 )stdlib";
 
 void Lisp::init()

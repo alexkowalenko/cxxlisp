@@ -270,7 +270,7 @@ Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
             }
             List aargs(accessor.begin() + 1, accessor.end());
             if (auto setf = setf_accessors.find(any_cast<Atom>(accessor[0])); setf != setf_accessors.end()) {
-                val = setf->second(aargs, val, a);
+                val = setf->second(l, aargs, val, a);
             } else {
                 throw EvalException(name + " accessor not found: " + any_cast<Atom>(accessor[0]));
             }
@@ -590,6 +590,7 @@ void init_prims()
 
         { "length", &length, one_arg, preEvaluate },
         { "elt", &elt, two_args, preEvaluate },
+        { "set-elt", &setelt, three_arg, preEvaluate },
         { "subseq", &subseq, min_two, preEvaluate },
 
         // I/O

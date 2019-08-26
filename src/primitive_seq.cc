@@ -108,22 +108,40 @@ Expr subseq(List& args)
     throw EvalException("length: needs sequence argument");
 };
 
-Expr fill(List& args)
-{
-    return sF;
-};
-
 template <typename T, typename S>
-Expr seq_setelt(Expr& s, size_t index, const S& r)
+Expr seq_setelt(const string& name, Expr& s, size_t index, const S& r)
 {
     if (index >= any_cast<T>(s).size()) {
-        throw EvalException("setf elt: index out of bounds");
+        throw EvalException(name + ": index out of bounds");
     }
     any_cast<T&>(s)[index] = r;
     return s;
 }
 
-Expr setf_elt(List& args, const Expr& r, SymbolTable& a)
+Expr setelt(List& args)
+{
+    auto seq = args[0];
+    if (!is_Seq(seq)) {
+        throw EvalException("setelt: needs sequence argument");
+    }
+    auto rindex = args[1];
+    if (!is_a<Int>(rindex)) {
+        throw EvalException("setelt: needs integer index");
+    }
+    size_t index = any_cast<Int>(rindex);
+    Expr res;
+    if (is_a<String>(seq)) {
+        if (!is_a<Char>(args[2])) {
+            throw EvalException("setf elt: strings need char replacement");
+        }
+        res = seq_setelt<String, Char>("set-elt", seq, index, any_cast<Char>(args[2]));
+    } else {
+        res = seq_setelt<List, Expr>("set-elt", seq, index, args[2]);
+    }
+    return res;
+}
+
+Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a)
 {
     if (args.size() != 2) {
         throw EvalException("setf elt: incorrect number of arguments");
@@ -136,18 +154,19 @@ Expr setf_elt(List& args, const Expr& r, SymbolTable& a)
         if (!is_Seq(*seq)) {
             throw EvalException("setf elt: needs sequence argument");
         }
-        if (!is_a<Int>(args[1])) {
+        auto rindex = l.eval(args[1], a);
+        if (!is_a<Int>(rindex)) {
             throw EvalException("setf elt: needs integer index");
         }
-        size_t index = any_cast<Int>(args[1]);
+        size_t index = any_cast<Int>(rindex);
         Expr res;
         if (is_a<String>(*seq)) {
             if (!is_a<Char>(r)) {
                 throw EvalException("setf elt: strings need char replacement");
             }
-            res = seq_setelt<String, Char>(*seq, index, any_cast<Char>(r));
+            res = seq_setelt<String, Char>("setf elt", *seq, index, any_cast<Char>(r));
         } else {
-            res = seq_setelt<List, Expr>(*seq, index, r);
+            res = seq_setelt<List, Expr>("setf elt", *seq, index, r);
         }
         a.set(any_cast<Atom>(var), res);
         return res;

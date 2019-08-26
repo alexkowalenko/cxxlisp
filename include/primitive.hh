@@ -37,7 +37,7 @@ extern map<string, Primitive> prim_table;
 
 void init_prims();
 
-using AccessorFunct = function<Expr(List& args, const Expr& val, SymbolTable& a)>;
+using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
 
 // Numbers
@@ -125,9 +125,9 @@ Expr string_fnct(const string& name, List& args);
 
 Expr length(List& args);
 Expr elt(List& args);
+Expr setelt(List& args);
 Expr subseq(List& args);
-Expr fill(List& args);
-Expr setf_elt(List& args, const Expr& r, SymbolTable& a);
+Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a);
 
 // I/O
 

@@ -206,3 +206,39 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_set_elt)
+{
+    vector<TestEval> tests = {
+        { "(defvar x '(1 2 3))", "x" },
+        { "(set-elt x 1 #\\b)", "(1 #\\b 3)" },
+        { "x", "(1 2 3)" },
+
+        { "(defvar x \"αβγ\")", "x" },
+        { "(set-elt x 0 #\\a)", "\"aβγ\"" },
+
+        { "(set-elt x 4 #\\a )", "Eval error: set-elt: index out of bounds" },
+        { "(set-elt x #\\a)", "Eval error: set-elt expecting 3 arguments" },
+        { "(set-elt y 4 #\\a)", "Eval error: unbound variable: y" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_fill)
+{
+    vector<TestEval> tests = {
+        { "(fill \"hello\" #\\1)", "\"11111\"" },
+        // { "(fill \"hello\" #\\1 :start 1 :end 4)", "\"h111o\"" },
+        // { "(fill \"hello" #\\👾 :start 1 :end 4)", ""h👾👾👾o"" },
+
+        { "(fill '(a b c d) 'symbol)", "(symbol symbol symbol symbol)" },
+        //{ "(fill '(a b c d e) 'symbol :start 1 :end 4)", "(a symbol symbol symbol e)" },
+
+        //{ "(fill '#(a b c d)' 1)", "#(1 1 1 1)" },
+        //{ "(fill '#(a b c d e) 'symbol :start 1 :end 4)", "#(a symbol symbol symbol e)" },
+
+        { "(fill)", "Eval error: fill: invalid number of arguments" },
+        { "(fill \"hello\")", "Eval error: fill: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
