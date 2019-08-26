@@ -231,6 +231,30 @@ Supported unicode characters.
 
 `(fold f list a)` - apply the function `f` (taking two elements), to the values of `list`, with initial value `a`.
 
+# Sequences
+
+Sequences are an abstraction of various types, as thus can be the arguments to functions that work on sequences. Strings, and lists sequences.
+
+## Functions
+
+`(length s)` - returns the length of a sequence.
+
+`(elt seq i)` - returns the `i`th element of the sequence.
+
+`(subseq seq start [end])` - returns a subsequence of `seq` starting at `start`, until the end or optional ending at `end`.
+
+`(copy-seq seq)` - returns a copy of `seq`.
+
+`(fill seq x)` - fill the `seq` with `x`. If `seq` is `string` then `x` must be a character.
+
+`(find x seq)` - find `x` in `seq`. If `seq` is `string` then `x` must be a character.
+
+`(find-if f seq)` `(find-if-not f seq)`-  if `f` returns `t` or does not return `t` for an element in `seq`, return that element. `f` is a function reference or lambda expression.
+
+`(position x seq)` - find the position of `x` in `seq`. If `seq` is `string` then `x` must be a character.
+
+`(position-if f seq)` `(position-if-not f seq)`- if `f` returns `t`/ or not `t` return the position of that element. If `seq` is `string` then `x` must be a character.
+
 # Functions
 
 ## Predicates 
@@ -271,11 +295,20 @@ Function parameter definitions
 
 `(constantly x)` - returns a function that always returns `x` regardless of argument(s).
 
+`(complement x)` - returns a function that always returns the opposite predicate of `x`.
+
 ## Macro generation
 
 `(demacro f (args ...) body)` - define a macro `f` with `args` and the `body`. Returns the macro expansion and then evaluation of `body` or `nil` if not present.
 
 `(macro (args ...) body)` - return a anonymous macro with `args` and the `body`.
+
+### Argument formats
+
+The list of arguments to function, lambda, macro definitions can be a sequence of symbols with the following special keywords:
+
+* `&optional` - the following arguments are optional. If a symbol is present then if the argument is missing, `nil` is assigned to the symbol. If a two-member list is present, and if the argument is missing the second value is assigned to the list as a default value.
+* `&rest` - the rest of the arguments are placed into the following parameter of the function. If there are no more, then the value of the parameter is `nil`.
 
 # Program Control
 
@@ -316,4 +349,21 @@ These are the options in running the executable:
 
 * `-D string` Debug options, `string` contains the characters:
   * `e` print compilation and execution.
+
+# Diferences to Common Lisp
+
+Apart from what is not implemented.
+
+* Don't support `#'(lambda ....)`. Use `(lambda ...)` directly.
+```
+(mapcar #'(lambda (x) (micro-eval x environment))
+		     (rest form))
+```
+Should have the function reference removed, i.e.:
+```
+(mapcar (lambda (x) (micro-eval x environment))
+		     (rest form))
+```
+
+* `(setf (x obj item) val)` does not work if obj is not defined in the local scope. For example, not when passed in as a function argument. Providing set-x functions that return a modified value. Functions receive a copy of the arguments, not direct references. Should convert everything to pointers.
   

@@ -148,7 +148,7 @@ inline const string stdlib = R"stdlib(
 
 (defun identity (x) x)
 (defmacro constantly (x) `(lambda (&optional s) ,x))
-;; (defmacro complement (x) `(lambda (&rest arguments) (not (apply ,x arguments))))
+(defmacro complement (x) `(lambda (&rest arguments) (not (apply ,x arguments))))
 
 (defun copy-seq (s)
     (subseq s 0))

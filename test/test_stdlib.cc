@@ -87,13 +87,13 @@ BOOST_AUTO_TEST_CASE(test_eval_member)
 BOOST_AUTO_TEST_CASE(test_eval_length)
 {
     vector<TestEval> tests = {
-        // { "(length \"123\")", "3" },
+        { "(length \"123\")", "3" },
         { "(length '(1 2 3 4))", "4" },
         //{ "(length #(1 2 3.5))", "3" },
 
         //{ "(length #())", "0" },
         { "(length '())", "0" },
-        //{ "(length \"\")", "0" },
+        { "(length \"\")", "0" },
         { "(length nil)", "0" },
 
         { "(length)", "Eval error: length expecting an argument" },

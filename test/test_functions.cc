@@ -448,7 +448,19 @@ BOOST_AUTO_TEST_CASE(test_eval_optional)
         { "(m 1)", "Eval error: m: optional default argument is not an atom 1" },
         { "(defun m (x &optional ()) (list x y z))", "m" },
         { "(m 1)", "Eval error: m: default argument not 2 member list nil" },
+    };
+    test_Evaluator(tests);
+}
 
+BOOST_AUTO_TEST_CASE(test_eval_rest)
+{
+    vector<TestEval> tests = {
+        { "(defun f (x &rest y) (append x y))", "f" },
+        { "(f 1)", "(1)" },
+        { "(f 1 2)", "(1 2)" },
+        { "(f 1 2 3 4)", "(1 2 3 4)" },
+
+        { "(f)", "Eval error: unbound variable: x" },
     };
     test_Evaluator(tests);
 }
@@ -593,9 +605,9 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
         { "(funcall c 1)", "17" },
         { "(funcall c 's)", "17" },
 
-        // { "(defvar d (complement #'atom))", "d" },
-        // { "(funcall d 1)", "nil" },
-        // { "(funcall d '(1 2))", "t" },
+        { "(defvar d (complement #'atom))", "d" },
+        { "(funcall d 1)", "nil" },
+        { "(funcall d '(1 2))", "t" },
 
     };
     test_Evaluator(tests);
@@ -678,3 +690,4 @@ BOOST_AUTO_TEST_CASE(test_eval_keywordp)
     };
     test_Evaluator(tests);
 }
+

@@ -26,6 +26,7 @@ template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
 const Keyword optional_atom = Keyword("&optional");
+const Keyword rest_atom = Keyword("&rest");
 
 Evaluator::Evaluator(Options& o)
     : opt(o){};
@@ -42,11 +43,15 @@ SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
 
     unsigned int arg_count = 0;
     bool optional = false;
+    bool rest = false;
     SymbolTable context(&a);
     for (unsigned int i = 0; i < f.parameters.size(); ++i) {
         auto param = f.parameters[i];
         if (is_a<Keyword>(param) && any_cast<Keyword>(param) == optional_atom) {
             optional = true;
+            continue;
+        } else if (is_a<Keyword>(param) && any_cast<Keyword>(param) == rest_atom) {
+            rest = true;
             continue;
         } else if (is_a<List>(param)) {
             if (optional) {
@@ -67,15 +72,25 @@ SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
             }
         } else if (is_a<Atom>(param)) {
             if (evalArgs.size() > arg_count) {
-                context.put(any_cast<Atom>(f.parameters[i]), evalArgs[arg_count]);
+                if (rest) {
+                    // Get all arguments and finish matching
+                    List restList(evalArgs.begin() + arg_count, evalArgs.end());
+                    context.put(any_cast<Atom>(f.parameters[i]), restList);
+                    break;
+                } else {
+                    context.put(any_cast<Atom>(f.parameters[i]), evalArgs[arg_count]);
+                }
             } else if (optional) {
+                context.put(any_cast<Atom>(f.parameters[i]), sF);
+            } else if (rest) {
                 context.put(any_cast<Atom>(f.parameters[i]), sF);
             }
         }
         ++arg_count;
     }
-    // cout << "Final Args " << f.parameters.size() - optional << " : " << evalArgs.size() << endl;
-    if (optional) {
+    if (rest) {
+        ; // don't worry about counting pararamters
+    } else if (optional) {
         if (!(f.parameters.size() - 1 == evalArgs.size() || f.parameters.size() - 2 == evalArgs.size())) {
             throw EvalException(f.name + ": invalid number of arguments"s);
         }
