@@ -153,6 +153,25 @@ inline const string stdlib = R"stdlib(
 (defun copy-seq (s)
     (subseq s 0))
 
+
+(defun every (fn seq)
+    (cond
+        ((eq (length seq) 0) t)
+        ((funcall fn (elt seq 0)) (every fn (subseq seq 1)))
+		(t nil)))
+
+(defun notevery (fn seq)
+	(not (every fn seq)))
+		
+(defun some (fn seq)
+    (cond
+        ((eq (length seq) 0) nil)
+        ((funcall fn (elt seq 0)) ) ;; return the value
+		(t (some fn (subseq seq 1)))))
+		
+(defun notany (fn seq)
+		(not (some fn seq)))
+
 (defun find (x seq)
     (cond
          ((eq (length seq) 0) nil)

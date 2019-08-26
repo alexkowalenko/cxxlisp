@@ -242,3 +242,100 @@ BOOST_AUTO_TEST_CASE(test_eval_fill)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_every)
+{
+    vector<TestEval> tests = {
+        { "(every #'atom '(a b 1 2))", "t" },
+        { "(every #'atom '(a b (1 2)))", "nil" },
+        { "(every #'atom '())", "t" },
+
+        { "(every (lambda (x) (atom x)) '(a b 1 2))", "t" },
+        { "(every (lambda (x) (atom x)) '(a b (1 2)))", "nil" },
+        { "(every (lambda (x) (atom x)) '())", "t" },
+
+        { "(every (lambda (x) x) '(t t t t))", "t" },
+        { "(every (lambda (x) x) '(t t nil t))", "nil" },
+        { "(every (lambda (x) x) '())", "t" },
+        { "(every (lambda (x) x) nil)", "t" },
+
+        { "(every (lambda (x) x) )", "Eval error: every: invalid number of arguments" },
+        { "(every)", "Eval error: every: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_notevery)
+{
+    vector<TestEval> tests = {
+        { "(notevery #'atom '(a b 1 2))", "nil" },
+        { "(notevery #'atom '(a b (1 2)))", "t" },
+        { "(notevery #'atom '())", "nil" },
+
+        { "(notevery (lambda (x) x) '(t t t t))", "nil" },
+        { "(notevery (lambda (x) x) '(nil nil nil nil))", "t" },
+        { "(notevery (lambda (x) x) '(t t nil t))", "t" },
+        { "(notevery (lambda (x) x) '())", "nil" },
+        { "(notevery (lambda (x) x) nil)", "nil" },
+
+        { "(notevery (lambda (x) x) )", "Eval error: notevery: invalid number of arguments" },
+        { "(notevery)", "Eval error: notevery: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_some)
+{
+    vector<TestEval> tests = {
+        { "(some #'evenp '(1 2 1 ))", "t" },
+        { "(some #'evenp '(1 3 5))", "nil" },
+        { "(some #'evenp '())", "nil" },
+
+        { "(some (lambda (x) x) '(t t t t))", "t" },
+        { "(some (lambda (x) x) '(nil nil nil nil))", "nil" },
+        { "(some (lambda (x) x) '(nil nil 2 nil t))", "2" },
+        { "(some (lambda (x) x) '())", "nil" },
+        { "(some (lambda (x) x) nil)", "nil" },
+
+        { "(some (lambda (x) x) )", "Eval error: some: invalid number of arguments" },
+        { "(some)", "Eval error: some: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_notany)
+{
+    vector<TestEval> tests = {
+        { "(notany #'atom '(a b 1 2))", "nil" },
+        { "(notany #'atom '(a b (1 2)))", "nil" },
+        { "(notany #'atom '())", "t" },
+
+        { "(notany (lambda (x) x) '(t t t t))", "nil" },
+        { "(notany (lambda (x) x) '(nil nil nil nil))", "t" },
+        { "(notany (lambda (x) x) '(nil nil 2 nil t))", "nil" },
+        { "(notany (lambda (x) x) '())", "t" },
+        { "(notany (lambda (x) x) nil)", "t" },
+
+        { "(notany (lambda (x) x) )", "Eval error: notany: invalid number of arguments" },
+        { "(notany)", "Eval error: notany: invalid number of arguments" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_make_sequence)
+{
+    vector<TestEval> tests = {
+        { "(make-sequence 'cons 3 :initial-element 'jones)", "(jones jones jones)" },
+        { "(make-sequence 'cons 3 )", "(nil nil nil)" },
+        { "(make-sequence 'cons 0 )", "nil" }, // empty list is nil
+
+        { "(make-sequence 'string 8 )", "\"        \"" },
+        { "(make-sequence 'string 3 :initial-element #\\x)", "\"xxx\"" },
+
+        { "(make-sequence )", "Eval error: make-sequence expecting at least 2 arguments" },
+        { "(make-sequence 'string )", "Eval error: make-sequence expecting at least 2 arguments" },
+        { "(make-sequence 'string -3 )", "Eval error: make-sequence: size must be a positive integer" },
+        { "(make-sequence 'jones 4)", "Eval error: make-sequence: first argument must be a sequence type name" },
+    };
+    test_Evaluator(tests);
+}

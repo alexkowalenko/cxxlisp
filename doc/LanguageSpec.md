@@ -78,6 +78,8 @@ Only symbols, integers, strings, and characters are atoms.
 
 `(keywordp x)` - is `x` a keyword, returns `t` if so, `nil` if `x` is not an symbol.
 
+`(type-of x)` - returns a symbol representing the type of `x`.
+
 ### Functions
 
 `(makunbound s)` - unbinds the symbol `s`.
@@ -235,6 +237,12 @@ Supported unicode characters.
 
 Sequences are an abstraction of various types, as thus can be the arguments to functions that work on sequences. Strings, and lists sequences.
 
+## Predicates
+
+`(every fn seq) (notevery fn seq)` - returns `t` if every/not every member of `seq` satisfies the test `f`. `f` is a function reference.
+
+`(some fn seq) (notany fn seq)` - returns `t` if some/not ant member of `seq` satisfies the test `f`. `f` is a function reference.
+
 ## Functions
 
 `(length s)` - returns the length of a sequence.
@@ -254,6 +262,8 @@ Sequences are an abstraction of various types, as thus can be the arguments to f
 `(position x seq)` - find the position of `x` in `seq`. If `seq` is `string` then `x` must be a character.
 
 `(position-if f seq)` `(position-if-not f seq)`- if `f` returns `t`/ or not `t` return the position of that element. If `seq` is `string` then `x` must be a character.
+
+`(make-sequence type-name size [:initial-element c])` - constructs a new sequence of type `type-name`, and size `size`. Optional initial elements `c` to be filled in the sequence.
 
 # Functions
 

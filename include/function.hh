@@ -30,6 +30,9 @@ public:
     FunctionRef(const string& s)
         : string(s){};
 };
+
+bool has_keyword(const List& args, const Keyword& k);
+Expr get_keyword_value(const List& args, const Keyword& k);
 }
 
 #endif

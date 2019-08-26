@@ -156,10 +156,10 @@ BOOST_AUTO_TEST_CASE(test_parser_TF)
 BOOST_AUTO_TEST_CASE(test_parser_quote)
 {
     vector<TestParser> tests = {
-        { "'a", "(quote a)" },
-        { "('a 'b 'c)", "((quote a) (quote b) (quote c))" },
-        { "('a '(b c))", "((quote a) (quote (b c)))" },
-        { "('(a b) 'c)", "((quote (a b)) (quote c))" },
+        { "'a", "'a" },
+        { "('a 'b 'c)", "('a 'b 'c)" },
+        { "('a '(b c))", "('a '(b c))" },
+        { "('(a b) 'c)", "('(a b) 'c)" },
     };
     test_Parser(tests);
 }
@@ -185,10 +185,10 @@ BOOST_AUTO_TEST_CASE(test_parser_backquote)
 BOOST_AUTO_TEST_CASE(test_parser_unicode)
 {
     vector<TestParser> tests = {
-        { "'七", "(quote 七)" },
-        { "('一 '二 '三)", "((quote 一) (quote 二) (quote 三))" },
+        { "'七", "'七" },
+        { "('一 '二 '三)", "('一 '二 '三)" },
         { "('liberté '(égalité fraternité))",
-            "((quote liberté) (quote (égalité fraternité)))" },
+            "('liberté '(égalité fraternité))" },
     };
     test_Parser(tests);
 }
@@ -309,7 +309,7 @@ void test_Parser(const vector<TestParser>& tests)
             outStr << to_string(val);
             cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << endl;
             if (test.output != outStr.str()) {
-                BOOST_ERROR(boost::format("%1% should be %3%, not %2%") % test.input % outStr.str() % test.output);
+                BOOST_ERROR(boost::format("%1% should \nbe: %3%, \nnot %2%") % test.input % outStr.str() % test.output);
             }
         } catch (UnknownToken& e) {
             BOOST_ERROR("Unknown token: " << e.tok);

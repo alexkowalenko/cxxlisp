@@ -397,10 +397,10 @@ BOOST_AUTO_TEST_CASE(test_eval_defmacro)
         { "(when-pos (+ -2 4) 'positive)", "positive" },
 
         { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
-        { "(test3 'b)", "(a (quote b))" },
+        { "(test3 'b)", "(a 'b)" },
 
-        //{ "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
-        //{ "(m3 1)", "(1)" },
+        { "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
+        { "(m3 1)", "(1)" },
     };
     test_Evaluator(tests);
 }
@@ -690,4 +690,3 @@ BOOST_AUTO_TEST_CASE(test_eval_keywordp)
     };
     test_Evaluator(tests);
 }
-

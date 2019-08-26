@@ -128,6 +128,7 @@ Expr elt(List& args);
 Expr setelt(List& args);
 Expr subseq(List& args);
 Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a);
+Expr make_sequence(List& args);
 
 // I/O
 

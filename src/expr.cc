@@ -15,6 +15,7 @@
 
 #include "exceptions.hh"
 #include "function.hh"
+#include "parser.hh"
 
 namespace ax {
 
@@ -40,8 +41,11 @@ string to_string(const Expr& s)
         if (l.empty()) {
             return "nil";
         }
-        string str;
-        str += '(';
+        if (is_a<Atom>(l[0]) && any_cast<Atom>(l[0]) == quote_atom) {
+            return "'" + to_string(l[1]);
+        }
+
+        string str{ "(" };
         for (auto i = l.begin(); i != l.end(); i++) {
             str += to_string(*i);
             if (i != l.end() - 1)
@@ -145,5 +149,33 @@ Float as_Float(const Expr& s)
         return Float(any_cast<Int>(s));
     } else
         throw EvalException("Not number");
+}
+
+Expr make_type(const Atom& t, size_t size)
+{
+    if (t == type_atom) {
+        return Atom{};
+    } else if (t == type_list) {
+        List l;
+        for (int i = 0; i < size; i++) {
+            l.push_back(sF);
+        }
+        return l;
+    } else if (t == type_int) {
+        return Int{ 0 };
+    } else if (t == type_float) {
+        return Float{ 0.0 };
+    } else if (t == type_string) {
+        return String(size, U' ');
+    } else if (t == type_char) {
+        return Char{ 0 };
+    } else if (t == type_funct) {
+        throw RuntimeException("Can't make empty function ref");
+    } else if (t == type_bool) {
+        return sT;
+    } else if (t == type_null) {
+        return sF;
+    }
+    throw EvalException("Unknown type: " + to_string(t));
 }
 }

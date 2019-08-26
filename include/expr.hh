@@ -94,11 +94,29 @@ constexpr bool is_atomic(const Expr& s)
 
 // sequence
 
-constexpr bool is_Seq(const Expr& s)
+constexpr bool is_seq(const Expr& s)
 {
     return is_a<List>(s) || is_a<String>(s);
 }
 
+// types
+
+const Atom type_atom{ "symbol" };
+const Atom type_list{ "cons" };
+const Atom type_int{ "integer" };
+const Atom type_float{ "float" };
+const Atom type_string{ "string" };
+const Atom type_char{ "char" };
+const Atom type_funct{ "function" };
+const Atom type_bool{ "boolean" };
+const Atom type_null{ "null" };
+
+Expr make_type(const Atom& t, size_t size = 0);
+
+inline bool is_seq_type(const Atom& s)
+{
+    return s == type_list || s == type_string;
+}
 } // namespace ax
 
 #endif

@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "'nil", "nil" },
         { "()", "nil" },
 
-        { "(quote)", "nil" },
+        { "(quote)", "Eval error: quote: requires one argument" },
         { "(quote (a b))", "(a b)" },
 
         { "'a", "a" },
@@ -116,6 +116,25 @@ BOOST_AUTO_TEST_CASE(test_eval_symbolp)
 
         { "(symbolp)", "Eval error: symbolp expecting an argument" },
         { "(symbolp nil nil)", "Eval error: symbolp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_typeof)
+{
+    vector<TestEval> tests = {
+        { "(type-of 'a)", "symbol" },
+        { "(type-of '(a b))", "cons" },
+        { "(type-of 1)", "integer" },
+        { "(type-of -2.3)", "float" },
+        { "(type-of \"123\")", "string" },
+        { "(type-of #\\c)", "char" },
+        { "(type-of #'atom)", "function" },
+        { "(type-of t)", "boolean" },
+        { "(type-of nil)", "null" },
+        { "(type-of '())", "null" },
+
+        { "(type-of)", "Eval error: type-of expecting an argument" },
     };
     test_Evaluator(tests);
 }

@@ -8,12 +8,15 @@
 #include <utf8.h>
 
 #include "exceptions.hh"
+#include "function.hh"
 
 namespace ax {
 
 //
 // Sequence functions
 //
+
+const Keyword keyword_initial_element(":initial-element");
 
 template <typename T>
 Expr seq_length(const Expr& s)
@@ -26,7 +29,7 @@ Expr length(List& args)
     if (is_false(args[0])) {
         return Int{ 0 };
     }
-    if (is_Seq(args[0])) {
+    if (is_seq(args[0])) {
         if (is_a<String>(args[0])) {
             return seq_length<String>(args[0]);
         } else {
@@ -55,7 +58,7 @@ Expr elt(List& args)
         throw EvalException("elt: index out of range");
     }
     size_t index = any_cast<Int>(args[1]);
-    if (is_Seq(args[0])) {
+    if (is_seq(args[0])) {
         if (is_a<String>(args[0])) {
             return seq_elt<String>(args[0], index);
         } else {
@@ -98,7 +101,7 @@ Expr subseq(List& args)
             throw EvalException("elt: length must be greater than zero");
         }
     }
-    if (is_Seq(args[0])) {
+    if (is_seq(args[0])) {
         if (is_a<String>(args[0])) {
             return seq_subseq<String>(args[0], index, length);
         } else {
@@ -121,7 +124,7 @@ Expr seq_setelt(const string& name, Expr& s, size_t index, const S& r)
 Expr setelt(List& args)
 {
     auto seq = args[0];
-    if (!is_Seq(seq)) {
+    if (!is_seq(seq)) {
         throw EvalException("setelt: needs sequence argument");
     }
     auto rindex = args[1];
@@ -151,7 +154,7 @@ Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a)
         throw EvalException("setf elt: must be a reference");
     }
     if (auto seq = a.find(any_cast<Atom>(var))) {
-        if (!is_Seq(*seq)) {
+        if (!is_seq(*seq)) {
             throw EvalException("setf elt: needs sequence argument");
         }
         auto rindex = l.eval(args[1], a);
@@ -173,5 +176,36 @@ Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a)
     } else {
         throw EvalException("setf elt: must be a reference");
     }
+}
+
+template <typename T, typename S>
+void fill_seq(Expr& seq, const S& e)
+{
+    fill(any_cast<T&>(seq).begin(), any_cast<T&>(seq).end(), e);
+}
+
+Expr make_sequence(List& args)
+{
+    if (!is_a<Atom>(args[0]) || !is_seq_type(any_cast<Atom>(args[0]))) {
+        throw EvalException("make-sequence: first argument must be a sequence type name");
+    }
+    if (!is_a<Int>(args[1]) || !(any_cast<Int>(args[1]) >= 0)) {
+        throw EvalException("make-sequence: size must be a positive integer");
+    }
+
+    auto seq = make_type(any_cast<Atom>(args[0]), any_cast<Int>(args[1]));
+    cout << to_string(seq) << endl;
+    if (has_keyword(args, keyword_initial_element)) {
+        Expr init = get_keyword_value(args, keyword_initial_element);
+        if (is_a<String>(seq)) {
+            if (!is_a<Char>(init)) {
+                throw EvalException("make-sequence: :initial-element must be char");
+            }
+            fill_seq<String, Char>(seq, any_cast<Char>(init));
+        } else {
+            fill_seq<List, Expr>(seq, init);
+        }
+    }
+    return seq;
 }
 }

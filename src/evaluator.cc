@@ -211,10 +211,10 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
 
         // quote
         if (name == quote_atom) {
-            if (e_list.size() > 1) {
+            if (e_list.size() == 2) {
                 return e_list[1];
             }
-            return sF;
+            throw EvalException("quote: requires one argument");
         }
 
         // backquote

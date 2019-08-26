@@ -45,6 +45,32 @@ Expr typep(List& args)
     return is_a<T>(args[0]);
 }
 
+Expr type_of(List& args)
+{
+    auto e = args[0];
+    if (is_false(e)) {
+        return type_null;
+    }
+    if (is_a<Atom>(e)) {
+        return type_atom;
+    } else if (is_a<List>(e)) {
+        return type_list;
+    } else if (is_a<Int>(e)) {
+        return type_int;
+    } else if (is_a<Float>(e)) {
+        return type_float;
+    } else if (is_a<String>(e)) {
+        return type_string;
+    } else if (is_a<Char>(e)) {
+        return type_char;
+    } else if (is_a<FunctionRef>(e)) {
+        return type_funct;
+    } else if (is_a<Bool>(e)) {
+        return type_bool;
+    }
+    throw EvalException("Uknown type: " + to_string(e));
+}
+
 Expr null(List& args)
 {
     return is_false(args.front());
@@ -413,6 +439,7 @@ void init_prims()
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
         { "keywordp", &typep<Keyword>, one_arg, preEvaluate },
+        { "type-of", &type_of, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
         { "not", &null, one_arg, preEvaluate },
@@ -592,6 +619,7 @@ void init_prims()
         { "elt", &elt, two_args, preEvaluate },
         { "set-elt", &setelt, three_arg, preEvaluate },
         { "subseq", &subseq, min_two, preEvaluate },
+        { "make-sequence", &make_sequence, min_two, preEvaluate },
 
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },
