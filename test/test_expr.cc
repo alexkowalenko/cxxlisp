@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_CASE(expr_is)
     // Test Atoms
     Expr* a = mk_atom("hello");
     BOOST_TEST(is_atom(a) == true);
+    BOOST_TEST(is_a<Type::atom>(a) == true);
     BOOST_TEST(is_list(a) == false);
     //BOOST_TEST(is_a<List>(a) == false);
     //BOOST_TEST(is_a<nullptr_t>(a) == false);
@@ -73,15 +74,40 @@ BOOST_AUTO_TEST_CASE(expr_print)
     (ss = stringstream()) << a;
     BOOST_CHECK_EQUAL(ss.str(), "hello");
 
-    // Expr c = List({ Atom("hello"), Int(1) });
-    // BOOST_CHECK_EQUAL(to_string(c), "(hello 1)");
-    // (ss = stringstream()) << c;
-    // BOOST_CHECK_EQUAL(ss.str(), "(hello 1)");
+    Expr* c = mk_list(mk_atom("hello"));
+    BOOST_CHECK_EQUAL(to_string(c), "(hello)");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello)");
 
-    // Expr d = List({ Atom("hello"), Int(1), c });
-    // BOOST_CHECK_EQUAL(to_string(d), "(hello 1 (hello 1))");
-    // (ss = stringstream()) << d;
-    // BOOST_CHECK_EQUAL(ss.str(), "(hello 1 (hello 1))");
+    c = mk_list(mk_atom("hello"), mk_atom("there"));
+    BOOST_CHECK_EQUAL(to_string(c), "(hello . there)");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello . there)");
+
+    c = mk_list(mk_atom("hello"), mk_list(mk_atom("there")));
+    BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
+
+    c = mk_list({ mk_atom("hello"), mk_atom("there") });
+    BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
+
+    c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") });
+    BOOST_CHECK_EQUAL(to_string(c), "(hello there jim)");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello there jim)");
+
+    c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
+    BOOST_CHECK_EQUAL(to_string(c), "(hello there jim (hello there jim))");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "(hello there jim (hello there jim))");
+
+    c = mk_list({ mk_list({ mk_atom("hello"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }), mk_atom("there"), mk_atom("jim") }), mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
+    BOOST_CHECK_EQUAL(to_string(c), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
+    (ss = stringstream()) << c;
+    BOOST_CHECK_EQUAL(ss.str(), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
 
     // Expr f = String(L"Olá!"s);
     // BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");

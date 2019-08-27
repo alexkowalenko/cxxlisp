@@ -19,6 +19,22 @@
 
 namespace ax {
 
+Expr* mk_list(initializer_list<Expr*> p)
+{
+    if (p.size() == 0) {
+        return sF;
+    }
+    Expr* start = mk_list();
+    Expr* l = start;
+    for (auto x : p) {
+        l->car = x;
+        l->cdr = mk_list();
+        l = l->cdr;
+    }
+    l->cdr = nullptr;
+    return start;
+}
+
 ostream& operator<<(ostream& os, const Expr* s)
 {
     return os << to_string(s);
@@ -26,8 +42,8 @@ ostream& operator<<(ostream& os, const Expr* s)
 
 string to_string(const Expr* s)
 {
-    if (is_false(s)) {
-        return "nil";
+    if (s == nullptr) {
+        return "";
     } else if (is_atom(s)) {
         return s->atom;
         // } else if (s.type() == typeid(Int)) {
@@ -39,13 +55,27 @@ string to_string(const Expr* s)
         // } else if (s.type() == typeid(Bool)) {
         //     return any_cast<Bool>(s) ? "t" : "nil";
     } else if (is_list(s)) {
-        string str{ "(" };
-        const Expr* ptr = s;
-        while (!is_false(ptr)) {
-            str += to_string(ptr->car) + " ";
-            ptr = ptr->cdr;
+        if (s->car == nullptr && s->cdr == nullptr) {
+            return "nil";
+        }
+        if (s->car == quote_atom) {
+            return "'" + to_string(s->cdr->car);
+        }
+        string str{ '(' };
+        str += to_string(s->car);
+        while (s->cdr != nullptr) {
+            if (is_atomic(s->cdr)) {
+                str += " . ";
+                str += to_string(s->cdr);
+                break;
+            } else {
+                s = s->cdr;
+                if (s->car != nullptr) {
+                    str += ' ';
+                    str += to_string(s->car);
+                }
+            }
         };
-        str.pop_back();
         str += ')';
         return str;
         // } else if (s.type() == typeid(String)) {

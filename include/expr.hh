@@ -55,6 +55,30 @@ inline Expr* mk_list()
     return e;
 }
 
+inline Expr* mk_list(Expr* car)
+{
+    auto e = new (GC) Expr(Type::list);
+    e->car = car;
+    e->cdr = nullptr;
+    return e;
+}
+
+inline Expr* mk_list(Expr* car, Expr* cdr)
+{
+    auto e = new (GC) Expr(Type::list);
+    e->car = car;
+    e->cdr = cdr;
+    return e;
+}
+
+Expr* mk_list(initializer_list<Expr*>);
+
+template <Type t>
+bool is_a(const Expr* s)
+{
+    return s->type == t;
+};
+
 constexpr bool is_atom(const Expr* s)
 {
     return s->type == Type::atom;
@@ -65,14 +89,19 @@ constexpr bool is_list(const Expr* s)
     return s->type == Type::list;
 }
 
+constexpr bool is_atomic(const Expr* s)
+{
+    return s->type != Type::list;
+}
+
 // Output
 
 string to_string(const Expr* e);
 
 // Bool
 
-constexpr Expr* sF = nullptr;
-inline const Expr* sT = mk_atom("t");
+inline Expr* sF = mk_atom("nil");
+inline Expr* sT = mk_atom("t");
 
 constexpr bool is_sF(const Expr* e)
 {
