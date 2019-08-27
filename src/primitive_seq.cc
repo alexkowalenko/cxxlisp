@@ -16,6 +16,7 @@ namespace ax {
 // Sequence functions
 //
 
+/*
 const Keyword keyword_initial_element(":initial-element");
 
 template <typename T>
@@ -207,4 +208,5 @@ Expr make_sequence(List& args)
     }
     return seq;
 }
+*/
 }

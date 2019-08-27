@@ -14,6 +14,7 @@ namespace ax {
 // String functions
 //
 
+/*
 PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans)
 {
     return [=](List& args) -> Expr {
@@ -42,4 +43,5 @@ Expr string_fnct(const string& name, List& args)
     }
     return String(s);
 }
+*/
 }

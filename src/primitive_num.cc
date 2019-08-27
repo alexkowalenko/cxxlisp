@@ -14,6 +14,7 @@
 
 namespace ax {
 
+/*
 Expr numberp(List& args)
 {
     return is_a<Int>(args[0]) || is_a<Float>(args[0]);
@@ -222,4 +223,5 @@ Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a)
         throw EvalException(name + ": undefined variable " + to_string(args[0]));
     }
 }
+*/
 };

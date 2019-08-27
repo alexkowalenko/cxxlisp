@@ -14,6 +14,7 @@ namespace ax {
 // I/O functions
 //
 
+/*
 Expr throw_error(List& args)
 {
     throw EvalException(to_string(args[0]));
@@ -29,4 +30,5 @@ Expr quit(List& args)
     }
     throw ExceptionQuit(0);
 }
+*/
 }

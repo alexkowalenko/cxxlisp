@@ -20,6 +20,7 @@ Parser::Parser(Lexer& lex)
 {
 }
 
+/*
 Expr mkSymbolInt(const string& atom)
 {
     if (atom == "nil") {
@@ -123,13 +124,16 @@ ParserResult Parser::parse_list()
         }
     }
 }
+*/
 
 ParserResult Parser::parse()
 {
     Token tok;
     lexer >> tok;
     // BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
+
     switch (tok.type) {
+        /*
     case TokenType::open:
         return parse_list();
 
@@ -152,6 +156,7 @@ ParserResult Parser::parse()
     case TokenType::hash: {
         return { parse_hash(tok), false };
     }
+    */
     case TokenType::eof:
         return { sF, true };
 

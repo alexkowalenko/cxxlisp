@@ -45,9 +45,10 @@ BOOST_AUTO_TEST_CASE(test_eval_chars)
         { "'#\\space", "#\\space" },
         { "'#\\newline", "#\\newline" },
     };
-    test_Evaluator(tests);
+    //test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_characterp)
 {
     vector<TestEval> tests = {
@@ -219,3 +220,4 @@ BOOST_AUTO_TEST_CASE(test_eval_char_ge_ci)
     };
     test_Evaluator(tests);
 }
+*/

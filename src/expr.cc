@@ -19,64 +19,62 @@
 
 namespace ax {
 
-ostream& operator<<(ostream& os, const Expr& s)
+ostream& operator<<(ostream& os, const Expr* s)
 {
     return os << to_string(s);
 }
 
-string to_string(const Expr& s)
+string to_string(const Expr* s)
 {
-    if (s.type() == typeid(Atom)) {
-        return any_cast<Atom>(s);
-    } else if (s.type() == typeid(Int)) {
-        return std::to_string(any_cast<Int>(s));
-    } else if (s.type() == typeid(Float)) {
-        array<char, 80> buf;
-        sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
-        return string(buf.data());
-    } else if (s.type() == typeid(Bool)) {
-        return any_cast<Bool>(s) ? "t" : "nil";
-    } else if (s.type() == typeid(List)) {
-        auto l = any_cast<List>(s);
-        if (l.empty()) {
-            return "nil";
-        }
-        if (is_a<Atom>(l[0]) && any_cast<Atom>(l[0]) == quote_atom) {
-            return "'" + to_string(l[1]);
-        }
-
+    if (is_false(s)) {
+        return "nil";
+    } else if (is_atom(s)) {
+        return s->atom;
+        // } else if (s.type() == typeid(Int)) {
+        //     return std::to_string(any_cast<Int>(s));
+        // } else if (s.type() == typeid(Float)) {
+        //     array<char, 80> buf;
+        //     sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
+        //     return string(buf.data());
+        // } else if (s.type() == typeid(Bool)) {
+        //     return any_cast<Bool>(s) ? "t" : "nil";
+    } else if (is_list(s)) {
         string str{ "(" };
-        for_each(l.begin(), l.end() - 1, [&](const Expr& e) {
-            str += to_string(e) + " ";
-        });
-        str += to_string(l.back()) + ')';
+        const Expr* ptr = s;
+        while (!is_false(ptr)) {
+            str += to_string(ptr->car) + " ";
+            ptr = ptr->cdr;
+        };
+        str.pop_back();
+        str += ')';
         return str;
-    } else if (s.type() == typeid(String)) {
-        return "\"" + ws2s(any_cast<String>(s)) + "\"";
-    } else if (s.type() == typeid(Char)) {
-        string str("#\\");
-        switch (any_cast<Char>(s)) {
-        case ' ':
-            str += "space";
-            break;
-        case '\n':
-            str += "newline";
-            break;
-        default:
-            utf8::append(any_cast<Char>(s), str);
-        }
-        return str;
-    } else if (s.type() == typeid(Function)) {
-        return any_cast<Function>(s);
-    } else if (s.type() == typeid(FunctionRef)) {
-        return "#'" + any_cast<FunctionRef>(s);
-    } else if (s.type() == typeid(Keyword)) {
-        return any_cast<Keyword>(s);
+        // } else if (s.type() == typeid(String)) {
+        //     return "\"" + ws2s(any_cast<String>(s)) + "\"";
+        // } else if (s.type() == typeid(Char)) {
+        //     string str("#\\");
+        //     switch (any_cast<Char>(s)) {
+        //     case ' ':
+        //         str += "space";
+        //         break;
+        //     case '\n':
+        //         str += "newline";
+        //         break;
+        //     default:
+        //         utf8::append(any_cast<Char>(s), str);
+        //     }
+        //     return str;
+        // } else if (s.type() == typeid(Function)) {
+        //     return any_cast<Function>(s);
+        // } else if (s.type() == typeid(FunctionRef)) {
+        //     return "#'" + any_cast<FunctionRef>(s);
+        // } else if (s.type() == typeid(Keyword)) {
+        //     return any_cast<Keyword>(s);
     } else {
         return "*Unprintable type*";
     }
 }
 
+/*
 template <typename T>
 constexpr bool same_type(const Expr& x, const Expr& y)
 {
@@ -176,4 +174,5 @@ Expr make_type(const Atom& t, size_t size)
     }
     throw EvalException("Unknown type: " + to_string(t));
 }
+*/
 }

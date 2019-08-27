@@ -18,6 +18,7 @@
 
 namespace ax {
 
+/*
 map<string, Primitive> prim_table;
 map<Atom, AccessorFunct> setf_accessors;
 
@@ -433,8 +434,11 @@ static PrimBasicFunct char_ge = predicate<Char>(ge_char);
 static PrimBasicFunct char_lt = predicate<Char>(lt_char);
 static PrimBasicFunct char_le = predicate<Char>(le_char);
 
+*/
+
 void init_prims()
 {
+    /*
     vector<Primitive> defs{
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
@@ -632,5 +636,6 @@ void init_prims()
     }
 
     setf_accessors[Atom("elt")] = &setf_elt;
+    */
 }
 }

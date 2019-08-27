@@ -10,6 +10,7 @@ namespace ax {
 
 using namespace std;
 
+/*
 Function::operator string()
 {
     return "λ:"s + name;
@@ -33,4 +34,5 @@ Expr get_keyword_value(const List& args, const Keyword& k)
     }
     return sF;
 }
+*/
 }

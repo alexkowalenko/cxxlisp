@@ -27,9 +27,10 @@ BOOST_AUTO_TEST_CASE(test_eval_cadr)
         { "(caar '((a b) x))", "a" },
         { "(caar '((a)))", "a" },
     };
-    test_Evaluator(tests);
+    //test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_second)
 {
     vector<TestEval> tests = {
@@ -158,3 +159,4 @@ BOOST_AUTO_TEST_CASE(test_eval_fold)
     };
     test_Evaluator(tests);
 }
+*/

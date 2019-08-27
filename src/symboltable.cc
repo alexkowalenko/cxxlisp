@@ -8,6 +8,7 @@
 
 namespace ax {
 
+/*
 optional<Expr> SymbolTable::find(const string& name)
 {
     if (auto x = table.find(name); x != table.end()) {
@@ -53,4 +54,5 @@ void SymbolTable::dump(ostream& os)
         next->dump(os);
     }
 }
+*/
 }

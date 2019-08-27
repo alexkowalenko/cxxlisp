@@ -19,6 +19,9 @@ namespace ax {
 
 using namespace std;
 
+void init_prims();
+
+/*
 using PrimBasicFunct = function<Expr(List& args)>;
 using PrimSimpleFunct = function<Expr(const string& name, List& args)>;
 using PrimFunct = function<Expr(const string& name, List& args, SymbolTable& a)>;
@@ -35,7 +38,6 @@ inline const bool preEvaluate = true;
 
 extern map<string, Primitive> prim_table;
 
-void init_prims();
 
 using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
@@ -134,6 +136,7 @@ Expr make_sequence(List& args);
 
 Expr throw_error(List& args);
 Expr quit(List& args);
+*/
 }
 
 #endif

@@ -21,7 +21,7 @@ class SymbolTable {
 public:
     SymbolTable(SymbolTable* s)
         : next(s){};
-
+    /*
     inline void put(const string& name, const Expr& val)
     {
         table[name] = val;
@@ -35,6 +35,7 @@ public:
 
 private:
     map<string, Expr> table;
+    */
     SymbolTable* next;
 };
 }

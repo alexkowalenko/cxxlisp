@@ -17,16 +17,17 @@ namespace ax {
 
 class Evaluator {
 public:
-    Evaluator(Options& opt);
+    Evaluator(Options& o)
+        : opt(o){};
 
-    Expr eval(Expr& e, SymbolTable& a);
-    Expr perform_list(List& l, SymbolTable& a);
-    List eval_list(List& l, SymbolTable& a);
+    //     Expr eval(Expr& e, SymbolTable& a);
+    //     Expr perform_list(List& l, SymbolTable& a);
+    //     List eval_list(List& l, SymbolTable& a);
 
-private:
-    SymbolTable create_context(Function& f, List args, SymbolTable& a);
-    Expr perform_function(Function& f, List args, SymbolTable& a);
-    Expr backquote(Expr& s, SymbolTable& a);
+    // private:
+    //     SymbolTable create_context(Function& f, List args, SymbolTable& a);
+    //     Expr perform_function(Function& f, List args, SymbolTable& a);
+    //     Expr backquote(Expr& s, SymbolTable& a);
 
     Options opt;
 };

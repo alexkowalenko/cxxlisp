@@ -11,6 +11,7 @@
 
 namespace ax {
 
+/*
 class Function {
 public:
     Function(Atom n, List p)
@@ -33,6 +34,7 @@ public:
 
 bool has_keyword(const List& args, const Keyword& k);
 Expr get_keyword_value(const List& args, const Keyword& k);
+*/
 }
 
 #endif

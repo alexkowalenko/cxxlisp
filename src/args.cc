@@ -11,6 +11,7 @@
 
 namespace ax {
 
+/*
 template <typename T>
 optional<string> checkType(const string& name, const List& args, const string& tname)
 {
@@ -92,4 +93,5 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
     }
     return {};
 }
+*/
 }

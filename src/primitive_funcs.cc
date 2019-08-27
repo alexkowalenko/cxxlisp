@@ -15,6 +15,7 @@ namespace ax {
 // Function functions
 //
 
+/*
 Function createFunction(const string& name, List args)
 {
     if (!is_a<List>(args[0])) {
@@ -249,4 +250,5 @@ end:
     }
     return sF;
 }
+*/
 }

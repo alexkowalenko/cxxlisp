@@ -11,48 +11,82 @@
 #include <iostream>
 #include <locale>
 #include <string>
-#include <vector>
 
-#include <any>
+#include <gc_cpp.h>
 
 namespace ax {
 
 using namespace std;
 
-using Expr = any;
+enum class Type {
+    atom,
+    list
+};
 
 using Atom = string;
-using Bool = bool;
-using Int = long;
-using List = vector<any>;
 
-template <typename T>
-constexpr bool is_a(const Expr& s)
+class List {
+}; // Dummy type
+
+struct Expr {
+    Expr(Type t)
+        : type(t){};
+    Type type;
+    union {
+        Atom atom;
+        struct {
+            Expr* car;
+            Expr* cdr;
+        };
+    };
+};
+
+inline Expr* mk_atom(const string& s)
 {
-    return s.type() == typeid(T);
+    auto e = new (GC) Expr(Type::atom);
+    e->atom = s;
+    return e;
+}
+
+inline Expr* mk_list()
+{
+    auto e = new (GC) Expr(Type::list);
+    e->car = e->cdr = nullptr;
+    return e;
+}
+
+constexpr bool is_atom(const Expr* s)
+{
+    return s->type == Type::atom;
+}
+
+constexpr bool is_list(const Expr* s)
+{
+    return s->type == Type::list;
 }
 
 // Output
 
-string to_string(const Expr& e);
+string to_string(const Expr* e);
 
 // Bool
 
-constexpr Bool sF = Bool{ false };
-constexpr Bool sT = Bool{ true };
+constexpr Expr* sF = nullptr;
+inline const Expr* sT = mk_atom("t");
 
-constexpr bool is_sF(const Expr& e)
+constexpr bool is_sF(const Expr* e)
 {
-    return is_a<Bool>(e) && !any_cast<Bool>(e);
+    return e == nullptr;
 }
 
-constexpr bool is_false(const Expr& s)
+constexpr bool is_false(const Expr* s)
 // Is the Bool sF, or is the empty list
 {
-    return (s.type() == typeid(Bool) && !any_cast<Bool>(s))
-        || (s.type() == typeid(List) && any_cast<List>(s).empty());
+    return (s == nullptr)
+        || (s->type == Type::list && s->car == nullptr);
 }
 
+/*
 Bool expr_eq(const Expr& x, const Expr&);
 Bool expr_eql(const Expr& x, const Expr&);
 Bool expr_equal(const Expr& x, const Expr&);
@@ -65,6 +99,7 @@ public:
 
 using Char = wchar_t;
 using String = wstring;
+*/
 
 inline wstring s2ws(const std::string& str)
 {
@@ -78,6 +113,7 @@ inline string ws2s(const std::wstring& wstr)
     return converterX.to_bytes(wstr);
 }
 
+/*
 using Float = double;
 
 Float as_Float(const Expr& s);
@@ -117,6 +153,6 @@ inline bool is_seq_type(const Atom& s)
 {
     return s == type_list || s == type_string;
 }
-} // namespace ax
-
+*/
+}
 #endif

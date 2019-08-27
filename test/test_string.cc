@@ -27,9 +27,10 @@ BOOST_AUTO_TEST_CASE(test_eval_strings)
         { R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")", R"("🍏🍎🍐🍊🍋🍌🍉🍇🍓🍈🍒")" },
         { R"("")", R"("")" },
     };
-    test_Evaluator(tests);
+    //test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_stringp)
 {
     vector<TestEval> tests = {
@@ -228,3 +229,4 @@ BOOST_AUTO_TEST_CASE(test_eval_string_string)
     };
     test_Evaluator(tests);
 }
+*/

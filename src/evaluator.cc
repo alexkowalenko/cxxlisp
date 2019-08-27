@@ -17,6 +17,7 @@
 
 namespace ax {
 
+/*
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -27,9 +28,6 @@ overloaded(Ts...)->overloaded<Ts...>;
 
 const Keyword optional_atom = Keyword("&optional");
 const Keyword rest_atom = Keyword("&rest");
-
-Evaluator::Evaluator(Options& o)
-    : opt(o){};
 
 SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
 {
@@ -266,4 +264,5 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
 
     throw EvalException("Can't evaluate "s + to_string(e));
 }
+*/
 }
