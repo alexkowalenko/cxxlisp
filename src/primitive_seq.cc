@@ -76,9 +76,7 @@ Expr seq_subseq(const Expr& s, size_t index, size_t length)
     if (length == 0) {
         length = seq.size() - index;
     }
-    for (size_t i = index; i < index + length; i++) {
-        sub.push_back(seq[i]);
-    }
+    copy_n(seq.begin() + index, length, back_inserter(sub));
     return sub;
 }
 
@@ -144,6 +142,7 @@ Expr setelt(List& args)
     return res;
 }
 
+// setf version
 Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a)
 {
     if (args.size() != 2) {

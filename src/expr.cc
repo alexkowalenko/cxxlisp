@@ -46,12 +46,10 @@ string to_string(const Expr& s)
         }
 
         string str{ "(" };
-        for (auto i = l.begin(); i != l.end(); i++) {
-            str += to_string(*i);
-            if (i != l.end() - 1)
-                str += ' ';
-        }
-        str += ')';
+        for_each(l.begin(), l.end() - 1, [&](const Expr& e) {
+            str += to_string(e) + " ";
+        });
+        str += to_string(l.back()) + ')';
         return str;
     } else if (s.type() == typeid(String)) {
         return "\"" + ws2s(any_cast<String>(s)) + "\"";
