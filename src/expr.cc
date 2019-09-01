@@ -26,12 +26,13 @@ Expr* mk_list(initializer_list<Expr*> p)
     }
     Expr* start = mk_list();
     Expr* l = start;
-    for (auto x : p) {
-        l->car = x;
-        l->cdr = mk_list();
-        l = l->cdr;
+    for (auto iter = p.begin(); iter != p.end(); iter++) {
+        l->car = *iter;
+        if (iter != p.end() - 1) {
+            l->cdr = mk_list();
+            l = l->cdr;
+        }
     }
-    l->cdr = nullptr;
     return start;
 }
 
@@ -40,11 +41,39 @@ ostream& operator<<(ostream& os, const Expr* s)
     return os << to_string(s);
 }
 
+string to_dstring(const Expr* s)
+{
+    if (!s) {
+        return "NULL";
+    }
+    switch (s->type) {
+    case Type::boolean:
+        return s->boolean ? "t" : "nil";
+    case Type::atom:
+        return s->atom;
+    case Type::list: {
+        string res("[");
+        res += to_dstring(s->car);
+        res += " . ";
+        res += to_dstring(s->cdr);
+        res += "]";
+        return res;
+    }
+    default:
+        return "<Unknown>";
+    }
+}
+
 string to_string(const Expr* s)
 {
     if (s == nullptr) {
         return "";
-    } else if (is_atom(s)) {
+    }
+    switch (s->type) {
+    case Type::boolean:
+        return s->boolean ? "t" : "nil";
+
+    case Type::atom:
         return s->atom;
         // } else if (s.type() == typeid(Int)) {
         //     return std::to_string(any_cast<Int>(s));
@@ -54,11 +83,12 @@ string to_string(const Expr* s)
         //     return string(buf.data());
         // } else if (s.type() == typeid(Bool)) {
         //     return any_cast<Bool>(s) ? "t" : "nil";
-    } else if (is_list(s)) {
+
+    case Type::list: {
         if (s->car == nullptr && s->cdr == nullptr) {
             return "nil";
         }
-        if (s->car == quote_atom) {
+        if (s->car == quote_at) {
             return "'" + to_string(s->cdr->car);
         }
         string str{ '(' };
@@ -78,6 +108,7 @@ string to_string(const Expr* s)
         };
         str += ')';
         return str;
+    }
         // } else if (s.type() == typeid(String)) {
         //     return "\"" + ws2s(any_cast<String>(s)) + "\"";
         // } else if (s.type() == typeid(Char)) {
@@ -99,9 +130,19 @@ string to_string(const Expr* s)
         //     return "#'" + any_cast<FunctionRef>(s);
         // } else if (s.type() == typeid(Keyword)) {
         //     return any_cast<Keyword>(s);
-    } else {
+    default:
         return "*Unprintable type*";
     }
+}
+
+unsigned int size_list(const Expr* s)
+{
+    unsigned int res = 0;
+    while (s && is_list(s)) {
+        res++;
+        s = s->cdr;
+    }
+    return res;
 }
 
 /*

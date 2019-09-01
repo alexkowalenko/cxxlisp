@@ -161,108 +161,112 @@ Expr Evaluator::perform_list(List& l, SymbolTable& a)
     for_each(l.begin(), l.end(), [&](Expr& e) { result = eval(e, a); });
     return result;
 }
+*/
 
-Expr Evaluator::eval(Expr& e, SymbolTable& a)
+Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
 {
+
     if (opt.debug_expr) {
         BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
     };
 
     // Eval basic types
-    if (is_a<Bool>(e)) {
+    switch (e->type) {
+    case Type::boolean:
         return e;
-    }
-    if (is_a<Int>(e) || is_a<Float>(e)) {
+        // if (is_a<Int>(e) || is_a<Float>(e)) {
+        //     return e;
+        // }
+    case Type::atom:
         return e;
-    }
-    if (is_a<Atom>(e)) {
-        if (auto val = a.find(any_cast<Atom>(e))) {
-            return *val;
-        }
-        throw EvalException("unbound variable: "s + to_string(e));
-    }
-    if (is_a<String>(e) || is_a<Char>(e)) {
-        return e;
-    }
-    if (is_a<FunctionRef>(e)) {
-        return e;
-    }
-    if (is_a<Keyword>(e)) {
-        return e;
+    //     if (auto val = a.find(any_cast<Atom>(e))) {
+    //         return *val;
+    //     }
+    //     throw EvalException("unbound variable: "s + to_string(e));
+    // }
+    // if (is_a<String>(e) || is_a<Char>(e)) {
+    //     return e;
+    // }
+    // if (is_a<FunctionRef>(e)) {
+    //     return e;
+    // }
+    // if (is_a<Keyword>(e)) {
+    //     return e;
+    // }
+    case Type::list:; // fallthrough
     }
 
     // Test for list
-    if (!is_a<List>(e)) {
+    if (!is_list(e)) {
         throw EvalException("Can't evaluate "s + to_string(e));
     }
 
     // Expression is a list
-    List e_list = any_cast<List>(e);
-    if (e_list.empty()) {
+    //List e_list = any_cast<List>(e);
+    if (is_false(e)) {
         return sF;
     }
 
-    auto e_car = e_list.front();
-    if (is_a<Atom>(e_car)) {
+    auto e_car = e->car;
+    if (is_atom(e_car)) {
         // Atom in function position
-        Atom name = any_cast<Atom>(e_car);
+        Atom name = e_car->atom;
 
         // quote
-        if (name == quote_atom) {
-            if (e_list.size() == 2) {
-                return e_list[1];
+        if (name == quote_at->atom) {
+            if (size_list(e) == 2) {
+                return e->cdr->car;
             }
             throw EvalException("quote: requires one argument");
         }
 
         // backquote
-        if (name == backquote_atom) {
-            return backquote(e_list[1], a);
-        }
+        // if (name == backquote_atom) {
+        //     return backquote(e_list[1], a);
+        // }
 
         // Lookup symbol table for function
-        if (auto f = a.find(name)) {
-            if (!is_a<Function>(*f)) {
-                throw EvalException("A non function in function location "s + to_string(*f));
-            }
-            Function fn = any_cast<Function>(*f);
-            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
-        }
+        //     if (auto f = a.find(name)) {
+        //         if (!is_a<Function>(*f)) {
+        //             throw EvalException("A non function in function location "s + to_string(*f));
+        //         }
+        //         Function fn = any_cast<Function>(*f);
+        //         return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
+        //     }
 
-        // Lookup primitive table
-        if (auto prim = prim_table.find(name); prim != prim_table.end()) {
-            List result(e_list.begin() + 1, e_list.end());
-            if (prim->second.preEval) {
-                result = eval_list(result, a);
-            }
-            auto check = checkArgs(prim->second.cons, name, result);
-            if (check) {
-                throw EvalException(*check);
-            }
-            return visit(overloaded{
-                             [&](PrimBasicFunct pf) -> Expr { return pf(result); },
-                             [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
-                             [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
-                             [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
-                         },
-                prim->second.pf);
-        }
-    } else if (is_a<Function>(e_car)) {
-        // compiled function in function position - out put of apply.
-        Function fn = any_cast<Function>(e_car);
-        return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
-    } else if (is_a<List>(e_car)) {
-        // List in function position - eval and check for function object
-        Expr flist = any_cast<List>(e_car);
-        auto res = eval(flist, a);
-        if (is_a<Function>(res)) {
-            // perform function
-            Function fn = any_cast<Function>(res);
-            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
-        }
+        //     // Lookup primitive table
+        //     if (auto prim = prim_table.find(name); prim != prim_table.end()) {
+        //         List result(e_list.begin() + 1, e_list.end());
+        //         if (prim->second.preEval) {
+        //             result = eval_list(result, a);
+        //         }
+        //         auto check = checkArgs(prim->second.cons, name, result);
+        //         if (check) {
+        //             throw EvalException(*check);
+        //         }
+        //         return visit(overloaded{
+        //                          [&](PrimBasicFunct pf) -> Expr { return pf(result); },
+        //                          [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
+        //                          [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
+        //                          [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
+        //                      },
+        //             prim->second.pf);
+        //     }
+        // } else if (is_a<Function>(e_car)) {
+        //     // compiled function in function position - out put of apply.
+        //     Function fn = any_cast<Function>(e_car);
+        //     return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
+        // } else if (is_a<List>(e_car)) {
+        //     // List in function position - eval and check for function object
+        //     Expr flist = any_cast<List>(e_car);
+        //     auto res = eval(flist, a);
+        //     if (is_a<Function>(res)) {
+        //         // perform function
+        //         Function fn = any_cast<Function>(res);
+        //         return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
+        //     }
     }
 
     throw EvalException("Can't evaluate "s + to_string(e));
 }
-*/
 }

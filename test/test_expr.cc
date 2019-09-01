@@ -29,6 +29,14 @@ BOOST_AUTO_TEST_CASE(expr_is)
     //BOOST_TEST(is_a<List>(a) == false);
     //BOOST_TEST(is_a<nullptr_t>(a) == false);
 
+    a = mk_bool(true);
+    BOOST_TEST(is_atom(a) == false);
+    BOOST_TEST(is_a<Type::boolean>(a) == true);
+    BOOST_TEST(is_list(a) == false);
+    BOOST_TEST(is_bool(a) == true);
+    //BOOST_TEST(is_a<List>(a) == false);
+    //BOOST_TEST(is_a<nullptr_t>(a) == false);
+
     Expr* b = mk_list();
     BOOST_TEST(is_atom(b) == false);
     BOOST_TEST(is_list(b) == true);
@@ -88,26 +96,31 @@ BOOST_AUTO_TEST_CASE(expr_print)
     BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
+    BOOST_CHECK_EQUAL(size_list(c), 2);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there") });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
+    BOOST_CHECK_EQUAL(size_list(c), 2);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there jim)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there jim)");
+    BOOST_CHECK_EQUAL(size_list(c), 3);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there jim (hello there jim))");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there jim (hello there jim))");
+    BOOST_CHECK_EQUAL(size_list(c), 4);
 
     c = mk_list({ mk_list({ mk_atom("hello"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }), mk_atom("there"), mk_atom("jim") }), mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
     BOOST_CHECK_EQUAL(to_string(c), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
+    BOOST_CHECK_EQUAL(size_list(c), 5);
 
     // Expr f = String(L"Olá!"s);
     // BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");

@@ -247,7 +247,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    // Evaluator evaluator(opt);
+    Evaluator evaluator(opt);
 
     while (true) {
         ParserResult res;
@@ -256,13 +256,13 @@ void Lisp::repl(istream& istr, ostream& ostr)
             if (res.eof) {
                 break;
             }
-            //if (opt.parse_only) {
-            cout << to_string(res.val) << endl;
-            continue;
-            //}
+            if (opt.parse_only) {
+                ostr << to_string(res.val) << endl;
+                continue;
+            }
 
-            //auto ex = evaluator.eval(res.val, symboltable);
-            //ostr << to_string(ex) << endl;
+            auto ex = evaluator.eval(res.val, symboltable);
+            ostr << to_string(ex) << endl;
 
         } catch (UnknownToken& e) {
             ostr << "Unknown token: " << e.tok << endl;

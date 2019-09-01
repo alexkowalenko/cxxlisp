@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(test_eval)
         { "t", "t" },
         { "nil", "nil" },
     };
-    // test_Evaluator(tests);
+    test_Evaluator(tests);
 }
 
 /*
@@ -31,6 +31,7 @@ BOOST_AUTO_TEST_CASE(test_eval_basic)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_quote)
 {
@@ -44,6 +45,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
 
         { "(quote)", "Eval error: quote: requires one argument" },
         { "(quote (a b))", "(a b)" },
+        { "(quote (a b(a b)))", "(a b (a b))" },
 
         { "'a", "a" },
         { "'λ", "λ" },
@@ -52,11 +54,12 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "'👾", "👾" },
         { "'🍊🍎🍉🍌", "🍊🍎🍉🍌" },
 
-        { "a", "Eval error: unbound variable: a" },
+        // { "a", "Eval error: unbound variable: a" },
     };
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_backquote)
 {
     vector<TestEval> tests = {

@@ -21,21 +21,20 @@ class SymbolTable {
 public:
     SymbolTable(SymbolTable* s)
         : next(s){};
-    /*
-    inline void put(const string& name, const Expr& val)
+
+    inline void put(const string& name, Expr* const val)
     {
         table[name] = val;
     };
 
-    optional<Expr> find(const string& name);
-    bool set(const string& name, const Expr& val);
+    optional<Expr*> find(const string& name);
+    bool set(const string& name, Expr* const val);
     void remove(const string& name);
 
     void dump(ostream& os);
 
 private:
-    map<string, Expr> table;
-    */
+    map<string, Expr*> table;
     SymbolTable* next;
 };
 }

@@ -20,7 +20,7 @@ public:
     Evaluator(Options& o)
         : opt(o){};
 
-    //     Expr eval(Expr& e, SymbolTable& a);
+    Expr* eval(Expr* const e, SymbolTable& a);
     //     Expr perform_list(List& l, SymbolTable& a);
     //     List eval_list(List& l, SymbolTable& a);
 

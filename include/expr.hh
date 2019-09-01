@@ -20,10 +20,12 @@ using namespace std;
 
 enum class Type {
     atom,
+    boolean,
     list
 };
 
 using Atom = string;
+using Bool = bool;
 
 class List {
 }; // Dummy type
@@ -34,6 +36,7 @@ struct Expr {
     Type type;
     union {
         Atom atom;
+        Bool boolean;
         struct {
             Expr* car;
             Expr* cdr;
@@ -45,6 +48,13 @@ inline Expr* mk_atom(const string& s)
 {
     auto e = new (GC) Expr(Type::atom);
     e->atom = s;
+    return e;
+}
+
+inline Expr* mk_bool(const bool s)
+{
+    auto e = new (GC) Expr(Type::boolean);
+    e->boolean = s;
     return e;
 }
 
@@ -84,6 +94,11 @@ constexpr bool is_atom(const Expr* s)
     return s->type == Type::atom;
 }
 
+constexpr bool is_bool(const Expr* s)
+{
+    return s->type == Type::boolean;
+}
+
 constexpr bool is_list(const Expr* s)
 {
     return s->type == Type::list;
@@ -97,23 +112,25 @@ constexpr bool is_atomic(const Expr* s)
 // Output
 
 string to_string(const Expr* e);
+string to_dstring(const Expr* e);
 
 // Bool
 
-inline Expr* sF = mk_atom("nil");
-inline Expr* sT = mk_atom("t");
+inline Expr* sF = mk_bool(false);
+inline Expr* sT = mk_bool(true);
 
-constexpr bool is_sF(const Expr* e)
+inline bool is_sF(const Expr* e)
 {
-    return e == nullptr;
+    return e == sF || e == nullptr;
 }
 
-constexpr bool is_false(const Expr* s)
+inline bool is_false(const Expr* s)
 // Is the Bool sF, or is the empty list
 {
-    return (s == nullptr)
-        || (s->type == Type::list && s->car == nullptr);
+    return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
+
+unsigned int size_list(const Expr* s);
 
 /*
 Bool expr_eq(const Expr& x, const Expr&);

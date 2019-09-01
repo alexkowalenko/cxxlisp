@@ -50,9 +50,9 @@ Expr* Parser::parse_comma()
 {
     if (lexer.peek() == '@') {
         lexer.get_token();
-        return splice_unquote_atom;
+        return splice_unquote_at;
     }
-    return unquote_atom;
+    return unquote_at;
 }
 
 // Expr Parser::parse_hash(const Token& tok)
@@ -98,9 +98,9 @@ ParserResult Parser::parse_quote(Token& tok)
 {
     auto x = mk_list();
     if (tok.type == TokenType::quote) {
-        x->car = quote_atom;
+        x->car = quote_at;
     } else {
-        x->car = backquote_atom;
+        x->car = backquote_at;
     }
     auto [next, eof] = parse();
     x->cdr = mk_list(next);
@@ -117,9 +117,13 @@ ParserResult Parser::parse_list()
             auto res = parse();
             eof = res.eof;
             if (res.val != nullptr) {
-                l->car = res.val;
-                l->cdr = mk_list();
-                l = l->cdr;
+                if (!l->car) {
+                    l->car = res.val;
+                } else {
+                    l->cdr = mk_list();
+                    l->cdr->car = res.val;
+                    l = l->cdr;
+                }
             }
         } catch (EndBracketException) {
             return { top, eof };
