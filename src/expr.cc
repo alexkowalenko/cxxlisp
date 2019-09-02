@@ -140,69 +140,65 @@ unsigned int size_list(const Expr* s)
     return res;
 }
 
-/*
-template <typename T>
-constexpr bool same_type(const Expr& x, const Expr& y)
+constexpr bool same_type(Type t, const Expr* x, const Expr* y)
 {
-    return is_a<T>(x) && is_a<T>(y);
+    return t == x->type && x->type == y->type;
 }
 
-template <typename T>
-constexpr bool eq_any(const Expr& x, const Expr& y)
+Expr* expr_eq(const Expr* x, const Expr* y)
 {
-    return same_type<T>(x, y) && any_cast<T>(x) == any_cast<T>(y);
-}
-
-Bool expr_eq(const Expr& x, const Expr& y)
-{
+    if (is_false(x) && is_false(y)) {
+        return sT;
+    }
     if (is_atomic(x) && is_atomic(y)) {
-        if (eq_any<Atom>(x, y)) {
+        if (same_type(Type::atom, x, y) && x->atom == y->atom) {
             return sT;
-        } else if (eq_any<Int>(x, y)) {
+            //} else if (eq_any<Int>(x, y)) {
+            //    return sT;
+        } else if (same_type(Type::boolean, x, y) && x->boolean == y->boolean) {
             return sT;
-        } else if (eq_any<Bool>(x, y)) {
-            return sT;
-        } else if (eq_any<Char>(x, y)) {
-            return sT;
-        } else if (eq_any<Float>(x, y)) {
-            return sT;
+            //} else if (eq_any<Char>(x, y)) {
+            //    return sT;
+            //} else if (eq_any<Float>(x, y)) {
+            //    return sT;
         }
         return sF;
     }
     return sF;
 }
 
-Bool expr_eql(const Expr& x, const Expr& y)
+Expr* expr_eql(const Expr* x, const Expr* y)
 {
     return expr_eq(x, y);
 }
 
-Bool expr_equal(const Expr& x, const Expr& y)
+Expr* expr_equal(const Expr* x, const Expr* y)
 {
-    if (expr_eql(x, y)) {
+    if (expr_eql(x, y) == sT) {
         return sT;
     }
-    if (same_type<List>(x, y)) {
-        auto xx = any_cast<List>(x);
-        auto yy = any_cast<List>(y);
-        if (xx.size() != yy.size()) {
+    if (same_type(Type::list, x, y)) {
+        if (size_list(x) != size_list(y)) {
             return sF;
         }
-        auto itx = xx.begin();
-        auto ity = yy.begin();
-        for (; itx != xx.end(); itx++, ity++) {
-            if (!expr_equal(*itx, *ity)) {
+        auto itx = x;
+        auto ity = y;
+        while (itx) {
+            if (expr_equal(itx->car, ity->car) == sF) {
                 return sF;
             }
+            itx = itx->cdr;
+            ity = ity->cdr;
         }
         return sT;
     }
-    if (eq_any<String>(x, y)) {
-        return sT;
-    }
+    //if (eq_any<String>(x, y)) {
+    //    return sT;
+    //}
     return sF;
 }
 
+/*
 Float as_Float(const Expr& s)
 {
     if (is_a<Float>(s)) {

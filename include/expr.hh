@@ -122,11 +122,11 @@ inline bool is_false(const Expr* s)
 
 unsigned int size_list(const Expr* s);
 
-/*
-Bool expr_eq(const Expr& x, const Expr&);
-Bool expr_eql(const Expr& x, const Expr&);
-Bool expr_equal(const Expr& x, const Expr&);
+Expr* expr_eq(const Expr* x, const Expr*);
+Expr* expr_eql(const Expr* x, const Expr*);
+Expr* expr_equal(const Expr* x, const Expr*);
 
+/*
 class Keyword : public string {
 public:
     Keyword(const string& s)

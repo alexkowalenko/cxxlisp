@@ -147,3 +147,42 @@ BOOST_AUTO_TEST_CASE(expr_print)
     // (ss = stringstream()) << g4;
     // BOOST_CHECK_EQUAL(ss.str(), "#\\👾");
 }
+
+BOOST_AUTO_TEST_CASE(expr_if_false)
+{
+    Expr* a = mk_atom("hello");
+    BOOST_CHECK(!is_false(a));
+
+    BOOST_CHECK(is_false(sF));
+    BOOST_CHECK(is_false(nullptr));
+    BOOST_CHECK(is_false(mk_list()));
+}
+
+BOOST_AUTO_TEST_CASE(expr_eq_test)
+{
+    BOOST_CHECK(expr_eq(sF, sF) == sT);
+    BOOST_CHECK(expr_eq(sT, sT) == sT);
+
+    BOOST_CHECK(expr_eq(sT, sF) == sF);
+    BOOST_CHECK(expr_eq(sF, sT) == sF);
+
+    BOOST_CHECK(expr_eq(mk_atom("hello"), mk_atom("hello")) == sT);
+    BOOST_CHECK(expr_eq(mk_atom("hello"), mk_atom("olá")) == sF);
+
+    BOOST_CHECK(expr_eq(mk_list(), mk_list()) == sT);
+
+    BOOST_CHECK(expr_equal(mk_list(), mk_list()) == sT);
+    BOOST_CHECK(expr_equal(mk_list(mk_atom("a")), mk_list(mk_atom("a"))) == sT);
+    BOOST_CHECK(expr_equal(mk_list(mk_atom("a")), mk_list(mk_atom("b"))) == sF);
+
+    BOOST_CHECK(expr_equal(mk_list(mk_atom("a")), mk_list({ mk_atom("a"), mk_atom("b") })) == sF);
+    BOOST_CHECK(expr_equal(mk_list({ mk_atom("a"), mk_atom("b") }), mk_list(mk_atom("a"))) == sF);
+
+    BOOST_CHECK(expr_equal(mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("b") }) }),
+                    mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("b") }) }))
+        == sT);
+
+    BOOST_CHECK(expr_equal(mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("b") }) }),
+                    mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("c") }) }))
+        == sF);
+}

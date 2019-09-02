@@ -215,26 +215,26 @@ Expr* append(Expr* args)
 // eq functions
 //
 
-/*
-Expr eq_p(List& args)
+Expr* eq_p(Expr* args)
 {
-    return expr_eq(args[0], args[1]);
+    return expr_eq(args->car, args->cdr->car);
 }
 
-Expr eql_p(List& args)
+Expr* eql_p(Expr* args)
 {
-    return expr_eql(args[0], args[1]);
+    return expr_eql(args->car, args->cdr->car);
 }
 
-Expr equal_p(List& args)
+Expr* equal_p(Expr* args)
 {
-    return expr_equal(args[0], args[1]);
+    return expr_equal(args->car, args->cdr->car);
 }
 
 //
 // variable functions
 //
 
+/*
 Expr defvar(Evaluator& l, const string& name, List& args, SymbolTable& a)
 {
     if (args.empty()) {
@@ -463,11 +463,12 @@ void init_prims()
 
         // { "reverse", &reverse, one_arg, preEvaluate },
         { "append", &append, no_check, preEvaluate },
-        // // eq
 
-        // { "eq", &eq_p, two_args, preEvaluate },
-        // { "eql", &eql_p, two_args, preEvaluate },
-        // { "equal", &equal_p, two_args, preEvaluate },
+        // eq
+
+        { "eq", &eq_p, two_args, preEvaluate },
+        { "eql", &eql_p, two_args, preEvaluate },
+        { "equal", &equal_p, two_args, preEvaluate },
 
         // // variables
 
