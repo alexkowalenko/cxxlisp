@@ -17,7 +17,6 @@
 
 namespace ax {
 
-/*
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -26,6 +25,7 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
+/*
 const Keyword optional_atom = Keyword("&optional");
 const Keyword rest_atom = Keyword("&rest");
 
@@ -147,14 +147,30 @@ Expr Evaluator::backquote(Expr& s, SymbolTable& a)
     }
     return s;
 }
+*/
 
-List Evaluator::eval_list(List& l, SymbolTable& a)
+Expr* Evaluator::eval_list(const Expr* e, SymbolTable& a)
 {
-    List result;
-    for_each(l.begin(), l.end(), [&](Expr& e) { result.push_back(eval(e, a)); });
+    if (is_false(e)) {
+        return sF;
+    }
+    Expr* result = mk_list();
+    Expr* rl = result;
+    while (e) {
+        if (!rl->car) {
+            rl->car = eval(e->car, a);
+        } else {
+            rl->cdr = mk_list();
+            rl->cdr->car = eval(e->car, a);
+            rl = rl->cdr;
+        }
+        e = e->cdr;
+    }
+    // cout << "eval_list: " << to_dstring(result) << endl;
     return result;
 }
 
+/*
 Expr Evaluator::perform_list(List& l, SymbolTable& a)
 {
     Expr result = sF;
@@ -165,10 +181,9 @@ Expr Evaluator::perform_list(List& l, SymbolTable& a)
 
 Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
 {
-
-    if (opt.debug_expr) {
-        BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
-    };
+    //if (opt.debug_expr) {
+    BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
+    //};
 
     // Eval basic types
     switch (e->type) {
@@ -235,23 +250,23 @@ Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
         //     }
 
         //     // Lookup primitive table
-        //     if (auto prim = prim_table.find(name); prim != prim_table.end()) {
-        //         List result(e_list.begin() + 1, e_list.end());
-        //         if (prim->second.preEval) {
-        //             result = eval_list(result, a);
-        //         }
-        //         auto check = checkArgs(prim->second.cons, name, result);
-        //         if (check) {
-        //             throw EvalException(*check);
-        //         }
-        //         return visit(overloaded{
-        //                          [&](PrimBasicFunct pf) -> Expr { return pf(result); },
-        //                          [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
-        //                          [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
-        //                          [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
-        //                      },
-        //             prim->second.pf);
-        //     }
+        if (auto prim = prim_table.find(name); prim != prim_table.end()) {
+            auto result = e->cdr;
+            if (prim->second.preEval) {
+                result = eval_list(result, a);
+            }
+            auto check = checkArgs(prim->second.cons, name, result);
+            if (check) {
+                throw EvalException(*check);
+            }
+            return visit(overloaded{
+                             [&](PrimBasicFunct pf) -> Expr* { return pf(result); },
+                             [&](PrimSimpleFunct pf) -> Expr* { return pf(name, result); },
+                             [&](PrimFunct pf) -> Expr* { return pf(name, result, a); },
+                             [&](PrimFullFunct pf) -> Expr* { return pf(*this, name, result, a); },
+                         },
+                prim->second.pf);
+        }
         // } else if (is_a<Function>(e_car)) {
         //     // compiled function in function position - out put of apply.
         //     Function fn = any_cast<Function>(e_car);

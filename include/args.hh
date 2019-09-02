@@ -61,9 +61,7 @@ const ArgConstraint two_int = { ArgConstraintType::eq, 2, ArgType::integer };
 const ArgConstraint two_str = { ArgConstraintType::eq, 2, ArgType::string };
 const ArgConstraint two_char = { ArgConstraintType::eq, 2, ArgType::character };
 
-/*
-optional<string> checkArgs(const ArgConstraint& cons, const string& name, const List& args);
-*/
+optional<string> checkArgs(const ArgConstraint& cons, const string& name, const Expr* args);
 }
 
 #endif

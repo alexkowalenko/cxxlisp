@@ -14,11 +14,6 @@
 using namespace ax;
 using namespace std;
 
-ostream& operator<<(ostream& os, const Expr* s)
-{
-    return os << to_string(s);
-}
-
 BOOST_AUTO_TEST_CASE(expr_is)
 {
     // Test Atoms

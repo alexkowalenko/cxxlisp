@@ -83,6 +83,7 @@ BOOST_AUTO_TEST_CASE(test_eval_backquote)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_atom)
 {
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_eval_atom)
         { "(atom (cdr '(a)))", "t" },
         { "(atom (cdr '(a b)))", "nil" },
 
-        { "(atom #\\c)", "t" },
+        //{ "(atom #\\c)", "t" },
 
         { "(atom 1)", "t" },
         { "(atom 1.273)", "t" },
@@ -116,13 +117,15 @@ BOOST_AUTO_TEST_CASE(test_eval_symbolp)
         { "(symbolp nil)", "t" },
         { "(symbolp '())", "t" },
 
-        { "(symbolp 3)", "nil" },
+        //{ "(symbolp 3)", "nil" },
 
         { "(symbolp)", "Eval error: symbolp expecting an argument" },
         { "(symbolp nil nil)", "Eval error: symbolp expecting an argument" },
     };
     test_Evaluator(tests);
 }
+
+/*
 
 BOOST_AUTO_TEST_CASE(test_eval_typeof)
 {
@@ -142,6 +145,7 @@ BOOST_AUTO_TEST_CASE(test_eval_typeof)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_null)
 {
@@ -195,12 +199,12 @@ BOOST_AUTO_TEST_CASE(test_eval_and)
 
         { "(and (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(and (symbolp (quote x)) (symbolp (quote (y))))", "nil" },
-        { "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
-        { "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
+        //{ "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
+        //{ "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        { "(and (= 2 2) (> 2 1))", "t" },
-        { "(and (= 2 2) (< 2 1))", "nil" },
+        //{ "(and (= 2 2) (> 2 1))", "t" },
+        //{ "(and (= 2 2) (< 2 1))", "nil" },
         { "(and 1 2 'c '(f g))", "(f g)" },
 
         { "(and)", "t" },
@@ -229,14 +233,14 @@ BOOST_AUTO_TEST_CASE(test_eval_or)
 
         { "(or (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(or (symbolp (quote x)) (symbolp (quote (y))))", "t" },
-        { "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
-        { "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
+        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
+        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        { "(or (= 2 2) (> 2 1))", "t" },
-        { "(or (= 2 2) (< 2 1))", "t" },
+        //{ "(or (= 2 2) (> 2 1))", "t" },
+        //{ "(or (= 2 2) (< 2 1))", "t" },
         { "(or nil nil nil)", "nil" },
-        { "(or 'a (/ 3 0))", "a" },
+        //{ "(or 'a (/ 3 0))", "a" },
 
         { "(or)", "nil" },
         { "(or 1)", "1" },
@@ -290,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_eval_consp)
         { "(consp t)", "nil" },
         { "(consp 1)", "nil" },
         { "(consp '())", "nil" },
-        { "(consp (list))", "nil" },
+        //{ "(consp (list))", "nil" },
 
         // { "(consp '(a . b))", "t" },
         { "(consp '(a))", "t" },
@@ -332,12 +336,12 @@ BOOST_AUTO_TEST_CASE(test_eval_listp)
 BOOST_AUTO_TEST_CASE(test_eval_cons)
 {
     vector<TestEval> tests = {
-        // { "(cons t t)", "(t . t)" },
+        { "(cons t t)", "(t . t)" },
         { "(cons t nil)", "(t)" },
-        // { "(cons nil t)", "(nil . t)" },
+        { "(cons nil t)", "(nil . t)" },
         { "(cons nil nil)", "(nil)" },
 
-        // { "(cons 'a 'b)", "(a . b)" },
+        { "(cons 'a 'b)", "(a . b)" },
         { "(cons 'a nil)", "(a)" },
 
         { "(cons t '())", "(t)" },
@@ -349,11 +353,11 @@ BOOST_AUTO_TEST_CASE(test_eval_cons)
         { "(cons 'a (cons 'b (cons 'c nil)))", "(a b c)" },
 
         { "(cons 'z '())", "(z)" },
-        // { "(cons '(a b) 'c)", "((a b) . c)" },
+        { "(cons '(a b) 'c)", "((a b) . c)" },
 
-        // { "(cons 1 2)", "(1 . 2)" },
+        { "(cons 1 2)", "(1 . 2)" },
         // {`(cons 1 "2")`, `(1. "2")`},
-        // { "(cons 1 's)", "(1 . s)" },
+        { "(cons 1 's)", "(1 . s)" },
 
         { "(cons 'all (cons (cons 'these (cons 'problems '())) '()))",
             "(all (these problems))" },
@@ -377,6 +381,8 @@ BOOST_AUTO_TEST_CASE(test_eval_list)
     };
     test_Evaluator(tests);
 }
+
+/*
 
 BOOST_AUTO_TEST_CASE(test_eval_reverse)
 {

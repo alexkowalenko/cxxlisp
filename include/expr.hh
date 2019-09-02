@@ -114,6 +114,11 @@ constexpr bool is_atomic(const Expr* s)
 string to_string(const Expr* e);
 string to_dstring(const Expr* e);
 
+inline ostream& operator<<(ostream& os, const Expr* s)
+{
+    return os << to_string(s);
+}
+
 // Bool
 
 inline Expr* sF = mk_bool(false);

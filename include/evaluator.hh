@@ -22,7 +22,7 @@ public:
 
     Expr* eval(Expr* const e, SymbolTable& a);
     //     Expr perform_list(List& l, SymbolTable& a);
-    //     List eval_list(List& l, SymbolTable& a);
+    Expr* eval_list(const Expr* e, SymbolTable& a);
 
     // private:
     //     SymbolTable create_context(Function& f, List args, SymbolTable& a);

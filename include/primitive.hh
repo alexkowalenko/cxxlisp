@@ -21,11 +21,10 @@ using namespace std;
 
 void init_prims();
 
-/*
-using PrimBasicFunct = function<Expr(List& args)>;
-using PrimSimpleFunct = function<Expr(const string& name, List& args)>;
-using PrimFunct = function<Expr(const string& name, List& args, SymbolTable& a)>;
-using PrimFullFunct = function<Expr(Evaluator& l, const string& name, List& args, SymbolTable& a)>;
+using PrimBasicFunct = function<Expr*(Expr* const args)>;
+using PrimSimpleFunct = function<Expr*(const string& name, Expr* const args)>;
+using PrimFunct = function<Expr*(const string& name, Expr* const args, SymbolTable& a)>;
+using PrimFullFunct = function<Expr*(Evaluator& l, const string& name, Expr* const args, SymbolTable& a)>;
 
 struct Primitive {
     string name;
@@ -38,7 +37,7 @@ inline const bool preEvaluate = true;
 
 extern map<string, Primitive> prim_table;
 
-
+/*
 using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
 

@@ -36,11 +36,6 @@ Expr* mk_list(initializer_list<Expr*> p)
     return start;
 }
 
-ostream& operator<<(ostream& os, const Expr* s)
-{
-    return os << to_string(s);
-}
-
 string to_dstring(const Expr* s)
 {
     if (!s) {

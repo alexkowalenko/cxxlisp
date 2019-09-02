@@ -18,28 +18,27 @@
 
 namespace ax {
 
-/*
 map<string, Primitive> prim_table;
-map<Atom, AccessorFunct> setf_accessors;
+// map<Atom, AccessorFunct> setf_accessors;
 
-Expr atom(List& args)
+Expr* atom(Expr* const args)
 {
-    return is_atomic(args[0]) || is_false(args[0]);
+    return is_atomic(args->car) || is_false(args->car) ? sT : sF;
 }
 
-Expr symbolp(List& args)
+Expr* symbolp(Expr* const args)
 {
-    auto a = args.front();
-    if (is_atomic(a)
-        && (is_a<Atom>(a) || is_a<Bool>(a))) {
+    auto a = args->car;
+    if (is_false(a)) {
         return sT;
     }
-    if (is_a<List>(a) && any_cast<List>(a).empty()) {
+    if (is_atomic(a) && (is_atom(a) || is_bool(a))) {
         return sT;
     }
     return sF;
 }
 
+/*
 template <typename T>
 Expr typep(List& args)
 {
@@ -71,20 +70,21 @@ Expr type_of(List& args)
     }
     throw EvalException("Uknown type: " + to_string(e));
 }
+*/
 
-Expr null(List& args)
+Expr* null(Expr* const args)
 {
-    return is_false(args.front());
+    return is_false(args->car) ? sT : sF;
 }
 
-Expr andor(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* andor(Evaluator& l, const string& name, Expr* args, SymbolTable& a)
 {
-    if (args.empty()) {
-        return name == "and";
+    if (is_false(args)) {
+        return name == "and" ? sT : sF;
     }
-    Expr last = sF;
-    for (auto& x : args) {
-        last = l.eval(x, a);
+    auto last = sF;
+    while (args) {
+        last = l.eval(args->car, a);
         if (name == "and") {
             // BOOST_LOG_TRIVIAL(trace) << "and: " << to_string(last) << " : " << is_false(last);
             if (is_false(last)) {
@@ -96,68 +96,52 @@ Expr andor(Evaluator& l, const string& name, List& args, SymbolTable& a)
                 return last;
             }
         }
+        args = args->cdr;
     }
     return name == "and" ? last : sF;
 }
 
-Expr carcdr(const string& name, List& args)
+Expr* carcdr(const string& name, Expr* args)
 {
-    auto res = args.front();
-    if (is_a<List>(res)) {
-        auto list = any_cast<List>(res);
-        if (list.size() > 0) {
-            if (name == "car" || name == "first") {
-                return list.front();
-            } else {
-                // cdr
-                if (list.size() > 1) {
-                    return List(list.begin() + 1, list.end());
-                } else {
-                    return sF;
-                }
-            }
+    auto res = args->car;
+    if (is_list(res)) {
+        if (name == "car" || name == "first") {
+            return res->car;
+        } else {
+            // cdr
+            return res->cdr != nullptr ? res->cdr : sF;
         }
     }
     return sF;
 }
 
-Expr consp(List& args)
+Expr* consp(Expr* args)
 {
-    auto res = args.front();
-    return is_a<List>(res) && any_cast<List>(res).size() > 0;
+    return is_list(args->car) && args->car->car ? sT : sF;
 }
 
-Expr listp(List& args)
+Expr* listp(Expr* args)
 {
-    auto res = args.front();
-    return is_a<List>(res) || is_sF(res);
+    return is_list(args->car) || is_sF(args->car) ? sT : sF;
 }
 
 //   (cons 'a '(x y z)) --> (a x y z)
-Expr cons(List& args)
+Expr* cons(Expr* args)
 {
-    if (is_a<List>(args[1])) {
-        List list = any_cast<List>(args[1]);
-        List res;
-        res.reserve(1 + list.size());
-        res.push_back(args[0]);
-        res.insert(res.end(), list.begin(), list.end());
-        return res;
-
-    } else if (is_sF(args[1])) {
-        return List{ args[0] };
+    auto result = mk_list();
+    result->car = args->car;
+    if (!is_false(args->cdr->car)) {
+        result->cdr = args->cdr->car;
     }
-    return sF;
+    return result;
 }
 
-Expr list(List& args)
+Expr* list(Expr* args)
 {
-    if (args.empty()) {
-        return sF;
-    }
     return args;
 }
 
+/*
 Expr rplaca(List& args)
 {
     if (is_a<List>(args[0])) {
@@ -438,12 +422,12 @@ static PrimBasicFunct char_le = predicate<Char>(le_char);
 
 void init_prims()
 {
-    /*
+
     vector<Primitive> defs{
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
-        { "keywordp", &typep<Keyword>, one_arg, preEvaluate },
-        { "type-of", &type_of, one_arg, preEvaluate },
+        // { "keywordp", &typep<Keyword>, one_arg, preEvaluate },
+        // { "type-of", &type_of, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
         { "not", &null, one_arg, preEvaluate },
@@ -461,173 +445,173 @@ void init_prims()
         { "cons", &cons, two_args, preEvaluate },
         { "list", &list, no_check, preEvaluate },
 
-        { "rplaca", &rplaca, two_args, preEvaluate },
-        { "rplacd", &rplacd, two_args, preEvaluate },
+        // { "rplaca", &rplaca, two_args, preEvaluate },
+        // { "rplacd", &rplacd, two_args, preEvaluate },
 
-        { "reverse", &reverse, one_arg, preEvaluate },
-        { "append", &append, no_check, preEvaluate },
-        // eq
+        // { "reverse", &reverse, one_arg, preEvaluate },
+        // { "append", &append, no_check, preEvaluate },
+        // // eq
 
-        { "eq", &eq_p, two_args, preEvaluate },
-        { "eql", &eql_p, two_args, preEvaluate },
-        { "equal", &equal_p, two_args, preEvaluate },
+        // { "eq", &eq_p, two_args, preEvaluate },
+        // { "eql", &eql_p, two_args, preEvaluate },
+        // { "equal", &equal_p, two_args, preEvaluate },
 
-        // variables
+        // // variables
 
-        { "defvar", &defvar, no_check },
-        { "defconstant", &defvar, no_check },
-        { "defparameter", &defvar, no_check },
-        { "setq", &setq, no_check },
-        { "setf", &setq, no_check },
-        { "makunbound", makunbound, one_arg, preEvaluate },
+        // { "defvar", &defvar, no_check },
+        // { "defconstant", &defvar, no_check },
+        // { "defparameter", &defvar, no_check },
+        // { "setq", &setq, no_check },
+        // { "setf", &setq, no_check },
+        // { "makunbound", makunbound, one_arg, preEvaluate },
 
-        // Program control
+        // // Program control
 
-        { "if", &ifFunc, no_check },
-        { "cond", &cond, no_check },
+        // { "if", &ifFunc, no_check },
+        // { "cond", &cond, no_check },
 
-        { "progn", &progn, no_check },
-        { "prog1", &prog1, no_check },
+        // { "progn", &progn, no_check },
+        // { "prog1", &prog1, no_check },
 
-        { "let", &let, min_two },
-        { "let*", &let, min_two },
+        // { "let", &let, min_two },
+        // { "let*", &let, min_two },
 
-        // Function
-        { "defun", &defun, min_two },
-        { "lambda", &lambda, min_one },
-        { "defmacro", &defun, min_one },
-        { "macro", &lambda, min_one },
-        { "functionp", &functionp, min_one, preEvaluate },
-        { "fboundp", &fboundp, min_one, preEvaluate },
-        { "fmakunbound", makunbound, one_arg, preEvaluate },
-        { "function", &funct, one_arg },
-        { "apply", &apply, min_two },
-        { "funcall", &funcall, min_two },
-        { "mapcar", &mapcar, min_two },
-        { "maplist", &mapcar, min_two },
-        { "dotimes", &doFuncs, min_two },
-        { "dolist", &doFuncs, min_two },
+        // // Function
+        // { "defun", &defun, min_two },
+        // { "lambda", &lambda, min_one },
+        // { "defmacro", &defun, min_one },
+        // { "macro", &lambda, min_one },
+        // { "functionp", &functionp, min_one, preEvaluate },
+        // { "fboundp", &fboundp, min_one, preEvaluate },
+        // { "fmakunbound", makunbound, one_arg, preEvaluate },
+        // { "function", &funct, one_arg },
+        // { "apply", &apply, min_two },
+        // { "funcall", &funcall, min_two },
+        // { "mapcar", &mapcar, min_two },
+        // { "maplist", &mapcar, min_two },
+        // { "dotimes", &doFuncs, min_two },
+        // { "dolist", &doFuncs, min_two },
 
-        // Number functions
+        // // Number functions
 
-        { "numberp", &numberp, one_arg, preEvaluate },
-        { "integerp", &typep<Int>, one_arg, preEvaluate },
-        { "realp", &typep<Float>, one_arg, preEvaluate },
-        { "floatp", &typep<Float>, one_arg, preEvaluate },
+        // { "numberp", &numberp, one_arg, preEvaluate },
+        // { "integerp", &typep<Int>, one_arg, preEvaluate },
+        // { "realp", &typep<Float>, one_arg, preEvaluate },
+        // { "floatp", &typep<Float>, one_arg, preEvaluate },
 
-        { "zerop", zerop, one_num, preEvaluate },
-        { "oddp", &nump<1>, one_int, preEvaluate },
-        { "evenp", &nump<0>, one_int, preEvaluate },
-        { "plusp", plusp, one_num, preEvaluate },
-        { "minusp", minusp, one_num, preEvaluate },
+        // { "zerop", zerop, one_num, preEvaluate },
+        // { "oddp", &nump<1>, one_int, preEvaluate },
+        // { "evenp", &nump<0>, one_int, preEvaluate },
+        // { "plusp", plusp, one_num, preEvaluate },
+        // { "minusp", minusp, one_num, preEvaluate },
 
-        { "=", num_eq, two_num, preEvaluate },
-        { "/=", num_neq, two_num, preEvaluate },
-        { "<", num_lt, two_num, preEvaluate },
-        { "<=", num_le, two_num, preEvaluate },
-        { ">", num_gt, two_num, preEvaluate },
-        { ">=", num_ge, two_num, preEvaluate },
+        // { "=", num_eq, two_num, preEvaluate },
+        // { "/=", num_neq, two_num, preEvaluate },
+        // { "<", num_lt, two_num, preEvaluate },
+        // { "<=", num_le, two_num, preEvaluate },
+        // { ">", num_gt, two_num, preEvaluate },
+        // { ">=", num_ge, two_num, preEvaluate },
 
-        { "+", num_add, any_num, preEvaluate },
-        { "-", &num_sub_init, any_num, preEvaluate },
-        { "*", num_mult, any_num, preEvaluate },
-        { "/", check_zeros(num_div), min_one_num, preEvaluate },
-        { "mod", check_zeros(num_mod), two_num, preEvaluate },
-        { "rem", check_zeros(num_rem), two_num, preEvaluate },
-        { "^", num_power, min_one_num, preEvaluate },
-        { "expt", num_power, min_one_num, preEvaluate },
-        { "max", num_max, min_one_num, preEvaluate },
-        { "min", num_min, min_one_num, preEvaluate },
+        // { "+", num_add, any_num, preEvaluate },
+        // { "-", &num_sub_init, any_num, preEvaluate },
+        // { "*", num_mult, any_num, preEvaluate },
+        // { "/", check_zeros(num_div), min_one_num, preEvaluate },
+        // { "mod", check_zeros(num_mod), two_num, preEvaluate },
+        // { "rem", check_zeros(num_rem), two_num, preEvaluate },
+        // { "^", num_power, min_one_num, preEvaluate },
+        // { "expt", num_power, min_one_num, preEvaluate },
+        // { "max", num_max, min_one_num, preEvaluate },
+        // { "min", num_min, min_one_num, preEvaluate },
 
-        { "abs", num_abs, one_num, preEvaluate },
-        { "floor", num_floor, one_num, preEvaluate },
-        { "ceiling", num_ceil, one_num, preEvaluate },
-        { "round", num_round, one_num, preEvaluate },
-        { "truncate", num_trunc, one_num, preEvaluate },
+        // { "abs", num_abs, one_num, preEvaluate },
+        // { "floor", num_floor, one_num, preEvaluate },
+        // { "ceiling", num_ceil, one_num, preEvaluate },
+        // { "round", num_round, one_num, preEvaluate },
+        // { "truncate", num_trunc, one_num, preEvaluate },
 
-        { "log", num_log, one_num, preEvaluate },
-        { "exp", num_exp, one_num, preEvaluate },
-        { "sin", num_sin, one_num, preEvaluate },
-        { "cos", num_cos, one_num, preEvaluate },
-        { "tan", num_tan, one_num, preEvaluate },
-        { "asin", num_asin, one_num, preEvaluate },
-        { "acos", num_acos, one_num, preEvaluate },
-        { "atan", num_atan, one_num, preEvaluate },
-        { "sqrt", num_sqrt, one_num, preEvaluate },
+        // { "log", num_log, one_num, preEvaluate },
+        // { "exp", num_exp, one_num, preEvaluate },
+        // { "sin", num_sin, one_num, preEvaluate },
+        // { "cos", num_cos, one_num, preEvaluate },
+        // { "tan", num_tan, one_num, preEvaluate },
+        // { "asin", num_asin, one_num, preEvaluate },
+        // { "acos", num_acos, one_num, preEvaluate },
+        // { "atan", num_atan, one_num, preEvaluate },
+        // { "sqrt", num_sqrt, one_num, preEvaluate },
 
-        { "incf", &incf, min_one },
-        { "decf", &incf, min_one },
+        // { "incf", &incf, min_one },
+        // { "decf", &incf, min_one },
 
-        // String functions
-        { "stringp", &typep<String>, one_arg, preEvaluate },
-        { "string=", str_eq, two_str, preEvaluate },
-        { "string-equal", str_eq, two_str, preEvaluate },
-        { "string/=", str_neq, two_str, preEvaluate },
-        { "string-not-equal", str_neq, two_str, preEvaluate },
-        { "string<", str_lt, two_str, preEvaluate },
-        { "string-lessp", str_lt, two_str, preEvaluate },
-        { "string>", str_gt, two_str, preEvaluate },
-        { "string-greaterp", str_gt, two_str, preEvaluate },
-        { "string<=", str_le, two_str, preEvaluate },
-        { "string-not-greaterp", str_le, two_str, preEvaluate },
-        { "string>=", str_ge, two_str, preEvaluate },
-        { "string-not-lessp", str_ge, two_str, preEvaluate },
+        // // String functions
+        // { "stringp", &typep<String>, one_arg, preEvaluate },
+        // { "string=", str_eq, two_str, preEvaluate },
+        // { "string-equal", str_eq, two_str, preEvaluate },
+        // { "string/=", str_neq, two_str, preEvaluate },
+        // { "string-not-equal", str_neq, two_str, preEvaluate },
+        // { "string<", str_lt, two_str, preEvaluate },
+        // { "string-lessp", str_lt, two_str, preEvaluate },
+        // { "string>", str_gt, two_str, preEvaluate },
+        // { "string-greaterp", str_gt, two_str, preEvaluate },
+        // { "string<=", str_le, two_str, preEvaluate },
+        // { "string-not-greaterp", str_le, two_str, preEvaluate },
+        // { "string>=", str_ge, two_str, preEvaluate },
+        // { "string-not-lessp", str_ge, two_str, preEvaluate },
 
-        { "string-ci=",
-            funct_ci(str_eq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }), two_str, preEvaluate },
-        { "string-ci/=",
-            funct_ci(str_neq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-            two_str, preEvaluate },
-        { "string-ci<",
-            funct_ci(str_lt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-            two_str, preEvaluate },
-        { "string-ci>",
-            funct_ci(str_gt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-            two_str, preEvaluate },
-        { "string-ci<=",
-            funct_ci(str_le, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-            two_str, preEvaluate },
-        { "string-ci>=",
-            funct_ci(str_ge, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-            two_str, preEvaluate },
+        // { "string-ci=",
+        //     funct_ci(str_eq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }), two_str, preEvaluate },
+        // { "string-ci/=",
+        //     funct_ci(str_neq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
+        //     two_str, preEvaluate },
+        // { "string-ci<",
+        //     funct_ci(str_lt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
+        //     two_str, preEvaluate },
+        // { "string-ci>",
+        //     funct_ci(str_gt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
+        //     two_str, preEvaluate },
+        // { "string-ci<=",
+        //     funct_ci(str_le, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
+        //     two_str, preEvaluate },
+        // { "string-ci>=",
+        //     funct_ci(str_ge, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
+        //     two_str, preEvaluate },
 
-        { "string", &string_fnct, one_arg, preEvaluate },
-        { "string-upcase", &string_fnct, one_arg, preEvaluate },
-        { "string-downcase", &string_fnct, one_arg, preEvaluate },
+        // { "string", &string_fnct, one_arg, preEvaluate },
+        // { "string-upcase", &string_fnct, one_arg, preEvaluate },
+        // { "string-downcase", &string_fnct, one_arg, preEvaluate },
 
-        // Character functions
-        { "characterp", &typep<Char>, one_arg, preEvaluate },
-        { "char=", char_eq, two_char, preEvaluate },
-        { "char-equal", char_eq, two_char, preEvaluate },
-        { "char/=", char_neq, two_char, preEvaluate },
-        { "char-not-equal", char_neq, two_char, preEvaluate },
-        { "char<", char_lt, two_char, preEvaluate },
-        { "char-lessp", char_lt, two_char, preEvaluate },
-        { "char>", char_gt, two_char, preEvaluate },
-        { "char-greaterp", char_gt, two_char, preEvaluate },
-        { "char<=", char_le, two_char, preEvaluate },
-        { "char-not-greaterp", char_le, two_char, preEvaluate },
-        { "char>=", char_ge, two_char, preEvaluate },
-        { "char-not-lessp", char_ge, two_char, preEvaluate },
+        // // Character functions
+        // { "characterp", &typep<Char>, one_arg, preEvaluate },
+        // { "char=", char_eq, two_char, preEvaluate },
+        // { "char-equal", char_eq, two_char, preEvaluate },
+        // { "char/=", char_neq, two_char, preEvaluate },
+        // { "char-not-equal", char_neq, two_char, preEvaluate },
+        // { "char<", char_lt, two_char, preEvaluate },
+        // { "char-lessp", char_lt, two_char, preEvaluate },
+        // { "char>", char_gt, two_char, preEvaluate },
+        // { "char-greaterp", char_gt, two_char, preEvaluate },
+        // { "char<=", char_le, two_char, preEvaluate },
+        // { "char-not-greaterp", char_le, two_char, preEvaluate },
+        // { "char>=", char_ge, two_char, preEvaluate },
+        // { "char-not-lessp", char_ge, two_char, preEvaluate },
 
-        { "char-ci=",
-            funct_ci(char_eq, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        { "char-ci<", funct_ci(char_lt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        { "char-ci>", funct_ci(char_gt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        { "char-ci<=", funct_ci(char_le, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        { "char-ci>=", funct_ci(char_ge, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        // { "char-ci=",
+        //     funct_ci(char_eq, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        // { "char-ci<", funct_ci(char_lt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        // { "char-ci>", funct_ci(char_gt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        // { "char-ci<=", funct_ci(char_le, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        // { "char-ci>=", funct_ci(char_ge, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
 
-        // Sequence
+        // // Sequence
 
-        { "length", &length, one_arg, preEvaluate },
-        { "elt", &elt, two_args, preEvaluate },
-        { "set-elt", &setelt, three_arg, preEvaluate },
-        { "subseq", &subseq, min_two, preEvaluate },
-        { "make-sequence", &make_sequence, min_two, preEvaluate },
+        // { "length", &length, one_arg, preEvaluate },
+        // { "elt", &elt, two_args, preEvaluate },
+        // { "set-elt", &setelt, three_arg, preEvaluate },
+        // { "subseq", &subseq, min_two, preEvaluate },
+        // { "make-sequence", &make_sequence, min_two, preEvaluate },
 
-        // I/O
-        { "error", &throw_error, one_arg, preEvaluate },
-        { "quit", &quit, no_check, preEvaluate },
+        // // I/O
+        // { "error", &throw_error, one_arg, preEvaluate },
+        // { "quit", &quit, no_check, preEvaluate },
 
     };
 
@@ -635,7 +619,6 @@ void init_prims()
         prim_table[p.name] = p;
     }
 
-    setf_accessors[Atom("elt")] = &setf_elt;
-    */
+    // setf_accessors[Atom("elt")] = &setf_elt;
 }
 }
