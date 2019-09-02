@@ -77,7 +77,7 @@ Expr* null(Expr* const args)
     return is_false(args->car) ? sT : sF;
 }
 
-Expr* andor(Evaluator& l, const string& name, Expr* args, SymbolTable& a)
+Expr* andor(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
     if (is_false(args)) {
         return name == "and" ? sT : sF;
@@ -234,174 +234,175 @@ Expr* equal_p(Expr* args)
 // variable functions
 //
 
-/*
-Expr defvar(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* defvar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (args.empty()) {
+    if (is_false(args)) {
         throw EvalException(name + " needs a name");
     }
-    if (args.size() > 3) {
+    auto list_size = size_list(args);
+    if (list_size > 3) {
         throw EvalException(name + " only takes maximum of 3 arguments");
     }
-    auto n = args[0];
-    if (!is_a<Atom>(n)) {
+    auto n = args->car;
+    if (!is_a<Type::atom>(n)) {
         throw EvalException(name + " requires a symbol as a first argument");
     }
     if (name == "defvar") {
-        if (args.size() > 1) {
-            auto val = l.eval(args[1], a);
-            a.put(any_cast<Atom>(n), val);
+        if (list_size > 1) {
+            auto val = l.eval(args->cdr->car, a);
+            a->put(n->atom, val);
         } else {
-            a.put(any_cast<Atom>(n), sF);
+            a->put(n->atom, sF);
         }
     } else if (name == "defparameter") {
-        if (args.size() == 1) {
+        if (list_size == 1) {
             throw EvalException(name + " needs a value");
         }
-        auto val = l.eval(args[1], a);
-        a.put(any_cast<Atom>(n), val); // should be global symbol table
+        auto val = l.eval(args->cdr->car, a);
+        l.globalTable->put(n->atom, val);
     } else if (name == "defconstant") {
-        if (args.size() == 1) {
+        if (list_size == 1) {
             throw EvalException(name + " needs a value");
         }
-        if (auto x = a.find(any_cast<Atom>(n))) {
-            throw RuntimeException(name + " redefined const " + any_cast<Atom>(n));
+        if (auto x = a->find(n->atom)) {
+            throw RuntimeException(name + " redefined const " + n->atom);
         }
-        auto val = l.eval(args[1], a);
-        a.put(any_cast<Atom>(n), val); // should be global symbol table
+        auto val = l.eval(args->cdr->car, a);
+        l.globalTable->put(n->atom, val);
     }
     return n;
 }
 
-Expr setq(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (args.size() % 2 != 0) {
+    if (size_list(args) % 2 != 0) {
         throw EvalException(name + " requires an even number of variables");
     }
-    Expr val = sF;
-    for (auto x = args.begin(); x != args.end(); x++) {
-        auto n = *x;
-        x++;
-        auto second = *x;
-        val = l.eval(second, a);
-        if (is_a<Atom>(n)) {
-            if (!a.set(any_cast<Atom>(n), val)) {
-                a.put(any_cast<Atom>(n), val);
+    Expr* val = sF;
+    while (args) {
+        auto n = args->car;
+        val = l.eval(args->cdr->car, a);
+        if (is_a<Type::atom>(n)) {
+            if (!a->set(n->atom, val)) {
+                a->put(n->atom, val);
             }
-        } else if (is_a<List>(n) && name == "setf") {
-            List accessor = any_cast<List>(n);
-            if (accessor.size() < 1 && is_a<Atom>(accessor[0])) {
-                throw EvalException(name + " expecting accessor name");
-            }
-            List aargs(accessor.begin() + 1, accessor.end());
-            if (auto setf = setf_accessors.find(any_cast<Atom>(accessor[0])); setf != setf_accessors.end()) {
-                val = setf->second(l, aargs, val, a);
-            } else {
-                throw EvalException(name + " accessor not found: " + any_cast<Atom>(accessor[0]));
-            }
+            // } else if (is_a<Type::list>(n) && name == "setf") {
+            //     List accessor = any_cast<List>(n);
+            //     if (accessor.size() < 1 && is_a<Atom>(accessor[0])) {
+            //         throw EvalException(name + " expecting accessor name");
+            //     }
+            //     List aargs(accessor.begin() + 1, accessor.end());
+            //     if (auto setf = setf_accessors.find(any_cast<Atom>(accessor[0])); setf != setf_accessors.end()) {
+            //         val = setf->second(l, aargs, val, a);
+            //     } else {
+            //         throw EvalException(name + " accessor not found: " + any_cast<Atom>(accessor[0]));
+            //     }
         } else {
             throw EvalException(name + " requires a symbol as an argument");
         }
+        args = args->cdr->cdr; // move forward 2 args
     }
     return val;
 }
 
-Expr makunbound(const string&, List& args, SymbolTable& a)
+Expr* makunbound(const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (is_a<Atom>(args[0])) {
-        a.remove(any_cast<Atom>(args[0]));
+    if (is_a<Type::atom>(args->car)) {
+        a->remove(args->car->atom);
     }
-    return args[0];
+    return args->car;
 }
 
 //
 // Program control
 //
 
-Expr ifFunc(Evaluator& l, const string&, List& args, SymbolTable& a)
+Expr* ifFunc(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (args.size() < 2) {
+    auto size = size_list(args);
+    if (size < 2) {
         throw EvalException("if requires 2 or 3 arguments");
     }
-    auto res = l.eval(args[0], a);
+    auto res = l.eval(args->car, a);
     if (is_false(res)) {
-        if (args.size() < 3) {
+        if (size < 3) {
             return sF;
         }
-        return l.eval(args[2], a);
+        return l.eval(args->cdr->cdr->car, a);
     }
     //
-    if (args.size() < 2) {
+    if (size < 2) {
         return sF;
     }
-    return l.eval(args[1], a);
+    return l.eval(args->cdr->car, a);
 }
 
-Expr cond(Evaluator& l, const string&, List& args, SymbolTable& a)
+Expr* cond(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    for (auto clause : args) {
-        if (is_a<List>(clause)) {
-            auto clauseList = any_cast<List>(clause);
-            auto first = l.eval(clauseList[0], a);
+    while (args) {
+        if (is_a<Type::list>(args->car)) {
+            auto first = l.eval(args->car->car, a);
             if (is_false(first)) {
+                args = args->cdr;
                 continue;
             }
-            if (clauseList.size() == 1) {
+            if (size_list(args->car) == 1) {
                 return first;
             }
-            List stats(clauseList.begin() + 1, clauseList.end());
-            return l.perform_list(stats, a);
+            return l.perform_list(args->car->cdr, a);
         }
-        return EvalException("cond: clause " + to_string(clause) + "is not a list");
+        throw EvalException("cond: clause " + to_string(args->car) + "is not a list");
     }
     return sF;
 }
 
-Expr progn(Evaluator& l, const string&, List& args, SymbolTable& a)
+Expr* progn(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
     return l.perform_list(args, a);
 }
 
-Expr prog1(Evaluator& l, const string&, List& args, SymbolTable& a)
+Expr* prog1(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (args.empty()) {
+    if (is_false(args)) {
         return sF;
     }
-    auto result = l.eval(args[0], a);
-    List rest(args.begin() + 1, args.end());
-    l.perform_list(rest, a);
+    auto result = l.eval(args->car, a);
+    l.perform_list(args->cdr, a);
     return result;
 }
 
-Expr let(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* let(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (!is_a<List>(args[0])) {
+    if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": expecting a list of bindings");
     }
-    SymbolTable context(&a);
-    for (auto b : any_cast<List>(args[0])) {
-        if (!is_a<List>(b)) {
-            throw EvalException(name + ": expecting a binding " + to_string(b));
+    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+
+    auto b = args->car;
+    while (!is_false(b)) {
+        if (!is_a<Type::list>(b->car)) {
+            throw EvalException(name + ": expecting a binding " + to_string(b->car));
         }
-        Expr sym = any_cast<List>(b)[0];
-        if (!is_a<Atom>(sym)) {
+        auto sym = b->car->car;
+        if (!is_a<Type::atom>(sym)) {
             throw EvalException(name + ": expecting a symbol for the binding - " + to_string(sym));
         }
-        Expr val;
+        Expr* val;
         if (name == "let") {
-            val = l.eval(any_cast<List>(b)[1], a);
+            val = l.eval(b->car->cdr->car, a);
         } else {
             // let*
-            val = l.eval(any_cast<List>(b)[1], context);
+            val = l.eval(b->car->cdr->car, context);
         }
-        context.put(any_cast<Atom>(sym), val);
+        context->put(sym->atom, val);
+        b = b->cdr;
     }
-    List code(args.begin() + 1, args.end());
-    return l.perform_list(code, context);
+    return l.perform_list(args->cdr, context);
 }
 
 // Strings
 
+/*
 static function<bool(String, String)> eq_str = equal_to<String>();
 static function<bool(String, String)> neq_str = not_equal_to<String>();
 static function<bool(String, String)> gt_str = greater<String>();
@@ -472,23 +473,23 @@ void init_prims()
 
         // // variables
 
-        // { "defvar", &defvar, no_check },
-        // { "defconstant", &defvar, no_check },
-        // { "defparameter", &defvar, no_check },
-        // { "setq", &setq, no_check },
-        // { "setf", &setq, no_check },
-        // { "makunbound", makunbound, one_arg, preEvaluate },
+        { "defvar", &defvar, no_check },
+        { "defconstant", &defvar, no_check },
+        { "defparameter", &defvar, no_check },
+        { "setq", &setq, no_check },
+        { "setf", &setq, no_check },
+        { "makunbound", makunbound, one_arg, preEvaluate },
 
         // // Program control
 
-        // { "if", &ifFunc, no_check },
-        // { "cond", &cond, no_check },
+        { "if", &ifFunc, no_check },
+        { "cond", &cond, no_check },
 
-        // { "progn", &progn, no_check },
-        // { "prog1", &prog1, no_check },
+        { "progn", &progn, no_check },
+        { "prog1", &prog1, no_check },
 
-        // { "let", &let, min_two },
-        // { "let*", &let, min_two },
+        { "let", &let, min_two },
+        { "let*", &let, min_two },
 
         // // Function
         // { "defun", &defun, min_two },

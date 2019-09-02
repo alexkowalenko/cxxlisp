@@ -22,6 +22,8 @@ public:
     SymbolTable(SymbolTable* s)
         : next(s){};
 
+    SymbolTable(const SymbolTable&) = delete; // stop copying
+
     inline void put(const string& name, Expr* const val)
     {
         table[name] = val;

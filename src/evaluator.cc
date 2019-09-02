@@ -149,7 +149,7 @@ Expr Evaluator::backquote(Expr& s, SymbolTable& a)
 }
 */
 
-Expr* Evaluator::eval_list(const Expr* e, SymbolTable& a)
+Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
 {
     if (is_false(e)) {
         return sF;
@@ -169,16 +169,17 @@ Expr* Evaluator::eval_list(const Expr* e, SymbolTable& a)
     return result;
 }
 
-/*
-Expr Evaluator::perform_list(List& l, SymbolTable& a)
+Expr* Evaluator::perform_list(Expr* e, shared_ptr<SymbolTable> a)
 {
-    Expr result = sF;
-    for_each(l.begin(), l.end(), [&](Expr& e) { result = eval(e, a); });
+    auto result = sF;
+    while (e) {
+        result = eval(e->car, a);
+        e = e->cdr;
+    }
     return result;
 }
-*/
 
-Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
+Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
 {
     //if (opt.debug_expr) {
     BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
@@ -191,12 +192,11 @@ Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
     case Type::integer:
         return e;
     case Type::atom:
-        return e;
-    //     if (auto val = a.find(any_cast<Atom>(e))) {
-    //         return *val;
-    //     }
-    //     throw EvalException("unbound variable: "s + to_string(e));
-    // }
+        if (auto val = a->find(e->atom)) {
+            return *val;
+        }
+        throw EvalException("unbound variable: "s + to_string(e));
+
     // if (is_a<String>(e) || is_a<Char>(e)) {
     //     return e;
     // }

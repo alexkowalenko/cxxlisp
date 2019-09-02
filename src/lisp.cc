@@ -27,8 +27,8 @@ public:
 
 Lisp::Lisp(Options& o)
     : opt(o)
-    , symboltable(nullptr)
 {
+    symboltable = make_shared<SymbolTable>(nullptr);
     GC_INIT();
 }
 
@@ -248,7 +248,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    Evaluator evaluator(opt);
+    Evaluator evaluator(opt, symboltable);
 
     while (true) {
         ParserResult res;

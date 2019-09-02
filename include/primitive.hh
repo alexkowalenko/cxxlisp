@@ -23,8 +23,8 @@ void init_prims();
 
 using PrimBasicFunct = function<Expr*(Expr* const args)>;
 using PrimSimpleFunct = function<Expr*(const string& name, Expr* const args)>;
-using PrimFunct = function<Expr*(const string& name, Expr* const args, SymbolTable& a)>;
-using PrimFullFunct = function<Expr*(Evaluator& l, const string& name, Expr* const args, SymbolTable& a)>;
+using PrimFunct = function<Expr*(const string& name, Expr* const args, shared_ptr<SymbolTable> a)>;
+using PrimFullFunct = function<Expr*(Evaluator& l, const string& name, Expr* const args, shared_ptr<SymbolTable> a)>;
 
 struct Primitive {
     string name;

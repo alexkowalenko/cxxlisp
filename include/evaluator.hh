@@ -17,14 +17,17 @@ namespace ax {
 
 class Evaluator {
 public:
-    Evaluator(Options& o)
-        : opt(o){};
+    Evaluator(Options& o, shared_ptr<SymbolTable> g)
+        : globalTable(g)
+        , opt(o){};
 
-    Expr* eval(Expr* const e, SymbolTable& a);
-    //     Expr perform_list(List& l, SymbolTable& a);
-    Expr* eval_list(const Expr* e, SymbolTable& a);
+    Expr* eval(Expr* const e, shared_ptr<SymbolTable> a);
+    Expr* perform_list(Expr* const e, shared_ptr<SymbolTable> a);
+    Expr* eval_list(const Expr* e, shared_ptr<SymbolTable> a);
 
-    // private:
+    shared_ptr<SymbolTable> globalTable;
+
+private:
     //     SymbolTable create_context(Function& f, List args, SymbolTable& a);
     //     Expr perform_function(Function& f, List args, SymbolTable& a);
     //     Expr backquote(Expr& s, SymbolTable& a);
