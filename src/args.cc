@@ -11,38 +11,42 @@
 
 namespace ax {
 
-// template <typename T>
-// optional<string> checkType(const string& name, const List& args, const string& tname)
-// {
-//     if (args.size() == 1) {
-//         if (!is_a<T>(args[0])) {
-//             return name + " argument needs to be a " + tname;
-//         }
-//     } else {
-//         for (auto x : args) {
-//             if (!is_a<T>(x)) {
-//                 return name + " arguments needs to be a " + tname;
-//             }
-//         }
-//     }
-//     return {};
-// }
+template <Type t>
+optional<string> checkType(const string& name, const Expr* args, const string& tname)
+{
+    if (size_list(args) == 1) {
+        if (!is_a<t>(args->car)) {
+            return name + " argument needs to be a " + tname;
+        }
+    } else {
+        while (args) {
+            if (!(is_a<t>(args->car))) {
+                return name + " arguments needs to be a " + tname;
+            }
+            args = args->cdr;
+        }
+    }
+    return {};
+}
 
-// optional<string> checkTypeNumeric(const string& name, const Expr* args, const string& tname)
-// {
-//     if (size_list(args)) {
-//         if (!(is_a<Int>(args->car) || is_a<Float>(args->car))) {
-//             return name + " argument needs to be a " + tname;
-//         }
-//     } else {
-//         for (auto x : args) {
-//             if (!(is_a<Int>(x) || is_a<Float>(x))) {
-//                 return name + " arguments needs to be a " + tname;
-//             }
-//         }
-//     }
-//     return {};
-// }
+optional<string> checkTypeNumeric(const string& name, const Expr* args, const string& tname)
+{
+    if (is_false(args)) {
+        return {};
+    } else if (size_list(args) == 1) {
+        if (!(is_a<Type::integer>(args->car) /*|| is_a<Float>(args->car) */)) {
+            return name + " argument needs to be a " + tname;
+        }
+    } else {
+        while (args) {
+            if (!(is_a<Type::integer>(args->car) /* || is_a<Float>(x) */)) {
+                return name + " arguments needs to be a " + tname;
+            }
+            args = args->cdr;
+        }
+    }
+    return {};
+}
 
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const Expr* args)
 {
@@ -82,15 +86,16 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
         break;
     case ArgConstraintType::no_check:;
     }
-    // if (cons.argType == ArgType::numeric) {
-    //     return checkTypeNumeric(name, args, "number");
-    // } else if (cons.argType == ArgType::integer) {
-    //     return checkType<Int>(name, args, "integer");
-    // } else if (cons.argType == ArgType::string) {
-    //     return checkType<String>(name, args, "string");
-    // } else if (cons.argType == ArgType::character) {
-    //     return checkType<Char>(name, args, "character");
-    // }
+    if (cons.argType == ArgType::numeric) {
+        return checkTypeNumeric(name, args, "number");
+    } else if (cons.argType == ArgType::integer) {
+        return checkType<Type::integer>(name, args, "integer");
+        // } else if (cons.argType == ArgType::string) {
+        //     return checkType<String>(name, args, "string");
+        // } else if (cons.argType == ArgType::character) {
+        //     return checkType<Char>(name, args, "character");
+        // }
+    }
     return {};
 }
 }

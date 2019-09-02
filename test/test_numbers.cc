@@ -38,18 +38,17 @@ BOOST_AUTO_TEST_CASE(test_eval)
         { "(cdr '(2 3 4))", "(3 4)" },
 
         // floats
-        { "1.2", "1.2" },
-        { "0.6", "0.6" },
-        { "-46846368.464", "-46846368.464" },
-        { "3.145926536", "3.145926536" },
-        { "1.2345e-8", "1.2345e-08" },
-        { "-1.0", "-1" },
-        { "+1.0", "1" },
+        // { "1.2", "1.2" },
+        // { "0.6", "0.6" },
+        // { "-46846368.464", "-46846368.464" },
+        // { "3.145926536", "3.145926536" },
+        // { "1.2345e-8", "1.2345e-08" },
+        // { "-1.0", "-1" },
+        // { "+1.0", "1" },
     };
-    //test_Evaluator(tests);
+    test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_numberp)
 {
     auto fmt = boost::format("(numberp %1%)");
@@ -62,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmt % numeric_limits<long>::max()), "t" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
-        //{ "(numberp (+ 2 3))", "t" },
+        { "(numberp (+ 2 3))", "t" },
         { "(numberp 'a)", "nil" },
         { "(numberp '(a b c))", "nil" },
         { "(numberp t)", "nil" },
@@ -78,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { boost::str(fmp % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmp % (numeric_limits<long>::max())), "t" },
         { boost::str(fmp % (numeric_limits<long>::max() - 1)), "t" },
-        //{ "(integerp (+ 2 3))", "t" },
+        { "(integerp (+ 2 3))", "t" },
         //{ "(integerp 3.145926536)", "nil" },
         //{ "(integerp #C(1 2))", "nil" },
         { "(integerp 'a)", "nil" },
@@ -89,38 +88,38 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { "(integerp)", "Eval error: integerp expecting an argument" },
         { "(integerp nil nil)", "Eval error: integerp expecting an argument" },
 
-        // realp
-        { "(realp 1)", "nil" },
-        { "(realp (+ 2 3))", "nil" },
-        { "(realp 0)", "nil" },
-        //{ "(realp #C(1 2))", "nil" },
-        { "(realp 'a)", "nil" },
-        { "(realp '(a b c))", "nil" },
-        { "(realp t)", "nil" },
-        { "(realp nil)", "nil" },
+        // // realp
+        // { "(realp 1)", "nil" },
+        // { "(realp (+ 2 3))", "nil" },
+        // { "(realp 0)", "nil" },
+        // //{ "(realp #C(1 2))", "nil" },
+        // { "(realp 'a)", "nil" },
+        // { "(realp '(a b c))", "nil" },
+        // { "(realp t)", "nil" },
+        // { "(realp nil)", "nil" },
 
-        // floatp
-        { "(floatp 1)", "nil" },
-        { "(floatp (+ 2 3))", "nil" },
-        { "(floatp 0)", "nil" },
-        //{ "(floatp #C(1 2))", "nil" },
-        { "(floatp 'a)", "nil" },
-        { "(floatp '(a b c))", "nil" },
-        { "(floatp t)", "nil" },
-        { "(floatp nil)", "nil" },
+        // // floatp
+        // { "(floatp 1)", "nil" },
+        // { "(floatp (+ 2 3))", "nil" },
+        // { "(floatp 0)", "nil" },
+        // //{ "(floatp #C(1 2))", "nil" },
+        // { "(floatp 'a)", "nil" },
+        // { "(floatp '(a b c))", "nil" },
+        // { "(floatp t)", "nil" },
+        // { "(floatp nil)", "nil" },
 
-        // floats
-        { "(numberp 3.145926536)", "t" },
-        { "(numberp -46846368.464)", "t" },
-        { "(numberp 1.2345e-8)", "t" },
+        // // floats
+        // { "(numberp 3.145926536)", "t" },
+        // { "(numberp -46846368.464)", "t" },
+        // { "(numberp 1.2345e-8)", "t" },
 
-        { "(integerp 1)", "t" },
-        { "(integerp -46846368.464)", "nil" },
-        { "(integerp 1.2345e-8)", "nil" },
+        // { "(integerp 1)", "t" },
+        // { "(integerp -46846368.464)", "nil" },
+        // { "(integerp 1.2345e-8)", "nil" },
 
-        { "(realp 3.145926536)", "t" },
-        { "(realp -46846368.464)", "t" },
-        { "(realp -1.2345e-8)", "t" },
+        // { "(realp 3.145926536)", "t" },
+        // { "(realp -46846368.464)", "t" },
+        // { "(realp -1.2345e-8)", "t" },
 
     };
     test_Evaluator(tests);
@@ -131,12 +130,12 @@ BOOST_AUTO_TEST_CASE(test_zerop)
     auto fmt = boost::format("(zerop %1%)");
     vector<TestEval> tests = {
         { "(zerop 0)", "t" },
-        { "(zerop 0.0)", "t" },
+        //{ "(zerop 0.0)", "t" },
         //{ "(zerop 0.0s0)", "t" },
         //{ "(zerop 0.0f0)", "t" },
         //{ "(zerop 0.0d0)", "t" },
         //{ "(zerop 0.0l0)", "t" },
-        { "(zerop -0.0)", "t" },
+        //{ "(zerop -0.0)", "t" },
         //{ "(zerop -0.0s0)", "t" },
         //{ "(zerop -0.0f0)", "t" },
         //{ "(zerop -0.0d0)", "t" },
@@ -151,12 +150,12 @@ BOOST_AUTO_TEST_CASE(test_zerop)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
 
         // Floats
-        { "(zerop 3.145926536)", "nil" },
-        { "(zerop -1.2345e-8)", "nil" },
-        { boost::str(fmt % numeric_limits<double>::min()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::max()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::epsilon()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::lowest()), "nil" },
+        // { "(zerop 3.145926536)", "nil" },
+        // { "(zerop -1.2345e-8)", "nil" },
+        // { boost::str(fmt % numeric_limits<double>::min()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::max()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::epsilon()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::lowest()), "nil" },
 
         // Complex
         //{ "(zerop #C(0 0))", "t" },
@@ -183,25 +182,25 @@ BOOST_AUTO_TEST_CASE(test_plusp)
         { "(plusp 0)", "nil" },
         { "(plusp -1)", "nil" },
         { "(plusp 0)", "nil" },
-        { "(plusp 0.0)", "nil" },
+        //{ "(plusp 0.0)", "nil" },
         //{ "(plusp 0.0s0)", "nil" },
         //{ "(plusp 0.0f0)", "nil" },
         //{ "(plusp 0.0d0)", "nil" },
         //{ "(plusp 0.0l0)", "nil" },
-        { "(plusp -0.0)", "nil" },
+        //{ "(plusp -0.0)", "nil" },
         //{ "(plusp -0.0s0)", "nil" },
         //{ "(plusp -0.0f0)", "nil" },
         //{ "(plusp -0.0d0)", "nil" },
         //{ "(plusp -0.0l0)", "nil" },
 
         // Floats
-        { "(plusp 3.145926536)", "t" },
-        { "(plusp -1.2345e-8)", "nil" },
-        { "(plusp 0.0)", "nil" },
-        { boost::str(fmt % numeric_limits<double>::min()), "t" },
-        { boost::str(fmt % numeric_limits<double>::max()), "t" },
-        { boost::str(fmt % numeric_limits<double>::epsilon()), "t" },
-        { boost::str(fmt % numeric_limits<double>::lowest()), "nil" },
+        // { "(plusp 3.145926536)", "t" },
+        // { "(plusp -1.2345e-8)", "nil" },
+        // { "(plusp 0.0)", "nil" },
+        // { boost::str(fmt % numeric_limits<double>::min()), "t" },
+        // { boost::str(fmt % numeric_limits<double>::max()), "t" },
+        // { boost::str(fmt % numeric_limits<double>::epsilon()), "t" },
+        // { boost::str(fmt % numeric_limits<double>::lowest()), "nil" },
 
         { "(plusp 'a)", "Eval error: plusp argument needs to be a number" },
         { "(plusp)", "Eval error: plusp expecting an argument" },
@@ -216,33 +215,32 @@ BOOST_AUTO_TEST_CASE(test_minusp)
     vector<TestEval> tests = {
         { "(minusp (- 2 3))", "t" },
         { "(minusp -1)", "t" },
+        { "(minusp 1)", "nil" },
         { boost::str(fmt % numeric_limits<long>::min()), "t" },
         { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmt % numeric_limits<long>::max()), "nil" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
 
         { "(minusp 0)", "nil" },
-        { "(minusp 0.0)", "nil" },
+        //{ "(minusp 0.0)", "nil" },
         //{ "(minusp 0.0s0)", "nil" },
         //{ "(minusp 0.0f0)", "nil" },
         //{ "(minusp 0.0d0)", "nil" },
         //{ "(minusp 0.0l0)", "nil" },
-        { "(minusp -0.0)", "nil" },
+        //{ "(minusp -0.0)", "nil" },
         //{ "(minusp -0.0s0)", "nil" },
         //{ "(minusp -0.0f0)", "nil" },
         //{ "(minusp -0.0d0)", "nil" },
         //{ "(minusp -0.0l0)", "nil" },
 
-        { "(minusp 1)", "nil" },
-
         // Floats
-        { "(minusp 3.145926536)", "nil" },
-        { "(minusp -1.2345e-8)", "t" },
-        { "(minusp 0.0)", "nil" },
-        { boost::str(fmt % numeric_limits<double>::min()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::max()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::epsilon()), "nil" },
-        { boost::str(fmt % numeric_limits<double>::lowest()), "t" },
+        // { "(minusp 3.145926536)", "nil" },
+        // { "(minusp -1.2345e-8)", "t" },
+        // { "(minusp 0.0)", "nil" },
+        // { boost::str(fmt % numeric_limits<double>::min()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::max()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::epsilon()), "nil" },
+        // { boost::str(fmt % numeric_limits<double>::lowest()), "t" },
 
         { "(minusp 'a)", "Eval error: minusp argument needs to be a number" },
         { "(minusp)", "Eval error: minusp expecting an argument" },
@@ -265,7 +263,7 @@ BOOST_AUTO_TEST_CASE(test_evenp)
         { boost::str(fmt % numeric_limits<long>::max()), "nil" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
-        { "(evenp 3.145926536)", "Eval error: evenp argument needs to be a integer" },
+        //{ "(evenp 3.145926536)", "Eval error: evenp argument needs to be a integer" },
         { "(evenp 'a)", "Eval error: evenp argument needs to be a integer" },
         { "(evenp)", "Eval error: evenp expecting an argument" },
         { "(evenp 1 0)", "Eval error: evenp expecting an argument" },
@@ -278,7 +276,7 @@ BOOST_AUTO_TEST_CASE(test_oddp)
     auto fmt = boost::format("(oddp %1%)");
     vector<TestEval> tests = {
         { "(oddp 1)", "t" },
-        //{ "(oddp (/ 2 3))", "nil" },
+        { "(oddp (/ 2 3))", "nil" },
         { "(oddp 0)", "nil" },
         { "(oddp -1)", "t" },
 
@@ -287,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_oddp)
         { boost::str(fmt % numeric_limits<long>::max()), "t" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "nil" },
 
-        { "(oddp 3.145926536)", "Eval error: oddp argument needs to be a integer" },
+        //{ "(oddp 3.145926536)", "Eval error: oddp argument needs to be a integer" },
         { "(oddp 'a)", "Eval error: oddp argument needs to be a integer" },
         { "(oddp)", "Eval error: oddp expecting an argument" },
         { "(oddp 1 0)", "Eval error: oddp expecting an argument" },
@@ -463,11 +461,11 @@ BOOST_AUTO_TEST_CASE(test_add)
         { "(+)", "0" },
 
         // floats
-        { "(+ 1.2)", "1.2" },
-        { "(+ 2.1 3)", "5.1" },
-        { "(+ 2 3.1)", "5.1" },
-        { "(+ 2.1 3.1)", "5.2" },
-        { "(+ 2.1 3.1 1.1)", "6.3" },
+        // { "(+ 1.2)", "1.2" },
+        // { "(+ 2.1 3)", "5.1" },
+        // { "(+ 2 3.1)", "5.1" },
+        // { "(+ 2.1 3.1)", "5.2" },
+        // { "(+ 2.1 3.1 1.1)", "6.3" },
 
         // // complex
         // { "(+ 1 #C(0 1))", "#C(1 1)" },
@@ -491,16 +489,16 @@ BOOST_AUTO_TEST_CASE(test_mult)
         { "(*)", "1" },
 
         // floats
-        { "(* 1.2)", "1.2" },
-        { "(* 2.1 3)", "6.3" },
-        { "(* 2 3.1)", "6.2" },
-        { "(* 2.1 3.1)", "6.51" },
-        { "(* 2.1 3.1 1.1)", "7.161" },
+        // { "(* 1.2)", "1.2" },
+        // { "(* 2.1 3)", "6.3" },
+        // { "(* 2 3.1)", "6.2" },
+        // { "(* 2.1 3.1)", "6.51" },
+        // { "(* 2.1 3.1 1.1)", "7.161" },
 
-        { boost::str(boost::format("(* %1% 0)") % numeric_limits<double>::min()), "0" },
-        { boost::str(boost::format("(* 0 %1%)") % numeric_limits<double>::max()), "0" },
-        { boost::str(boost::format("(* %1% 0)") % numeric_limits<double>::epsilon()), "0" },
-        { boost::str(boost::format("(* 0 %1%)") % numeric_limits<double>::lowest()), "-0" },
+        // { boost::str(boost::format("(* %1% 0)") % numeric_limits<double>::min()), "0" },
+        // { boost::str(boost::format("(* 0 %1%)") % numeric_limits<double>::max()), "0" },
+        // { boost::str(boost::format("(* %1% 0)") % numeric_limits<double>::epsilon()), "0" },
+        // { boost::str(boost::format("(* 0 %1%)") % numeric_limits<double>::lowest()), "-0" },
 
         // Complex
         //{ "(* #C(0 1) #C(0 1))", "#C(-1 0)" },
@@ -521,11 +519,11 @@ BOOST_AUTO_TEST_CASE(test_sub)
         { "(- 2)", "-2" },
 
         // floats
-        { "(- 1.2)", "-1.2" },
-        { "(- 2.1 3)", "-0.9" },
-        { "(- 2 3.1)", "-1.1" },
-        { "(- 2.1 3.1)", "-1" },
-        { "(- 2.1 3.1 1.1)", "-2.1" },
+        // { "(- 1.2)", "-1.2" },
+        // { "(- 2.1 3)", "-0.9" },
+        // { "(- 2 3.1)", "-1.1" },
+        // { "(- 2.1 3.1)", "-1" },
+        // { "(- 2.1 3.1 1.1)", "-2.1" },
 
         // // Complex
         // { "(- #C(1 3) #C(3 1))", "#C(-2 2)" },
@@ -544,14 +542,14 @@ BOOST_AUTO_TEST_CASE(test_div)
         { "(/ 0 2)", "0" },
         { "(/ 3 -1)", "-3" },
         { "(/ 66433345534 34684)", "1915388" },
-        { "(/ 3.0 4 5)", "0.15" },
 
         { "(/ 1 'jones)", "Eval error: / arguments needs to be a number" },
 
         // floats
-        { "(/ 0.5 2)", "0.25" },
-        { "(/ 1 3.0)", "0.333333333333" },
-        { "(/ 8)", "0.125" },
+        // { "(/ 0.5 2)", "0.25" },
+        // { "(/ 1 3.0)", "0.333333333333" },
+        // { "(/ 8)", "0.125" },
+        //{ "(/ 3.0 4 5)", "0.15" },
 
         // // Complex
         // { "(/ #C(1 0) #C(0 1))", "#C(0 -1)" },
@@ -586,11 +584,11 @@ BOOST_AUTO_TEST_CASE(test_power)
         { "(^ 12)", "12" },
         { "(expt 2 3)", "8" },
         //{ "(^ 3 -3)", "0.037037037037037035" },
-        { "(^ 3 -3.0)", "0.037037037037" },
+        //{ "(^ 3 -3.0)", "0.037037037037" },
         { "(expt 0 0)", "1" },
         { "(^ 0 2)", "0" },
 
-        { "(^ 1.1 1.1)", "1.11053424105" },
+        //{ "(^ 1.1 1.1)", "1.11053424105" },
 
         // Complex
         //{ "(^ #C(0 1) #C(0 1))", "#C(0.20787957635076193 0)" },
@@ -612,7 +610,7 @@ BOOST_AUTO_TEST_CASE(test_max)
         { "(max 66433534 345847684)", "345847684" },
         { "(max 2)", "2" },
 
-        { "(max 1.2 2.4)", "2.4" },
+        //{ "(max 1.2 2.4)", "2.4" },
 
         { "(max 1 'jones)", "Eval error: max arguments needs to be a number" },
     };
@@ -631,7 +629,7 @@ BOOST_AUTO_TEST_CASE(test_min)
         { "(min 66433534 345847684)", "66433534" },
         { "(min 2)", "2" },
 
-        { "(min 1.2 2.4)", "1.2" },
+        //{ "(min 1.2 2.4)", "1.2" },
 
         { "(min 1 'jones)", "Eval error: min arguments needs to be a number" },
     };
@@ -654,28 +652,29 @@ BOOST_AUTO_TEST_CASE(test_abs)
         { "(round 12)", "12" },
 
         // floats
-        { "(abs 12.0)", "12" },
-        { "(abs -12.0)", "12" },
-        { "(abs 0.0)", "0" },
+        // { "(abs 12.0)", "12" },
+        // { "(abs -12.0)", "12" },
+        // { "(abs 0.0)", "0" },
 
-        { "(floor 12.7)", "12" },
-        { "(ceiling 12.7)", "13" },
-        { "(truncate 12.7)", "12" },
-        { "(round 12.7)", "13" },
+        // { "(floor 12.7)", "12" },
+        // { "(ceiling 12.7)", "13" },
+        // { "(truncate 12.7)", "12" },
+        // { "(round 12.7)", "13" },
 
-        { "(floor -12.7)", "-13" },
-        { "(ceiling -12.7)", "-12" },
-        { "(truncate -12.7)", "-12" },
-        { "(round -12.7)", "-13" },
+        // { "(floor -12.7)", "-13" },
+        // { "(ceiling -12.7)", "-12" },
+        // { "(truncate -12.7)", "-12" },
+        // { "(round -12.7)", "-13" },
 
-        { "(floor 0.0)", "0" },
-        { "(ceiling 0.0)", "0" },
-        { "(truncate 0.0)", "0" },
-        { "(round 0.0)", "0" },
+        // { "(floor 0.0)", "0" },
+        // { "(ceiling 0.0)", "0" },
+        // { "(truncate 0.0)", "0" },
+        // { "(round 0.0)", "0" },
     };
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_real_funcs)
 {
     vector<TestEval> tests = {

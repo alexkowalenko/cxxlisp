@@ -21,34 +21,40 @@ BOOST_AUTO_TEST_CASE(expr_is)
     BOOST_TEST(is_atom(a) == true);
     BOOST_TEST(is_a<Type::atom>(a) == true);
     BOOST_TEST(is_list(a) == false);
-    //BOOST_TEST(is_a<List>(a) == false);
-    //BOOST_TEST(is_a<nullptr_t>(a) == false);
+    BOOST_TEST(is_a<Type::list>(a) == false);
+    BOOST_TEST(is_int(a) == false);
 
     a = mk_bool(true);
     BOOST_TEST(is_atom(a) == false);
     BOOST_TEST(is_a<Type::boolean>(a) == true);
     BOOST_TEST(is_list(a) == false);
     BOOST_TEST(is_bool(a) == true);
-    //BOOST_TEST(is_a<List>(a) == false);
-    //BOOST_TEST(is_a<nullptr_t>(a) == false);
+    BOOST_TEST(is_int(a) == false);
+
+    a = mk_int(7);
+    BOOST_TEST(is_atom(a) == false);
+    BOOST_TEST(is_list(a) == false);
+    BOOST_TEST(is_a<Type::atom>(a) == false);
+    BOOST_TEST(is_list(a) == false);
+    BOOST_TEST(is_a<Type::list>(a) == false);
+    BOOST_TEST(is_int(a) == true);
 
     Expr* b = mk_list();
     BOOST_TEST(is_atom(b) == false);
     BOOST_TEST(is_list(b) == true);
-    // BOOST_TEST(is_a<List>(b) == false);
-    // BOOST_TEST(is_a<nullptr_t>(b) == false);
+    BOOST_TEST(is_a<Type::atom>(b) == false);
+    BOOST_TEST(is_list(b) == true);
+    BOOST_TEST(is_a<Type::list>(b) == true);
+    BOOST_TEST(is_int(b) == false);
 
-    // Expr c = List({ Atom("hello"), Int(1) });
-    // BOOST_TEST(is_a<Atom>(c) == false);
-    // BOOST_TEST(is_a<Int>(c) == false);
-    // BOOST_TEST(is_a<List>(c) == true);
-    // BOOST_TEST(is_a<nullptr_t>(c) == false);
-
-    // Expr d = nullptr; // Can take any value
-    // BOOST_TEST(is_a<Atom>(d) == false);
-    // BOOST_TEST(is_a<Int>(d) == false);
-    // BOOST_TEST(is_a<List>(d) == false);
-    // BOOST_TEST(is_a<nullptr_t>(d) == true);
+    b = mk_list({ mk_atom("hello"), mk_int(1) });
+    BOOST_TEST(is_atom(b) == false);
+    BOOST_TEST(is_list(b) == true);
+    BOOST_TEST(is_bool(b) == false);
+    BOOST_TEST(is_a<Type::atom>(b) == false);
+    BOOST_TEST(is_list(b) == true);
+    BOOST_TEST(is_a<Type::list>(b) == true);
+    BOOST_TEST(is_int(b) == false);
 
     // Expr e = FunctionRef("atom");
     // BOOST_TEST(is_a<Atom>(e) == false);
@@ -76,6 +82,16 @@ BOOST_AUTO_TEST_CASE(expr_print)
     BOOST_CHECK_EQUAL(to_string(a), "hello");
     (ss = stringstream()) << a;
     BOOST_CHECK_EQUAL(ss.str(), "hello");
+
+    a = mk_int(7);
+    BOOST_CHECK_EQUAL(to_string(a), "7");
+    (ss = stringstream()) << a;
+    BOOST_CHECK_EQUAL(ss.str(), "7");
+
+    a = mk_int(-616561564165146146);
+    BOOST_CHECK_EQUAL(to_string(a), "-616561564165146146");
+    (ss = stringstream()) << a;
+    BOOST_CHECK_EQUAL(ss.str(), "-616561564165146146");
 
     Expr* c = mk_list(mk_atom("hello"));
     BOOST_CHECK_EQUAL(to_string(c), "(hello)");
@@ -168,6 +184,13 @@ BOOST_AUTO_TEST_CASE(expr_eq_test)
 
     BOOST_CHECK(expr_eq(mk_atom("hello"), mk_atom("hello")) == sT);
     BOOST_CHECK(expr_eq(mk_atom("hello"), mk_atom("olá")) == sF);
+
+    BOOST_CHECK(expr_eq(mk_int(7), mk_int(7)) == sT);
+    BOOST_CHECK(expr_eq(mk_int(7), mk_int(-13)) == sF);
+
+    BOOST_CHECK(expr_eq(sT, mk_atom("hello")) == sF);
+    BOOST_CHECK(expr_eq(mk_atom("hello"), mk_int(-13)) == sF);
+    BOOST_CHECK(expr_eq(mk_int(7), sT) == sF);
 
     BOOST_CHECK(expr_eq(mk_list(), mk_list()) == sT);
 

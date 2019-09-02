@@ -40,28 +40,29 @@ extern map<string, Primitive> prim_table;
 /*
 using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
+*/
 
 // Numbers
 
-Expr numberp(List& args);
+Expr* numberp(Expr* args);
 
 extern PrimBasicFunct zerop;
 extern PrimBasicFunct plusp;
 extern PrimBasicFunct minusp;
 
 template <Int N>
-Expr nump(List& args)
+Expr* nump(Expr* args)
 // Generates a templated function which mods compared to N.
 {
-    return abs(any_cast<Int>(args[0]) % 2) == N;
+    return abs(args->car->integer % 2) == N ? sT : sF;
 }
 
 template <typename T>
 PrimBasicFunct predicate(const function<bool(T, T)>& f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](List& args) -> Expr {
-        return f(any_cast<T>(args[0]), any_cast<T>(args[1]));
+    return [&](Expr* args) -> Expr* {
+        return mk_int(f(args->car->integer, args->cdr->car->integer));
     };
 }
 
@@ -79,7 +80,7 @@ extern PrimBasicFunct num_div;
 extern PrimBasicFunct num_mod;
 extern PrimBasicFunct num_rem;
 
-Expr num_sub_init(List& args);
+Expr* num_sub_init(Expr* args);
 PrimBasicFunct check_zeros(PrimBasicFunct f);
 
 extern PrimBasicFunct num_power;
@@ -93,6 +94,7 @@ extern PrimBasicFunct num_ceil;
 extern PrimBasicFunct num_round;
 extern PrimBasicFunct num_trunc;
 
+/*
 extern PrimBasicFunct num_log;
 extern PrimBasicFunct num_exp;
 extern PrimBasicFunct num_sin;
@@ -102,11 +104,12 @@ extern PrimBasicFunct num_asin;
 extern PrimBasicFunct num_acos;
 extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
+*/
 
-Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a);
+//Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a);
 
 // Functions
-
+/*
 Expr defun(const string& name, List& args, SymbolTable& a);
 Expr lambda(const string& name, List& args);
 Expr funct(const string& name, List& args);

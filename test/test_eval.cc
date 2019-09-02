@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_eval_symbolp)
         { "(symbolp nil)", "t" },
         { "(symbolp '())", "t" },
 
-        //{ "(symbolp 3)", "nil" },
+        { "(symbolp 3)", "nil" },
 
         { "(symbolp)", "Eval error: symbolp expecting an argument" },
         { "(symbolp nil nil)", "Eval error: symbolp expecting an argument" },
@@ -199,12 +199,12 @@ BOOST_AUTO_TEST_CASE(test_eval_and)
 
         { "(and (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(and (symbolp (quote x)) (symbolp (quote (y))))", "nil" },
-        //{ "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
-        //{ "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
+        { "(and (symbolp (quote z)) (eq (quote x) (quote x)))", "t" },
+        { "(and (symbolp (quote z)) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        //{ "(and (= 2 2) (> 2 1))", "t" },
-        //{ "(and (= 2 2) (< 2 1))", "nil" },
+        { "(and (= 2 2) (> 2 1))", "t" },
+        { "(and (= 2 2) (< 2 1))", "nil" },
         { "(and 1 2 'c '(f g))", "(f g)" },
 
         { "(and)", "t" },
@@ -233,14 +233,14 @@ BOOST_AUTO_TEST_CASE(test_eval_or)
 
         { "(or (symbolp (quote x)) (symbolp (quote y)))", "t" },
         { "(or (symbolp (quote x)) (symbolp (quote (y))))", "t" },
-        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
-        //{ "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
+        { "(or (symbolp (quote (z y))) (eq (quote x) (quote x)))", "t" },
+        { "(or (symbolp (quote (z y))) (eq (quote x) (quote 2)))", "nil" },
 
         // R3R2
-        //{ "(or (= 2 2) (> 2 1))", "t" },
-        //{ "(or (= 2 2) (< 2 1))", "t" },
+        { "(or (= 2 2) (> 2 1))", "t" },
+        { "(or (= 2 2) (< 2 1))", "t" },
         { "(or nil nil nil)", "nil" },
-        //{ "(or 'a (/ 3 0))", "a" },
+        { "(or 'a (/ 3 0))", "a" },
 
         { "(or)", "nil" },
         { "(or 1)", "1" },
@@ -294,11 +294,11 @@ BOOST_AUTO_TEST_CASE(test_eval_consp)
         { "(consp t)", "nil" },
         { "(consp 1)", "nil" },
         { "(consp '())", "nil" },
-        //{ "(consp (list))", "nil" },
+        { "(consp (list))", "nil" },
 
         // { "(consp '(a . b))", "t" },
         { "(consp '(a))", "t" },
-        // { "(consp (cons nil nil))", "t" },
+        { "(consp (cons nil nil))", "t" },
         { "(consp '(a b c))", "t" },
 
         // ;; For everything in *universe*, it is either an atom, or satisfies
@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(test_eval_cons)
         { "(cons '(a b) 'c)", "((a b) . c)" },
 
         { "(cons 1 2)", "(1 . 2)" },
-        // {`(cons 1 "2")`, `(1. "2")`},
+        // {`(cons 1 "2")`, `(1 . "2")`},
         { "(cons 1 's)", "(1 . s)" },
 
         { "(cons 'all (cons (cons 'these (cons 'problems '())) '()))",
@@ -496,15 +496,15 @@ BOOST_AUTO_TEST_CASE(test_eval_eq)
         // { "(eq #\\a 1)", "nil" },
 
         // Int
-        // { "(eq 1 1)", "t" },
-        // { "(eq 1 2)", "nil" },
-        // { "(eq 0 -0)", "t" },
-        // { "(eq -1 1)", "nil" },
-        // { "(eq 1 'a)", "nil" },
-        // { boost::str(fmt % numeric_limits<long>::min()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
-        // { boost::str(fmt % numeric_limits<long>::max()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+        { "(eq 1 1)", "t" },
+        { "(eq 1 2)", "nil" },
+        { "(eq 0 -0)", "t" },
+        { "(eq -1 1)", "nil" },
+        { "(eq 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
         // { "(eq 1.1 1.1)", "t" },
@@ -534,15 +534,15 @@ BOOST_AUTO_TEST_CASE(test_eval_eql)
         // { "(eql #\\a 1)", "nil" },
 
         // Int
-        // { "(eql 1 1)", "t" },
-        // { "(eql 1 2)", "nil" },
-        // { "(eql 0 -0)", "t" },
-        // { "(eql -1 1)", "nil" },
-        // { "(eql 1 'a)", "nil" },
-        // { boost::str(fmt % numeric_limits<long>::min()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
-        // { boost::str(fmt % numeric_limits<long>::max()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+        { "(eql 1 1)", "t" },
+        { "(eql 1 2)", "nil" },
+        { "(eql 0 -0)", "t" },
+        { "(eql -1 1)", "nil" },
+        { "(eql 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
         // { "(eql 1.1 1.1)", "t" },
@@ -573,15 +573,15 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { "(equal (quote (a b)) (quote (a z)) )", "nil" },
         { "(equal (quote a) (quote (a b)))", "nil" },
 
-        // { "(equal 1 1)", "t" },
-        // { "(equal 0 0)", "t" },
-        // { "(equal 1 2)", "nil" },
-        // { "(equal -1 1)", "nil" },
-        // { "(equal 1 'a)", "nil" },
-        // { boost::str(fmt % numeric_limits<long>::min()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
-        // { boost::str(fmt % numeric_limits<long>::max()), "t" },
-        // { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
+        { "(equal 1 1)", "t" },
+        { "(equal 0 0)", "t" },
+        { "(equal 1 2)", "nil" },
+        { "(equal -1 1)", "nil" },
+        { "(equal 1 'a)", "nil" },
+        { boost::str(fmt % numeric_limits<long>::min()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
+        { boost::str(fmt % numeric_limits<long>::max()), "t" },
+        { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // // Characters
         // { "(equal #\\a #\\a)", "t" },

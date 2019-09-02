@@ -188,9 +188,8 @@ Expr* Evaluator::eval(Expr* const e, SymbolTable& a)
     switch (e->type) {
     case Type::boolean:
         return e;
-        // if (is_a<Int>(e) || is_a<Float>(e)) {
-        //     return e;
-        // }
+    case Type::integer:
+        return e;
     case Type::atom:
         return e;
     //     if (auto val = a.find(any_cast<Atom>(e))) {

@@ -38,11 +38,11 @@ Expr* mk_symbolInt(const string& atom)
     //     };
     //     // fallthrough to Int.
     // }
-    // try {
-    //     return Int{ stol(atom) };
-    // } catch (invalid_argument) { //fallthrough to be an atom
-    // } catch (out_of_range) {
-    // };
+    try {
+        return mk_int(stol(atom));
+    } catch (invalid_argument) { //fallthrough to be an atom
+    } catch (out_of_range) {
+    };
     return mk_atom(atom);
 }
 

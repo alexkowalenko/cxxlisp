@@ -46,6 +46,8 @@ string to_dstring(const Expr* s)
         return s->boolean ? "t" : "nil";
     case Type::atom:
         return s->atom;
+    case Type::integer:
+        return std::to_string(s->integer);
     case Type::list: {
         string res("[");
         res += to_dstring(s->car);
@@ -70,14 +72,12 @@ string to_string(const Expr* s)
 
     case Type::atom:
         return s->atom;
-        // } else if (s.type() == typeid(Int)) {
-        //     return std::to_string(any_cast<Int>(s));
+    case Type::integer:
+        return std::to_string(s->integer);
         // } else if (s.type() == typeid(Float)) {
         //     array<char, 80> buf;
         //     sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
         //     return string(buf.data());
-        // } else if (s.type() == typeid(Bool)) {
-        //     return any_cast<Bool>(s) ? "t" : "nil";
 
     case Type::list: {
         if (s->car == nullptr && s->cdr == nullptr) {
@@ -153,8 +153,8 @@ Expr* expr_eq(const Expr* x, const Expr* y)
     if (is_atomic(x) && is_atomic(y)) {
         if (same_type(Type::atom, x, y) && x->atom == y->atom) {
             return sT;
-            //} else if (eq_any<Int>(x, y)) {
-            //    return sT;
+        } else if (same_type(Type::integer, x, y) && x->integer == y->integer) {
+            return sT;
         } else if (same_type(Type::boolean, x, y) && x->boolean == y->boolean) {
             return sT;
             //} else if (eq_any<Char>(x, y)) {

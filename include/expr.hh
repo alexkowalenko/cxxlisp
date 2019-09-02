@@ -21,11 +21,13 @@ using namespace std;
 enum class Type {
     atom,
     boolean,
+    integer,
     list
 };
 
 using Atom = string;
 using Bool = bool;
+using Int = long;
 
 class List {
 }; // Dummy type
@@ -37,6 +39,7 @@ struct Expr {
     union {
         Atom atom;
         Bool boolean;
+        Int integer;
         struct {
             Expr* car;
             Expr* cdr;
@@ -44,7 +47,7 @@ struct Expr {
     };
 };
 
-inline Expr* mk_atom(const string& s)
+inline Expr* mk_atom(const Atom& s)
 {
     auto e = new (GC) Expr(Type::atom);
     e->atom = s;
@@ -55,6 +58,13 @@ inline Expr* mk_bool(const bool s)
 {
     auto e = new Expr(Type::boolean); // bools are not make often and last forever.
     e->boolean = s;
+    return e;
+}
+
+inline Expr* mk_int(const Int i)
+{
+    auto e = new (GC) Expr(Type::integer);
+    e->integer = i;
     return e;
 }
 
@@ -82,6 +92,11 @@ constexpr bool is_atom(const Expr* s)
 constexpr bool is_bool(const Expr* s)
 {
     return s->type == Type::boolean;
+}
+
+constexpr bool is_int(const Expr* s)
+{
+    return s->type == Type::integer;
 }
 
 constexpr bool is_list(const Expr* s)
