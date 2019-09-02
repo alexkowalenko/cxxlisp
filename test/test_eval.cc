@@ -399,6 +399,7 @@ BOOST_AUTO_TEST_CASE(test_eval_reverse)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_append)
 {
@@ -411,13 +412,12 @@ BOOST_AUTO_TEST_CASE(test_eval_append)
         { "(append '(a b) '(c) '(d))", "(a b c d)" },
         { "(append '(a) '(b (c1 2)) '(d) '(e))", "(a b (c1 2) d e)" },
         // { "(append '(a b) '(c . d))", "(a b c . d)" },
-        { "(append 'a)", "(a)" },
+        { "(append 'a)", "a" },
+        { "(append '(a b c) '(d e f) '() '(g))", "(a b c d e f g)" },
+        { "(append '(a b c) 'd)", "(a b c . d)" },
 
-        { "(append 'a nil)", "(a)" },
-        { "(append 'a '())", "(a)" },
-
-        { "(append nil '(a))", "(a)" },
-        { "(append '() '(a))", "(a)" },
+        //{ "(append nil '(a))", "(a)" },
+        // { "(append '() '(a))", "(a)" },
 
         { "(append '(a) '() '(b))", "(a b)" },
         { "(append '(a) nil '(b))", "(a b)" },
@@ -435,13 +435,13 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 
         { "(rplaca '((a1 a2) b) 'x)", "(x b)" },
         { "(rplaca '(a b) '(c c))", "((c c) b)" },
-        { "(setq x '(1 2))", "(1 2)" },
-        { "x", "(1 2)" },
-        { "(rplaca x 'x)", "(x 2)" },
+        //{ "(setq x '(1 2))", "(1 2)" },
+        //{ "x", "(1 2)" },
+        //{ "(rplaca x 'x)", "(x 2)" },
         // { "x", "(x 2)" }, // destructive modify of things in the symbol table not supported
 
-        { "(defun f (x) (rplaca x 'a))", "f" },
-        { "(f '(1 2 3))", "(a 2 3)" },
+        //{ "(defun f (x) (rplaca x 'a))", "f" },
+        //{ "(f '(1 2 3))", "(a 2 3)" },
 
         // errors
         { "(rplaca '(a b))", "Eval error: rplaca expecting 2 arguments" },
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 BOOST_AUTO_TEST_CASE(test_eval_rplacd)
 {
     vector<TestEval> tests = {
-        //{ "(rplacd '(a b) 'x)", "(a . x)" },
+        { "(rplacd '(a b) 'x)", "(a . x)" },
         { "(rplacd '(a b) '(x))", "(a x)" },
         //{ "(rplacd '(a . b) 'x)", "(a . x)" },
 
@@ -465,12 +465,13 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
         //{ "(rplacd x 'x)", "(1 . x)" },
         // {"x", "(1 . x)"}, // this does not work, due to Go's immutable lists
 
-        { "(defun f (x) (rplacd x '(a b)))", "f" },
-        { "(f '(1 2 3))", "(1 a b)" },
+        //{ "(defun f (x) (rplacd x '(a b)))", "f" },
+        //{ "(f '(1 2 3))", "(1 a b)" },
     };
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_eq)
 {
     auto fmt = boost::format("(eq %1% %1%)");

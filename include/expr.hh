@@ -53,27 +53,12 @@ inline Expr* mk_atom(const string& s)
 
 inline Expr* mk_bool(const bool s)
 {
-    auto e = new (GC) Expr(Type::boolean);
+    auto e = new Expr(Type::boolean); // bools are not make often and last forever.
     e->boolean = s;
     return e;
 }
 
-inline Expr* mk_list()
-{
-    auto e = new (GC) Expr(Type::list);
-    e->car = e->cdr = nullptr;
-    return e;
-}
-
-inline Expr* mk_list(Expr* car)
-{
-    auto e = new (GC) Expr(Type::list);
-    e->car = car;
-    e->cdr = nullptr;
-    return e;
-}
-
-inline Expr* mk_list(Expr* car, Expr* cdr)
+inline Expr* mk_list(Expr* car = nullptr, Expr* cdr = nullptr)
 {
     auto e = new (GC) Expr(Type::list);
     e->car = car;
@@ -121,8 +106,8 @@ inline ostream& operator<<(ostream& os, const Expr* s)
 
 // Bool
 
-inline Expr* sF = mk_bool(false);
-inline Expr* sT = mk_bool(true);
+inline Expr* const sF = mk_bool(false);
+inline Expr* const sT = mk_bool(true);
 
 inline bool is_sF(const Expr* e)
 {

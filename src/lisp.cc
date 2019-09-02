@@ -29,6 +29,7 @@ Lisp::Lisp(Options& o)
     : opt(o)
     , symboltable(nullptr)
 {
+    GC_INIT();
 }
 
 inline const string stdlib = R"stdlib( 

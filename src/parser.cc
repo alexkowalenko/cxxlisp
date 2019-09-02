@@ -120,8 +120,7 @@ ParserResult Parser::parse_list()
                 if (!l->car) {
                     l->car = res.val;
                 } else {
-                    l->cdr = mk_list();
-                    l->cdr->car = res.val;
+                    l->cdr = mk_list(res.val);
                     l = l->cdr;
                 }
             }

@@ -128,8 +128,7 @@ Expr* listp(Expr* args)
 //   (cons 'a '(x y z)) --> (a x y z)
 Expr* cons(Expr* args)
 {
-    auto result = mk_list();
-    result->car = args->car;
+    auto result = mk_list(args->car);
     if (!is_false(args->cdr->car)) {
         result->cdr = args->cdr->car;
     }
@@ -141,33 +140,27 @@ Expr* list(Expr* args)
     return args;
 }
 
-/*
-Expr rplaca(List& args)
+// (rplaca '(a b) 'x) -> (x b)
+Expr* rplaca(Expr* args)
 {
-    if (is_a<List>(args[0])) {
-        auto l = any_cast<List>(args[0]);
-        l[0] = args[1];
-        return l;
+    if (is_list(args->car)) {
+        args->car->car = args->cdr->car;
+        return args->car;
     }
     throw EvalException("rplaca first argument not a list");
 }
 
-Expr rplacd(List& args)
+// (rplacd '(a b) 'x) -> (a . x)
+Expr* rplacd(Expr* args)
 {
-    if (is_a<List>(args[0])) {
-        if (is_a<List>(args[1])) {
-            auto l = any_cast<List>(args[0]);
-            l.resize(1);
-            auto cdr = any_cast<List>(args[1]);
-            for (auto& x : cdr) {
-                l.push_back(x);
-            }
-            return l;
-        }
+    if (is_list(args->car)) {
+        args->car->cdr = args->cdr->car;
+        return args->car;
     }
     throw EvalException("rplacd first argument not a list");
 }
 
+/*
 Expr reverse(List& args)
 {
     if (is_false(args[0])) {
@@ -180,28 +173,49 @@ Expr reverse(List& args)
     }
     throw EvalException("reverse: argument not a list");
 }
+*/
 
-Expr append(List& args)
+// (append x y)
+//
+// Takes two lists x, y and appends into one list
+//
+//  (cond ((null. x) y)
+//        ('t (cons (car x) (append. (cdr x) y)))))
+
+Expr* s_append(Expr* x, Expr* y)
 {
-    if (args.empty()) {
+    if (is_false(x)) {
+        return y;
+    }
+    Expr* res = mk_list(x->car, s_append(x->cdr, y));
+    return res;
+}
+
+// (append '(a) '(b)) -> (a b)
+Expr* append(Expr* args)
+{
+    if (is_false(args->car)) {
         return sF;
     }
-    List l;
-    for (auto a : args) {
-        if (is_a<List>(a)) {
-            List x = any_cast<List>(a);
-            l.insert(l.end(), x.begin(), x.end());
-        } else if (!is_false(a)) {
-            l.push_back(a);
+    auto cur = mk_list();
+    while (!is_false(args)) {
+        if (is_list(args->car)) {
+            cur = s_append(cur, args->car);
+        } else {
+            if (!is_false(args->car)) {
+                cur = s_append(cur, args->car);
+            }
         }
+        args = args->cdr;
     }
-    return l;
+    return cur;
 }
 
 //
 // eq functions
 //
 
+/*
 Expr eq_p(List& args)
 {
     return expr_eq(args[0], args[1]);
@@ -422,7 +436,6 @@ static PrimBasicFunct char_le = predicate<Char>(le_char);
 
 void init_prims()
 {
-
     vector<Primitive> defs{
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
@@ -445,11 +458,11 @@ void init_prims()
         { "cons", &cons, two_args, preEvaluate },
         { "list", &list, no_check, preEvaluate },
 
-        // { "rplaca", &rplaca, two_args, preEvaluate },
-        // { "rplacd", &rplacd, two_args, preEvaluate },
+        { "rplaca", &rplaca, two_args, preEvaluate },
+        { "rplacd", &rplacd, two_args, preEvaluate },
 
         // { "reverse", &reverse, one_arg, preEvaluate },
-        // { "append", &append, no_check, preEvaluate },
+        { "append", &append, no_check, preEvaluate },
         // // eq
 
         // { "eq", &eq_p, two_args, preEvaluate },

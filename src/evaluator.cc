@@ -160,8 +160,7 @@ Expr* Evaluator::eval_list(const Expr* e, SymbolTable& a)
         if (!rl->car) {
             rl->car = eval(e->car, a);
         } else {
-            rl->cdr = mk_list();
-            rl->cdr->car = eval(e->car, a);
+            rl->cdr = mk_list(eval(e->car, a));
             rl = rl->cdr;
         }
         e = e->cdr;
