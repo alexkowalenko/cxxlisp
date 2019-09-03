@@ -15,49 +15,52 @@ namespace ax {
 // Function functions
 //
 
-/*
-Function createFunction(const string& name, List args)
+Function* createFunction(const string& name, Expr* args)
 {
-    if (!is_a<List>(args[0])) {
+    cout << "create Function args:" << args << endl;
+    if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + " needs a list of parameters");
     }
-    for (auto p : any_cast<List>(args[0])) {
-        if (!(is_a<Atom>(p) || is_a<Keyword>(p) || is_a<List>(p))) {
-            throw EvalException(name + " parameter needs to be an atom :" + to_string(p));
+    auto p = args->car;
+    while (!is_false(p)) {
+        if (!(is_a<Type::atom>(p->car) || is_a<Type::keyword>(p->car) || is_a<Type::list>(p->car))) {
+            throw EvalException(name + " parameter needs to be an atom :" + to_string(p->car));
         }
+        p = p->cdr;
     }
-    Function f(name, any_cast<List>(args[0]));
-    if (args.size() > 1) {
-        f.body = List(args.begin() + 1, args.end());
+    Function* f = new (GC) Function(name, args->car);
+    if (size_list(args) > 1) {
+        f->body = args->cdr;
     } else {
-        f.body = List();
+        f->body = sF;
     }
     return f;
 }
 
-Expr defun(const string& name, List& args, SymbolTable& a)
+Expr* defun(const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (!is_a<Atom>(args[0])) {
+    if (!is_a<Type::atom>(args->car)) {
         throw EvalException(name + " function name needs to an atom");
     }
-    auto fname = any_cast<Atom>(args[0]);
-    Function f = createFunction(fname, List(args.begin() + 1, args.end()));
+    auto fname = args->car->atom;
+    auto f = createFunction(fname, args->cdr);
     if (name == "defmacro") {
-        f.macro = true;
+        f->macro = true;
     }
-    a.put(fname, f);
-    return fname;
+    a->put(fname, mk_function(f));
+    return args->car;
 }
 
-Expr lambda(const string& name, List& args)
+Expr* lambda(const string& name, Expr* args)
 {
     auto f = createFunction(name, args);
     if (name == "macro") {
-        f.macro = true;
+        f->macro = true;
     }
-    return f;
+    return mk_function(f);
 }
 
+/*
 Expr funct(const string& name, List& args)
 {
     if (is_a<Atom>(args[0])) {

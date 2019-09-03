@@ -10,12 +10,12 @@ namespace ax {
 
 using namespace std;
 
-/*
 Function::operator string()
 {
     return "λ:"s + name;
 }
 
+/*
 bool has_keyword(const List& args, const Keyword& k)
 {
     auto it = find_if(args.begin(), args.end(), [&k](const Expr& e) -> bool {

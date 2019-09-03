@@ -22,7 +22,6 @@ BOOST_AUTO_TEST_CASE(test_eval)
     test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_basic)
 {
     vector<TestEval> tests = {
@@ -31,7 +30,6 @@ BOOST_AUTO_TEST_CASE(test_eval_basic)
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_quote)
 {
@@ -54,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "'👾", "👾" },
         { "'🍊🍎🍉🍌", "🍊🍎🍉🍌" },
 
-        // { "a", "Eval error: unbound variable: a" },
+        { "a", "Eval error: unbound variable: a" },
     };
     test_Evaluator(tests);
 }
@@ -435,13 +433,13 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 
         { "(rplaca '((a1 a2) b) 'x)", "(x b)" },
         { "(rplaca '(a b) '(c c))", "((c c) b)" },
-        //{ "(setq x '(1 2))", "(1 2)" },
-        //{ "x", "(1 2)" },
-        //{ "(rplaca x 'x)", "(x 2)" },
-        // { "x", "(x 2)" }, // destructive modify of things in the symbol table not supported
+        { "(setq x '(1 2))", "(1 2)" },
+        { "x", "(1 2)" },
+        { "(rplaca x 'x)", "(x 2)" },
+        { "x", "(x 2)" },
 
-        //{ "(defun f (x) (rplaca x 'a))", "f" },
-        //{ "(f '(1 2 3))", "(a 2 3)" },
+        { "(defun f (x) (rplaca x 'a))", "f" },
+        { "(f '(1 2 3))", "(a 2 3)" },
 
         // errors
         { "(rplaca '(a b))", "Eval error: rplaca expecting 2 arguments" },
@@ -460,13 +458,13 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
 
         { "(rplacd '((a1 a2) b) '(x))", "((a1 a2) x)" },
         { "(rplacd '(a b) '(c c))", "(a c c)" },
-        //{ "(setq x '(1 2))", "(1 2)" },
-        //{ "x", "(1 2)" },
-        //{ "(rplacd x 'x)", "(1 . x)" },
-        // {"x", "(1 . x)"}, // this does not work, due to Go's immutable lists
+        { "(setq x '(1 2))", "(1 2)" },
+        { "x", "(1 2)" },
+        { "(rplacd x 'x)", "(1 . x)" },
+        { "x", "(1 . x)" },
 
-        //{ "(defun f (x) (rplacd x '(a b)))", "f" },
-        //{ "(f '(1 2 3))", "(1 a b)" },
+        { "(defun f (x) (rplacd x '(a b)))", "f" },
+        { "(f '(1 2 3))", "(1 a b)" },
     };
     test_Evaluator(tests);
 }
@@ -598,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
 
         // changes from eql
         { "(equal '(a b) '(a b))", "t" },
-        //{ "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
+        // { "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'c))", "nil" },
         { "(equal '(a b (c)) '(a b (c)))", "t" },
@@ -656,10 +654,10 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
 
         // globals - should not change
         { "(defconstant xx 1)", "xx" },
-        //{ "(defun f() (defconstant xx '2))", "f" },
+        { "(defun f() (defconstant xx '2))", "f" },
         { "xx", "1" },
-        //{ "(f)", "xx" },
-        //{ "xx", "2" },
+        { "(f)", "Runtime exception: defconstant redefined const xx" },
+        { "xx", "1" },
 
         // fail
         { "(defconstant 1 'd)", "Eval error: defconstant requires a symbol as a first argument" },
@@ -690,14 +688,14 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
 
         // globals - should not change
         { "(defvar xx 1)", "xx" },
-        //{ "(defun f() (defvar xx 2))", "f" },
+        { "(defun f() (defvar xx 2))", "f" },
         { "xx", "1" },
-        //{ "(f)", "xx" },
+        { "(f)", "xx" },
         { "xx", "1" },
 
         // locally defined
-        //{ "(defun g () (defvar y 1) y)", "g" },
-        //{ "(g)", "1" },
+        { "(defun g () (defvar y 1) y)", "g" },
+        { "(g)", "1" },
 
         // fail
         { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },
@@ -733,10 +731,10 @@ BOOST_AUTO_TEST_CASE(test_eval_setq)
 
         // should change
         { "(setq x '1)", "1" },
-        // { "(defun f() (setq x '2))", "f" },
+        { "(defun f() (setq x '2))", "f" },
         { "x", "1" },
-        //{ "(f)", "2" },
-        //{ "x", "2" },
+        { "(f)", "2" },
+        { "x", "2" },
 
         // fail
         { "(setq 1 'd)", "Eval error: setq requires a symbol as an argument" },
@@ -971,16 +969,16 @@ BOOST_AUTO_TEST_CASE(test_eval_let)
                 y)) )",
             "5" },
 
-        // { R"( (let* ((even? (lambda (n)
-        // 					(if (zerop n)
-        // 						t
-        // 						(oddp (- n 1)))))
-        // 			(odd? (lambda (n)
-        // 					(if (zerop n)
-        // 						nil
-        // 						(evenp (- n 1))))))
-        // 			(even? 88)) )",
-        //     "t" },
+        { R"( (let* ((even? (lambda (n)
+         					(if (zerop n)
+         						t
+         						(oddp (- n 1)))))
+         			(odd? (lambda (n)
+         					(if (zerop n)
+         						nil
+         						(evenp (- n 1))))))
+         			(even? 88)) )",
+            "t" },
 
         { "(let)", "Eval error: let expecting at least 2 arguments" },
         { "(let 1)", "Eval error: let expecting at least 2 arguments" },

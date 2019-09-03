@@ -38,7 +38,7 @@ inline const bool preEvaluate = true;
 extern map<string, Primitive> prim_table;
 
 /*
-using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
+using AccessorFunct = function<Expr(Evaluator& l, Expr* args, const Expr& val, SymbolTable& a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
 */
 
@@ -106,38 +106,39 @@ extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
 */
 
-//Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a);
+//Expr incf(Evaluator& l, const string& name, Expr* args, SymbolTable& a);
 
 // Functions
-/*
-Expr defun(const string& name, List& args, SymbolTable& a);
-Expr lambda(const string& name, List& args);
-Expr funct(const string& name, List& args);
-Expr functionp(const string&, List& args, SymbolTable& a);
-Expr fboundp(const string&, List& args, SymbolTable& a);
-Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a);
+
+Expr* defun(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* lambda(const string& name, Expr* args);
+Expr* funct(const string& name, Expr* args);
+Expr* functionp(const string&, Expr* args, shared_ptr<SymbolTable> a);
+Expr* fboundp(const string&, Expr* args, shared_ptr<SymbolTable> a);
+Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* funcall(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 
 // Strings
 
+/*
 PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans);
-Expr string_fnct(const string& name, List& args);
+Expr string_fnct(const string& name, Expr* args);
 
 // Sequences
 
-Expr length(List& args);
-Expr elt(List& args);
-Expr setelt(List& args);
-Expr subseq(List& args);
-Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a);
-Expr make_sequence(List& args);
+Expr length(Expr* args);
+Expr elt(Expr* args);
+Expr setelt(Expr* args);
+Expr subseq(Expr* args);
+Expr setf_elt(Evaluator& l, Expr* args, const Expr& r, SymbolTable& a);
+Expr make_sequence(Expr* args);
 
 // I/O
 
-Expr throw_error(List& args);
-Expr quit(List& args);
+Expr throw_error(Expr* args);
+Expr quit(Expr* args);
 */
 }
 

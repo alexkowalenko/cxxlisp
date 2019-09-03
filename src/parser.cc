@@ -27,9 +27,9 @@ Expr* mk_symbolInt(const string& atom)
     } else if (atom == "t") {
         return sT;
     }
-    // if (atom[0] == '&' || atom[0] == ':') {
-    //     return Keyword(atom);
-    // }
+    if (atom[0] == '&' || atom[0] == ':') {
+        return mk_keyword(atom);
+    }
     // if (atom.find('.') != string::npos) {
     //     try {
     //         return Float(stod(atom));

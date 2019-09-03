@@ -88,10 +88,8 @@ PrimBasicFunct numeric_operation(const function<Int(Int, Int)>& f, Int s)
         }
         auto accum = args->car->integer;
         args = args->cdr;
-        cout << "accum : " << accum << endl;
         while (args) {
             accum = f(accum, args->car->integer);
-            cout << "accum : " << accum << endl;
             args = args->cdr;
         }
         return mk_int(accum);

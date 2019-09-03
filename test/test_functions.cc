@@ -28,10 +28,9 @@ BOOST_AUTO_TEST_CASE(test_eval_noargs)
 
         { "(k 1)", "Eval error: k: invalid number of arguments" },
     };
-    // test_Evaluator(tests);
+    test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_1args)
 {
     vector<TestEval> tests = {
@@ -262,15 +261,15 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
         { "(rember 'x  '(b l a t))", "(b l a t)" },
 
         // The Little Lisper, pg. 48
-        { R"( (defun firsts (x)
-         (cond
-         	((null x) nil)
-         	(t (cons (caar x)
-         			 (firsts (cdr x)))))) )",
-            "firsts" },
-        { "(firsts '())", "nil" },
-        { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
-        { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
+        // { R"( (defun firsts (x)
+        //  (cond
+        //  	((null x) nil)
+        //  	(t (cons (caar x)
+        //  			 (firsts (cdr x)))))) )",
+        //     "firsts" },
+        // { "(firsts '())", "nil" },
+        // { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
+        // { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
 
         // The Little Lisper, pg. 54
         { R"( (defun insertr (new old lat) 
@@ -382,26 +381,26 @@ BOOST_AUTO_TEST_CASE(test_eval_defmacro)
         { "(defmacro eight () (+ 3 5))", "eight" },
         { "(eight)", "8" },
 
-        { "(defmacro if-x (x y z) `(cond (,x ,y) (t ,z)))", "if-x" },
-        { "(if-x (atom 'x) 1 2)", "1" },
-        { "(if-x (atom '(a b)) 1 2)", "2" },
+        // { "(defmacro if-x (x y z) `(cond (,x ,y) (t ,z)))", "if-x" },
+        // { "(if-x (atom 'x) 1 2)", "1" },
+        // { "(if-x (atom '(a b)) 1 2)", "2" },
 
-        { "(defmacro when-x (test expr) `(cond (,test ,expr) (t nil)))", "when-x" },
-        { "(when-x t 2)", "2" },
-        { "(when-x nil 2)", "nil" },
-        { "(when-x (atom '(a b)) 2)", "nil" },
+        // { "(defmacro when-x (test expr) `(cond (,test ,expr) (t nil)))", "when-x" },
+        // { "(when-x t 2)", "2" },
+        // { "(when-x nil 2)", "nil" },
+        // { "(when-x (atom '(a b)) 2)", "nil" },
 
-        { "(defmacro when-pos (num expr) `(if (> ,num 0) ,expr))", "when-pos" },
-        { "(when-pos 2 'positive)", "positive" },
-        { "(when-pos 0 'positive)", "nil" },
-        { "(when-pos -2 'positive)", "nil" },
-        { "(when-pos (+ -2 4) 'positive)", "positive" },
+        // { "(defmacro when-pos (num expr) `(if (> ,num 0) ,expr))", "when-pos" },
+        // { "(when-pos 2 'positive)", "positive" },
+        // { "(when-pos 0 'positive)", "nil" },
+        // { "(when-pos -2 'positive)", "nil" },
+        // { "(when-pos (+ -2 4) 'positive)", "positive" },
 
-        { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
-        { "(test3 'b)", "(a 'b)" },
+        // { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
+        // { "(test3 'b)", "(a 'b)" },
 
-        { "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
-        { "(m3 1)", "(1)" },
+        // { "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
+        // { "(m3 1)", "(1)" },
     };
     test_Evaluator(tests);
 }
@@ -412,16 +411,17 @@ BOOST_AUTO_TEST_CASE(test_eval_macro)
         { "(defvar eight (macro () (+ 3 5)))", "eight" },
         { "(eight)", "8" },
 
-        { "(defvar when-pos (macro (num expr) `(if (> ,num 0) ,expr)))", "when-pos" },
-        { "(when-pos 2 'positive)", "positive" },
-        { "(when-pos 0 'positive)", "nil" },
-        { "(when-pos -2 'positive)", "nil" },
-        { "(when-pos (+ -2 4) 'positive)", "positive" },
+        // { "(defvar when-pos (macro (num expr) `(if (> ,num 0) ,expr)))", "when-pos" },
+        // { "(when-pos 2 'positive)", "positive" },
+        // { "(when-pos 0 'positive)", "nil" },
+        // { "(when-pos -2 'positive)", "nil" },
+        // { "(when-pos (+ -2 4) 'positive)", "positive" },
 
     };
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_optional)
 {
     vector<TestEval> tests = {

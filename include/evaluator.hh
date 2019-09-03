@@ -28,8 +28,8 @@ public:
     shared_ptr<SymbolTable> globalTable;
 
 private:
-    //     SymbolTable create_context(Function& f, List args, SymbolTable& a);
-    //     Expr perform_function(Function& f, List args, SymbolTable& a);
+    shared_ptr<SymbolTable> create_context(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
+    Expr* perform_function(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
     //     Expr backquote(Expr& s, SymbolTable& a);
 
     Options opt;

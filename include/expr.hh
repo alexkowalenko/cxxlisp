@@ -22,15 +22,17 @@ enum class Type {
     atom,
     boolean,
     integer,
-    list
+    list,
+    function,
+    keyword
 };
 
 using Atom = string;
 using Bool = bool;
 using Int = long;
+using Keyword = string;
 
-class List {
-}; // Dummy type
+class Function;
 
 struct Expr {
     Expr(Type t)
@@ -44,6 +46,8 @@ struct Expr {
             Expr* car;
             Expr* cdr;
         };
+        Function* function;
+        Keyword keyword;
     };
 };
 
@@ -142,11 +146,6 @@ Expr* expr_eql(const Expr* x, const Expr*);
 Expr* expr_equal(const Expr* x, const Expr*);
 
 /*
-class Keyword : public string {
-public:
-    Keyword(const string& s)
-        : string(s){};
-};
 
 using Char = wchar_t;
 using String = wstring;

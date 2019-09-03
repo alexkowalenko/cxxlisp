@@ -56,6 +56,10 @@ string to_dstring(const Expr* s)
         res += "]";
         return res;
     }
+    case Type::function:
+        return string(*s->function);
+    case Type::keyword:
+        return s->keyword;
     default:
         return "<Unknown>";
     }
@@ -119,12 +123,12 @@ string to_string(const Expr* s)
         //         utf8::append(any_cast<Char>(s), str);
         //     }
         //     return str;
-        // } else if (s.type() == typeid(Function)) {
-        //     return any_cast<Function>(s);
+    case Type::function:
+        return string(*s->function);
         // } else if (s.type() == typeid(FunctionRef)) {
         //     return "#'" + any_cast<FunctionRef>(s);
-        // } else if (s.type() == typeid(Keyword)) {
-        //     return any_cast<Keyword>(s);
+    case Type::keyword:
+        return s->keyword;
     default:
         return "*Unprintable type*";
     }

@@ -11,21 +11,35 @@
 
 namespace ax {
 
-/*
 class Function {
 public:
-    Function(Atom n, List p)
+    Function(Atom n, Expr* p)
         : name(n)
         , parameters(p){};
 
     operator string();
 
     Atom name;
-    List parameters;
-    List body;
+    Expr* parameters;
+    Expr* body;
     bool macro = false;
 };
 
+inline Expr* mk_function(Function* f)
+{
+    auto e = new (GC) Expr(Type::function);
+    e->function = f;
+    return e;
+}
+
+inline Expr* mk_keyword(const string& k)
+{
+    auto e = new (GC) Expr(Type::keyword);
+    e->keyword = k;
+    return e;
+}
+
+/*
 class FunctionRef : public string {
 public:
     FunctionRef(const string& s)

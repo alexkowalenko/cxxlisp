@@ -492,10 +492,10 @@ void init_prims()
         { "let*", &let, min_two },
 
         // // Function
-        // { "defun", &defun, min_two },
-        // { "lambda", &lambda, min_one },
-        // { "defmacro", &defun, min_one },
-        // { "macro", &lambda, min_one },
+        { "defun", &defun, min_two },
+        { "lambda", &lambda, min_one },
+        { "defmacro", &defun, min_one },
+        { "macro", &lambda, min_one },
         // { "functionp", &functionp, min_one, preEvaluate },
         // { "fboundp", &fboundp, min_one, preEvaluate },
         // { "fmakunbound", makunbound, one_arg, preEvaluate },
