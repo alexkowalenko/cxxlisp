@@ -38,6 +38,8 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
         evalArgs = eval_list(args, a);
     }
 
+    // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
+
     auto evalArgs_size = size_list(evalArgs);
     unsigned int arg_count = 0;
     bool optional = false;
@@ -87,8 +89,7 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
         evalArgs = evalArgs->cdr;
     }
     auto f_param_size = is_false(f->parameters) ? 0 : size_list(f->parameters);
-    cout << to_dstring(f->parameters) << endl;
-    cout << "param count " << f_param_size << " : " << evalArgs_size << endl;
+    // cout << "param count " << f_param_size << " : " << evalArgs_size << endl;
     if (rest) {
         ; // don't worry about counting pararamters
     } else if (optional) {
@@ -109,49 +110,59 @@ Expr* Evaluator::perform_function(Function* f, Expr* args, shared_ptr<SymbolTabl
     auto result = perform_list(f->body, context);
     if (f->macro) {
         // macros are post-evaluated
+        // BOOST_LOG_TRIVIAL(debug) << "macro expand: " << to_string(result);
         result = eval(result, a);
     }
     return result;
 }
 
-/*
-Expr Evaluator::backquote(Expr& s, SymbolTable& a)
+Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
 {
     if (is_atomic(s)) {
         return s;
     }
-    if (is_a<List>(s)) {
-        List result;
-        List slist = any_cast<List>(s);
-        for (auto iter = slist.begin(); iter != slist.end(); ++iter) {
-            auto e = *iter;
-            if (is_a<Atom>(e)
-                && (any_cast<Atom>(e) == unquote_atom || any_cast<Atom>(e) == splice_unquote_atom)) {
-                if (iter + 1 != slist.end()) {
-                    auto res = eval(*(++iter), a);
-                    if (any_cast<Atom>(e) == unquote_atom) {
-                        result.push_back(res);
-                    } else {
-                        if (is_a<List>(res)) {
-                            for (auto x : any_cast<List>(res)) {
-                                result.push_back(x);
-                            }
+    if (is_a<Type::list>(s)) {
+        auto top = mk_list();
+        Expr* p = nullptr;
+        for (auto cur = top; !is_false(s); s = s->cdr, cur = cur->cdr) {
+            if (is_a<Type::atom>(s->car)) {
+                if (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom) {
+                    if (!is_false(s->cdr)) {
+                        auto res = eval(s->cdr->car, a);
+                        if (s->car->atom == unquote_at->atom) {
+                            cur->car = res;
+                            s = s->cdr; // advance
                         } else {
-                            result.push_back(res);
+                            if (is_a<Type::list>(res)) {
+                                // splice in list
+                                while (!is_false(res)) {
+                                    cur->car = res->car;
+                                    cur->cdr = mk_list();
+                                    cur = cur->cdr;
+                                    res = res->cdr;
+                                }
+                            } else {
+                                cur->car = res;
+                            }
+                            s = s->cdr; // advance
                         }
                     }
+                } else {
+                    cur->car = s->car;
                 }
-            } else if (is_a<List>(e)) {
-                result.push_back(backquote(e, a));
+            } else if (is_a<Type::list>(s->car)) {
+                cur->car = backquote(s->car, a);
             } else {
-                result.push_back(e);
+                cur->car = s->car;
             }
+            cur->cdr = mk_list();
+            p = cur;
         }
-        return result;
+        p->cdr = nullptr;
+        return top;
     }
     return s;
 }
-*/
 
 Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
 {
@@ -185,9 +196,9 @@ Expr* Evaluator::perform_list(Expr* e, shared_ptr<SymbolTable> a)
 
 Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
 {
-    //if (opt.debug_expr) {
-    BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
-    //};
+    if (opt.debug_expr) {
+        BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
+    };
 
     if (is_false(e)) { // stops nullptrs
         return sF;
@@ -236,9 +247,9 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
         }
 
         // backquote
-        // if (name == backquote_atom) {
-        //     return backquote(e_list[1], a);
-        // }
+        if (name == backquote_at->atom) {
+            return backquote(e->cdr->car, a);
+        }
 
         // Lookup symbol table for function
         if (auto f = a->find(name)) {

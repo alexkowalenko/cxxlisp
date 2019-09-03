@@ -30,7 +30,7 @@ public:
 private:
     shared_ptr<SymbolTable> create_context(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
     Expr* perform_function(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
-    //     Expr backquote(Expr& s, SymbolTable& a);
+    Expr* backquote(Expr* s, shared_ptr<SymbolTable> a);
 
     Options opt;
 };

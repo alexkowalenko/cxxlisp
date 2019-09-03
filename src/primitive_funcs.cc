@@ -17,7 +17,6 @@ namespace ax {
 
 Function* createFunction(const string& name, Expr* args)
 {
-    cout << "create Function args:" << args << endl;
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + " needs a list of parameters");
     }

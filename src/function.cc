@@ -12,7 +12,7 @@ using namespace std;
 
 Function::operator string()
 {
-    return "λ:"s + name;
+    return "λ:"s + name + " : " + to_string(body);
 }
 
 /*

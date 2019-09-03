@@ -57,7 +57,6 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
     test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_backquote)
 {
     vector<TestEval> tests = {
@@ -78,10 +77,14 @@ BOOST_AUTO_TEST_CASE(test_eval_backquote)
         { "`(this is a var)", "(this is a var)" },
         { "`(this is a ,var)", "(this is a (more difficult test))" },
         { "`(this is a ,@var)", "(this is a more difficult test)" },
+
+        { "(defvar x '(1 2 3))", "x" },
+        { "`(0 ,@x 4)", "(0 1 2 3 4)" },
+        { "(defvar x 'a)", "x" },
+        { "`(0 ,@x 4)", "(0 a 4)" },
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_atom)
 {
