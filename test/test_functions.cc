@@ -681,6 +681,7 @@ BOOST_AUTO_TEST_CASE(test_eval_dotimes)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_keywordp)
 {
@@ -690,4 +691,3 @@ BOOST_AUTO_TEST_CASE(test_eval_keywordp)
     };
     test_Evaluator(tests);
 }
-*/

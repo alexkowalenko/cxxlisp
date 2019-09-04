@@ -66,6 +66,24 @@ PrimBasicFunct predicate(const function<bool(T, T)>& f)
     };
 }
 
+template <typename T>
+PrimBasicFunct predicate_str(const function<bool(T, T)>& f)
+// Returns a function with compare the first element to zero.
+{
+    return [&](Expr* args) -> Expr* {
+        return f(args->car->string, args->cdr->car->string) ? sT : sF;
+    };
+}
+
+template <typename T>
+PrimBasicFunct predicate_chr(const function<bool(T, T)>& f)
+// Returns a function with compare the first element to zero.
+{
+    return [&](Expr* args) -> Expr* {
+        return f(args->car->chr, args->cdr->car->chr) ? sT : sF;
+    };
+}
+
 extern PrimBasicFunct num_eq;
 extern PrimBasicFunct num_neq;
 extern PrimBasicFunct num_gt;
@@ -122,24 +140,23 @@ Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
 
 // Strings
 
-/*
-PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans);
-Expr string_fnct(const string& name, Expr* args);
+PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr*(const Expr*)> trans);
+Expr* string_fnct(const string& name, Expr* args);
 
 // Sequences
-
+/*
 Expr length(Expr* args);
 Expr elt(Expr* args);
 Expr setelt(Expr* args);
 Expr subseq(Expr* args);
 Expr setf_elt(Evaluator& l, Expr* args, const Expr& r, SymbolTable& a);
 Expr make_sequence(Expr* args);
+*/
 
 // I/O
 
-Expr throw_error(Expr* args);
-Expr quit(Expr* args);
-*/
+Expr* throw_error(Expr* args);
+Expr* quit(Expr* args);
 }
 
 #endif

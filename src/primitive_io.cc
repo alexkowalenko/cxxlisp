@@ -14,21 +14,19 @@ namespace ax {
 // I/O functions
 //
 
-/*
-Expr throw_error(List& args)
+Expr* throw_error(Expr* args)
 {
-    throw EvalException(to_string(args[0]));
+    throw EvalException(to_string(args->car));
 }
 
-Expr quit(List& args)
+Expr* quit(Expr* args)
 {
-    if (args.size() > 0) {
-        if (is_a<Int>(args[0])) {
-            long ret = any_cast<Int>(args[0]);
+    if (!is_false(args)) {
+        if (is_a<Type::integer>(args)) {
+            long ret = args->integer;
             throw ExceptionQuit(ret);
         }
     }
     throw ExceptionQuit(0);
 }
-*/
 }

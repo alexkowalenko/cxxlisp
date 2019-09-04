@@ -212,16 +212,16 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     switch (e->type) {
     case Type::boolean:
     case Type::integer:
+    case Type::character:
+    case Type::string:
         return e;
+
     case Type::atom:
         if (auto val = a->find(e->atom)) {
             return *val;
         }
         throw EvalException("unbound variable: "s + to_string(e));
 
-    // if (is_a<String>(e) || is_a<Char>(e)) {
-    //     return e;
-    // }
     case Type::function_ref:
     case Type::function:
     case Type::keyword:

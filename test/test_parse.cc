@@ -236,13 +236,13 @@ BOOST_AUTO_TEST_CASE(test_parser_atoms)
 BOOST_AUTO_TEST_CASE(test_parser_strings)
 {
     vector<TestParser> tests = {
-        // { R"("one")", R"("one")" },
-        // { R"("κὀσμος")", R"("κὀσμος")" },
+        { R"("one")", R"("one")" },
+        { R"("κὀσμος")", R"("κὀσμος")" },
 
-        // { R"("👾")", R"("👾")" },
-        // { R"("🇵🇹")", R"("🇵🇹")" },
-        // { R"("🏄🏻‍🏖")", R"("🏄🏻‍🏖")" },
-        // { R"("")", R"("")" },
+        { R"("👾")", R"("👾")" },
+        { R"("🇵🇹")", R"("🇵🇹")" },
+        { R"("🏄🏻‍🏖")", R"("🏄🏻‍🏖")" },
+        { R"("")", R"("")" },
     };
     test_Parser(tests);
 }
@@ -250,26 +250,26 @@ BOOST_AUTO_TEST_CASE(test_parser_strings)
 BOOST_AUTO_TEST_CASE(test_parser_char)
 {
     vector<TestParser> tests = {
-        // { "#\\a", "#\\a" },
-        // { "#\\1", "#\\1" },
-        // { "#\\A", "#\\A" },
-        // { "#\\.", "#\\." },
-        // { "#\\;", "#\\;" },
-        // { "#\\(", "#\\(" },
-        // { "#\\)", "#\\)" },
-        // { "#\\#", "#\\#" },
-        // { "#\\\\", "#\\\\" },
-        // { "#\\ἄ", "#\\ἄ" },
-        // { "#\\七", "#\\七" },
-        // { "#\\👾", "#\\👾" },
-        // { "#\\space", "#\\space" },
-        // { "#\\newline", "#\\newline" },
-        // { "#\\SPACE", "#\\space" },
-        // { "#\\NeWlInE", "#\\newline" },
+        { "#\\a", "#\\a" },
+        { "#\\1", "#\\1" },
+        { "#\\A", "#\\A" },
+        { "#\\.", "#\\." },
+        { "#\\;", "#\\;" },
+        { "#\\(", "#\\(" },
+        { "#\\)", "#\\)" },
+        { "#\\#", "#\\#" },
+        { "#\\\\", "#\\\\" },
+        { "#\\ἄ", "#\\ἄ" },
+        { "#\\七", "#\\七" },
+        { "#\\👾", "#\\👾" },
+        { "#\\space", "#\\space" },
+        { "#\\newline", "#\\newline" },
+        { "#\\SPACE", "#\\space" },
+        { "#\\NeWlInE", "#\\newline" },
 
-        // { "(#\\A #\\ἄ #\\七)", "(#\\A #\\ἄ #\\七)" },
+        { "(#\\A #\\ἄ #\\七)", "(#\\A #\\ἄ #\\七)" },
 
-        // { "#\\abc", "#\\a" }, // this is not really correct
+        { "#\\abc", "#\\a" }, // this is not really correct
     };
     test_Parser(tests);
 }
@@ -277,8 +277,8 @@ BOOST_AUTO_TEST_CASE(test_parser_char)
 BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
 {
     vector<TestParser> tests = {
-        // { "#'id", "#'id" },
-        // { "#'+", "#'+" },
+        { "#'id", "#'id" },
+        { "#'+", "#'+" },
     };
     test_Parser(tests);
 }
@@ -286,8 +286,8 @@ BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
 BOOST_AUTO_TEST_CASE(test_parser_keyword)
 {
     vector<TestParser> tests = {
-        // { ":keyword", ":keyword" },
-        // { "&keyword", "&keyword" },
+        { ":keyword", ":keyword" },
+        { "&keyword", "&keyword" },
     };
     test_Parser(tests);
 }

@@ -90,11 +90,10 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
         return checkTypeNumeric(name, args, "number");
     } else if (cons.argType == ArgType::integer) {
         return checkType<Type::integer>(name, args, "integer");
-        // } else if (cons.argType == ArgType::string) {
-        //     return checkType<String>(name, args, "string");
-        // } else if (cons.argType == ArgType::character) {
-        //     return checkType<Char>(name, args, "character");
-        // }
+    } else if (cons.argType == ArgType::string) {
+        return checkType<Type::string>(name, args, "string");
+    } else if (cons.argType == ArgType::character) {
+        return checkType<Type::character>(name, args, "character");
     }
     return {};
 }

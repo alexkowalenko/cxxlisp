@@ -56,18 +56,18 @@ BOOST_AUTO_TEST_CASE(expr_is)
     BOOST_TEST(is_a<Type::list>(b) == true);
     BOOST_TEST(is_int(b) == false);
 
-    // Expr e = FunctionRef("atom");
-    // BOOST_TEST(is_a<Atom>(e) == false);
-    // BOOST_TEST(is_a<FunctionRef>(e) == true);
+    Expr* e = mk_function_ref("atom");
+    BOOST_TEST(is_a<Type::atom>(e) == false);
+    BOOST_TEST(is_a<Type::function_ref>(e) == true);
 
-    // Expr f = String(L"Olá!");
-    // BOOST_TEST(is_a<Atom>(f) == false);
-    // BOOST_TEST(is_a<String>(f) == true);
+    Expr* f = mk_string(L"Olá!");
+    BOOST_TEST(is_a<Type::atom>(f) == false);
+    BOOST_TEST(is_a<Type::string>(f) == true);
 
-    // Expr g = Char('c');
-    // BOOST_TEST(is_a<Atom>(g) == false);
-    // BOOST_TEST(is_a<Int>(g) == false);
-    // BOOST_TEST(is_a<Char>(g) == true);
+    Expr* g = mk_char('c');
+    BOOST_TEST(is_a<Type::atom>(g) == false);
+    BOOST_TEST(is_a<Type::integer>(g) == false);
+    BOOST_TEST(is_a<Type::character>(g) == true);
 }
 
 BOOST_AUTO_TEST_CASE(expr_print)
@@ -133,35 +133,35 @@ BOOST_AUTO_TEST_CASE(expr_print)
     BOOST_CHECK_EQUAL(ss.str(), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
     BOOST_CHECK_EQUAL(size_list(c), 5);
 
-    // Expr f = String(L"Olá!"s);
-    // BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");
-    // (ss = stringstream()) << f;
-    // BOOST_CHECK_EQUAL(ss.str(), "\"Olá!\"");
+    Expr* f = mk_string(L"Olá!"s);
+    BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");
+    (ss = stringstream()) << f;
+    BOOST_CHECK_EQUAL(ss.str(), "\"Olá!\"");
 
-    // Expr g = Char('g');
-    // BOOST_CHECK_EQUAL(to_string(g), "#\\g");
-    // (ss = stringstream()) << g;
-    // BOOST_CHECK_EQUAL(ss.str(), "#\\g");
+    Expr* g = mk_char('g');
+    BOOST_CHECK_EQUAL(to_string(g), "#\\g");
+    (ss = stringstream()) << g;
+    BOOST_CHECK_EQUAL(ss.str(), "#\\g");
 
-    // Expr g1 = Char(' ');
-    // BOOST_CHECK_EQUAL(to_string(g1), "#\\space");
-    // (ss = stringstream()) << g1;
-    // BOOST_CHECK_EQUAL(ss.str(), "#\\space");
+    Expr* g1 = mk_char(' ');
+    BOOST_CHECK_EQUAL(to_string(g1), "#\\space");
+    (ss = stringstream()) << g1;
+    BOOST_CHECK_EQUAL(ss.str(), "#\\space");
 
-    // Expr g2 = Char('\n');
-    // BOOST_CHECK_EQUAL(to_string(g2), "#\\newline");
-    // (ss = stringstream()) << g2;
-    // BOOST_CHECK_EQUAL(ss.str(), "#\\newline");
+    Expr* g2 = mk_char('\n');
+    BOOST_CHECK_EQUAL(to_string(g2), "#\\newline");
+    (ss = stringstream()) << g2;
+    BOOST_CHECK_EQUAL(ss.str(), "#\\newline");
 
-    // Expr g3 = Char(u'Ж');
-    // BOOST_CHECK_EQUAL(to_string(g3), "#\\Ж");
-    // (ss = stringstream()) << g3;
-    // BOOST_CHECK_EQUAL(ss.str(), "#\\Ж");
+    Expr* g3 = mk_char(u'Ж');
+    BOOST_CHECK_EQUAL(to_string(g3), "#\\Ж");
+    (ss = stringstream()) << g3;
+    BOOST_CHECK_EQUAL(ss.str(), "#\\Ж");
 
-    // Expr g4 = Char(U'👾'); // or L'👾'
-    // BOOST_CHECK_EQUAL(to_string(g4), "#\\👾");
-    // (ss = stringstream()) << g4;
-    // BOOST_CHECK_EQUAL(ss.str(), "#\\👾");
+    Expr* g4 = mk_char(U'👾'); // or L'👾'
+    BOOST_CHECK_EQUAL(to_string(g4), "#\\👾");
+    (ss = stringstream()) << g4;
+    BOOST_CHECK_EQUAL(ss.str(), "#\\👾");
 }
 
 BOOST_AUTO_TEST_CASE(expr_if_false)

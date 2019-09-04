@@ -57,33 +57,32 @@ Expr* Parser::parse_comma()
 
 Expr* Parser::parse_hash(const Token& tok)
 {
-    //     if (get<string>(tok.val) == "\\") {
-    //         // character
-    //         auto t = lexer.peek();
-    //         if (!iswspace(t)) {
-    //             switch (t) {
-    //             case 's':
-    //             case 'S':
-    //             case 'n':
-    //             case 'N': {
-    //                 Token newTok = lexer.get_token();
-    //                 auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
-    //                 if (val == "newline") {
-    //                     return Char('\n');
-    //                 } else if (val == "space") {
-    //                     return Char(' ');
-    //                 }
-    //                 t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
-    //                 return Char(wchar_t(t));
-    //             }
-    //             default:
-    //                 lexer.scan();
-    //                 return Char(wchar_t(t));
-    //             }
-    //         }
-    //         throw ParseException("#\\ expecting a character");
-    //     } else
-    if (get<string>(tok.val) == "'") {
+    if (get<string>(tok.val) == "\\") {
+        // character
+        auto t = lexer.peek();
+        if (!iswspace(t)) {
+            switch (t) {
+            case 's':
+            case 'S':
+            case 'n':
+            case 'N': {
+                Token newTok = lexer.get_token();
+                auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
+                if (val == "newline") {
+                    return mk_char('\n');
+                } else if (val == "space") {
+                    return mk_char(' ');
+                }
+                t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
+                return mk_char(wchar_t(t));
+            }
+            default:
+                lexer.scan();
+                return mk_char(wchar_t(t));
+            }
+        }
+        throw ParseException("#\\ expecting a character");
+    } else if (get<string>(tok.val) == "'") {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
@@ -148,8 +147,8 @@ ParserResult Parser::parse()
     case TokenType::atom:
         return { mk_symbolInt(get<string>(tok.val)), false };
 
-        // case TokenType::string:
-        //     return { String(get<wstring>(tok.val)), false };
+    case TokenType::string:
+        return { mk_string(get<wstring>(tok.val)), false };
 
     case TokenType::quote:
     case TokenType::backquote:

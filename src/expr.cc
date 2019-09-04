@@ -108,21 +108,22 @@ string to_string(const Expr* s)
         str += ')';
         return str;
     }
-        // } else if (s.type() == typeid(String)) {
-        //     return "\"" + ws2s(any_cast<String>(s)) + "\"";
-        // } else if (s.type() == typeid(Char)) {
-        //     string str("#\\");
-        //     switch (any_cast<Char>(s)) {
-        //     case ' ':
-        //         str += "space";
-        //         break;
-        //     case '\n':
-        //         str += "newline";
-        //         break;
-        //     default:
-        //         utf8::append(any_cast<Char>(s), str);
-        //     }
-        //     return str;
+    case Type::string:
+        return "\"" + ws2s(s->string) + "\"";
+    case Type::character: {
+        string str("#\\");
+        switch (s->chr) {
+        case ' ':
+            str += "space";
+            break;
+        case '\n':
+            str += "newline";
+            break;
+        default:
+            utf8::append(s->chr, str);
+        }
+        return str;
+    }
     case Type::function:
         return string(*s->function);
     case Type::function_ref:

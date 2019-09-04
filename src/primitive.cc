@@ -402,7 +402,6 @@ Expr* let(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> 
 
 // Strings
 
-/*
 static function<bool(String, String)> eq_str = equal_to<String>();
 static function<bool(String, String)> neq_str = not_equal_to<String>();
 static function<bool(String, String)> gt_str = greater<String>();
@@ -410,12 +409,17 @@ static function<bool(String, String)> ge_str = greater_equal<String>();
 static function<bool(String, String)> lt_str = less<String>();
 static function<bool(String, String)> le_str = less_equal<String>();
 
-static PrimBasicFunct str_eq = predicate<String>(eq_str);
-static PrimBasicFunct str_neq = predicate<String>(neq_str);
-static PrimBasicFunct str_gt = predicate<String>(gt_str);
-static PrimBasicFunct str_ge = predicate<String>(ge_str);
-static PrimBasicFunct str_lt = predicate<String>(lt_str);
-static PrimBasicFunct str_le = predicate<String>(le_str);
+static PrimBasicFunct str_eq = predicate_str<String>(eq_str);
+static PrimBasicFunct str_neq = predicate_str<String>(neq_str);
+static PrimBasicFunct str_gt = predicate_str<String>(gt_str);
+static PrimBasicFunct str_ge = predicate_str<String>(ge_str);
+static PrimBasicFunct str_lt = predicate_str<String>(lt_str);
+static PrimBasicFunct str_le = predicate_str<String>(le_str);
+
+Expr* to_lower_str(const Expr* s)
+{
+    return mk_string(boost::algorithm::to_lower_copy(wstring(s->string)));
+}
 
 // Chars
 
@@ -426,21 +430,24 @@ static function<bool(Char, Char)> ge_char = greater_equal<Char>();
 static function<bool(Char, Char)> lt_char = less<Char>();
 static function<bool(Char, Char)> le_char = less_equal<Char>();
 
-static PrimBasicFunct char_eq = predicate<Char>(eq_char);
-static PrimBasicFunct char_neq = predicate<Char>(neq_char);
-static PrimBasicFunct char_gt = predicate<Char>(gt_char);
-static PrimBasicFunct char_ge = predicate<Char>(ge_char);
-static PrimBasicFunct char_lt = predicate<Char>(lt_char);
-static PrimBasicFunct char_le = predicate<Char>(le_char);
+static PrimBasicFunct char_eq = predicate_chr<Char>(eq_char);
+static PrimBasicFunct char_neq = predicate_chr<Char>(neq_char);
+static PrimBasicFunct char_gt = predicate_chr<Char>(gt_char);
+static PrimBasicFunct char_ge = predicate_chr<Char>(ge_char);
+static PrimBasicFunct char_lt = predicate_chr<Char>(lt_char);
+static PrimBasicFunct char_le = predicate_chr<Char>(le_char);
 
-*/
+Expr* to_lower_char(const Expr* s)
+{
+    return mk_char(tolower(s->chr));
+}
 
 void init_prims()
 {
     vector<Primitive> defs{
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
-        // { "keywordp", &typep<Keyword>, one_arg, preEvaluate },
+        { "keywordp", &typep<Type::keyword>, one_arg, preEvaluate },
         // { "type-of", &type_of, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
@@ -557,64 +564,52 @@ void init_prims()
         // { "incf", &incf, min_one },
         // { "decf", &incf, min_one },
 
-        // // String functions
-        // { "stringp", &typep<String>, one_arg, preEvaluate },
-        // { "string=", str_eq, two_str, preEvaluate },
-        // { "string-equal", str_eq, two_str, preEvaluate },
-        // { "string/=", str_neq, two_str, preEvaluate },
-        // { "string-not-equal", str_neq, two_str, preEvaluate },
-        // { "string<", str_lt, two_str, preEvaluate },
-        // { "string-lessp", str_lt, two_str, preEvaluate },
-        // { "string>", str_gt, two_str, preEvaluate },
-        // { "string-greaterp", str_gt, two_str, preEvaluate },
-        // { "string<=", str_le, two_str, preEvaluate },
-        // { "string-not-greaterp", str_le, two_str, preEvaluate },
-        // { "string>=", str_ge, two_str, preEvaluate },
-        // { "string-not-lessp", str_ge, two_str, preEvaluate },
+        // String functions
+        { "stringp", &typep<Type::string>, one_arg, preEvaluate },
+        { "string=", str_eq, two_str, preEvaluate },
+        { "string-equal", str_eq, two_str, preEvaluate },
+        { "string/=", str_neq, two_str, preEvaluate },
+        { "string-not-equal", str_neq, two_str, preEvaluate },
+        { "string<", str_lt, two_str, preEvaluate },
+        { "string-lessp", str_lt, two_str, preEvaluate },
+        { "string>", str_gt, two_str, preEvaluate },
+        { "string-greaterp", str_gt, two_str, preEvaluate },
+        { "string<=", str_le, two_str, preEvaluate },
+        { "string-not-greaterp", str_le, two_str, preEvaluate },
+        { "string>=", str_ge, two_str, preEvaluate },
+        { "string-not-lessp", str_ge, two_str, preEvaluate },
 
-        // { "string-ci=",
-        //     funct_ci(str_eq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }), two_str, preEvaluate },
-        // { "string-ci/=",
-        //     funct_ci(str_neq, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-        //     two_str, preEvaluate },
-        // { "string-ci<",
-        //     funct_ci(str_lt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-        //     two_str, preEvaluate },
-        // { "string-ci>",
-        //     funct_ci(str_gt, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-        //     two_str, preEvaluate },
-        // { "string-ci<=",
-        //     funct_ci(str_le, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-        //     two_str, preEvaluate },
-        // { "string-ci>=",
-        //     funct_ci(str_ge, [](const Expr& s) -> Expr { return String(boost::algorithm::to_lower_copy(wstring(any_cast<String>(s)))); }),
-        //     two_str, preEvaluate },
+        { "string-ci=", funct_ci(str_eq, to_lower_str), two_str, preEvaluate },
+        { "string-ci/=", funct_ci(str_neq, to_lower_str), two_str, preEvaluate },
+        { "string-ci<", funct_ci(str_lt, to_lower_str), two_str, preEvaluate },
+        { "string-ci>", funct_ci(str_gt, to_lower_str), two_str, preEvaluate },
+        { "string-ci<=", funct_ci(str_le, to_lower_str), two_str, preEvaluate },
+        { "string-ci>=", funct_ci(str_ge, to_lower_str), two_str, preEvaluate },
 
-        // { "string", &string_fnct, one_arg, preEvaluate },
-        // { "string-upcase", &string_fnct, one_arg, preEvaluate },
-        // { "string-downcase", &string_fnct, one_arg, preEvaluate },
+        { "string", &string_fnct, one_arg, preEvaluate },
+        { "string-upcase", &string_fnct, one_arg, preEvaluate },
+        { "string-downcase", &string_fnct, one_arg, preEvaluate },
 
-        // // Character functions
-        // { "characterp", &typep<Char>, one_arg, preEvaluate },
-        // { "char=", char_eq, two_char, preEvaluate },
-        // { "char-equal", char_eq, two_char, preEvaluate },
-        // { "char/=", char_neq, two_char, preEvaluate },
-        // { "char-not-equal", char_neq, two_char, preEvaluate },
-        // { "char<", char_lt, two_char, preEvaluate },
-        // { "char-lessp", char_lt, two_char, preEvaluate },
-        // { "char>", char_gt, two_char, preEvaluate },
-        // { "char-greaterp", char_gt, two_char, preEvaluate },
-        // { "char<=", char_le, two_char, preEvaluate },
-        // { "char-not-greaterp", char_le, two_char, preEvaluate },
-        // { "char>=", char_ge, two_char, preEvaluate },
-        // { "char-not-lessp", char_ge, two_char, preEvaluate },
+        // Character functions
+        { "characterp", &typep<Type::character>, one_arg, preEvaluate },
+        { "char=", char_eq, two_char, preEvaluate },
+        { "char-equal", char_eq, two_char, preEvaluate },
+        { "char/=", char_neq, two_char, preEvaluate },
+        { "char-not-equal", char_neq, two_char, preEvaluate },
+        { "char<", char_lt, two_char, preEvaluate },
+        { "char-lessp", char_lt, two_char, preEvaluate },
+        { "char>", char_gt, two_char, preEvaluate },
+        { "char-greaterp", char_gt, two_char, preEvaluate },
+        { "char<=", char_le, two_char, preEvaluate },
+        { "char-not-greaterp", char_le, two_char, preEvaluate },
+        { "char>=", char_ge, two_char, preEvaluate },
+        { "char-not-lessp", char_ge, two_char, preEvaluate },
 
-        // { "char-ci=",
-        //     funct_ci(char_eq, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        // { "char-ci<", funct_ci(char_lt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        // { "char-ci>", funct_ci(char_gt, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        // { "char-ci<=", funct_ci(char_le, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
-        // { "char-ci>=", funct_ci(char_ge, [](const Expr& c) -> Expr { return Char(tolower(any_cast<Char>(c))); }), two_char, preEvaluate },
+        { "char-ci=", funct_ci(char_eq, to_lower_char), two_char, preEvaluate },
+        { "char-ci<", funct_ci(char_lt, to_lower_char), two_char, preEvaluate },
+        { "char-ci>", funct_ci(char_gt, to_lower_char), two_char, preEvaluate },
+        { "char-ci<=", funct_ci(char_le, to_lower_char), two_char, preEvaluate },
+        { "char-ci>=", funct_ci(char_ge, to_lower_char), two_char, preEvaluate },
 
         // // Sequence
 
@@ -624,9 +619,9 @@ void init_prims()
         // { "subseq", &subseq, min_two, preEvaluate },
         // { "make-sequence", &make_sequence, min_two, preEvaluate },
 
-        // // I/O
-        // { "error", &throw_error, one_arg, preEvaluate },
-        // { "quit", &quit, no_check, preEvaluate },
+        // I/O
+        { "error", &throw_error, one_arg, preEvaluate },
+        { "quit", &quit, no_check, preEvaluate },
 
     };
 

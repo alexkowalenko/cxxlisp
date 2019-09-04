@@ -23,6 +23,8 @@ enum class Type {
     boolean,
     integer,
     list,
+    character,
+    string,
     function,
     keyword,
     function_ref
@@ -32,6 +34,8 @@ using Atom = string;
 using Bool = bool;
 using Int = long;
 using Keyword = string;
+using Char = wchar_t;
+using String = wstring;
 
 class Function;
 
@@ -47,6 +51,8 @@ struct Expr {
             Expr* car;
             Expr* cdr;
         };
+        Char chr;
+        String string;
         Function* function;
         Keyword keyword;
         Atom function_ref;
@@ -147,11 +153,19 @@ Expr* expr_eq(const Expr* x, const Expr*);
 Expr* expr_eql(const Expr* x, const Expr*);
 Expr* expr_equal(const Expr* x, const Expr*);
 
-/*
+inline Expr* mk_char(Char c)
+{
+    auto e = new (GC) Expr(Type::character);
+    e->chr = c;
+    return e;
+}
 
-using Char = wchar_t;
-using String = wstring;
-*/
+inline Expr* mk_string(String s)
+{
+    auto e = new (GC) Expr(Type::string);
+    e->string = s;
+    return e;
+}
 
 inline wstring s2ws(const std::string& str)
 {
@@ -173,11 +187,6 @@ Float as_Float(const Expr& s);
 constexpr bool is_Num(const Expr& n)
 {
     return is_a<Int>(n) || is_a<Float>(n);
-}
-
-constexpr bool is_atomic(const Expr& s)
-{
-    return s.type() == typeid(Atom) || s.type() == typeid(Bool) || s.type() == typeid(Int) || s.type() == typeid(Char) || s.type() == typeid(Float);
 }
 
 // sequence
