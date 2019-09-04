@@ -45,14 +45,16 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
     bool optional = false;
     bool rest = false;
     shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    auto f_param_size = is_false(f->parameters) ? 0 : size_list(f->parameters);
 
-    for (auto param = f->parameters; !is_false(param) && !is_false(evalArgs); param = param->cdr) {
+    for (auto param = f->parameters; !is_false(param); param = param->cdr) {
         if (is_a<Type::keyword>(param->car) && param->car->keyword == optional_atom) {
             optional = true;
-
+            cout << "opt args " << endl;
             continue;
-        } else if (is_a<Type::keyword>(param) && param->car->keyword == rest_atom) {
+        } else if (is_a<Type::keyword>(param->car) && param->car->keyword == rest_atom) {
             rest = true;
+            cout << "rest args " << endl;
             continue;
         } else if (is_a<Type::list>(param->car)) {
             if (optional) {
@@ -60,14 +62,14 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
                 if (size_list(param->car) != 2) {
                     throw EvalException(f->name + ": default argument not 2 member list " + to_string(param->car));
                 }
-                auto pp = param->car->car;
-                if (!is_a<Type::atom>(pp)) {
-                    throw EvalException(f->name + ": optional default argument is not an atom " + to_string(pp));
+                auto atom = param->car->car;
+                if (!is_a<Type::atom>(atom)) {
+                    throw EvalException(f->name + ": optional default argument is not an atom " + to_string(atom));
                 }
-                if (evalArgs_size < arg_count) {
-                    context->put(pp->atom, param->cdr->car);
+                if (evalArgs_size < f_param_size - 1) {
+                    context->put(atom->atom, param->car->cdr->car);
                 } else {
-                    context->put(pp->atom, evalArgs->car);
+                    context->put(atom->atom, evalArgs->car);
                 }
             }
         } else if (is_a<Type::atom>(param->car)) {
@@ -86,14 +88,17 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
             }
         }
         ++arg_count;
-        evalArgs = evalArgs->cdr;
+        if (!is_false(evalArgs->cdr)) {
+            evalArgs = evalArgs->cdr;
+        }
     }
-    auto f_param_size = is_false(f->parameters) ? 0 : size_list(f->parameters);
+
     // cout << "param count " << f_param_size << " : " << evalArgs_size << endl;
     if (rest) {
         ; // don't worry about counting pararamters
     } else if (optional) {
-        if (!(f_param_size - 1 == evalArgs_size || f_param_size - 2 == evalArgs_size)) {
+        f_param_size -= 1;
+        if (!(f_param_size == evalArgs_size || f_param_size - 1 == evalArgs_size)) {
             throw EvalException(f->name + ": invalid number of arguments"s);
         }
     } else {
@@ -206,7 +211,6 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     // Eval basic types
     switch (e->type) {
     case Type::boolean:
-        return e;
     case Type::integer:
         return e;
     case Type::atom:
@@ -218,11 +222,8 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     // if (is_a<String>(e) || is_a<Char>(e)) {
     //     return e;
     // }
-    // if (is_a<FunctionRef>(e)) {
-    //     return e;
-    // }
+    case Type::function_ref:
     case Type::function:
-        return e;
     case Type::keyword:
         return e;
     case Type::list:; // fallthrough

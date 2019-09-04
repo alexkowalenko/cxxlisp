@@ -266,10 +266,10 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
           	((null x) nil)
           	(t (cons (caar x)
           			 (firsts (cdr x)))))) )",
-             "firsts" },
-         { "(firsts '())", "nil" },
-         { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
-         { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
+            "firsts" },
+        { "(firsts '())", "nil" },
+        { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
+        { "(firsts '((a b) (c) (d e f)))", "(a c d)" },
 
         // The Little Lisper, pg. 54
         { R"( (defun insertr (new old lat) 
@@ -421,7 +421,6 @@ BOOST_AUTO_TEST_CASE(test_eval_macro)
     test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_optional)
 {
     vector<TestEval> tests = {
@@ -456,10 +455,10 @@ BOOST_AUTO_TEST_CASE(test_eval_optional)
 BOOST_AUTO_TEST_CASE(test_eval_rest)
 {
     vector<TestEval> tests = {
-        { "(defun f (x &rest y) (append x y))", "f" },
-        { "(f 1)", "(1)" },
-        { "(f 1 2)", "(1 2)" },
-        { "(f 1 2 3 4)", "(1 2 3 4)" },
+        { "(defun f (x &rest y) (list x y))", "f" },
+        { "(f 1)", "(1 nil)" },
+        { "(f 1 2)", "(1 (2))" },
+        { "(f 1 2 3 4)", "(1 (2 3 4))" },
 
         { "(f)", "Eval error: unbound variable: x" },
     };
@@ -590,7 +589,6 @@ BOOST_AUTO_TEST_CASE(test_eval_apply)
         { "(apply)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply f)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply 1 1)", "Eval error: apply: Not function ref or lambda expression: 1" },
-
     };
     test_Evaluator(tests);
 }
@@ -614,6 +612,7 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_map)
 {
     vector<TestEval> tests = {

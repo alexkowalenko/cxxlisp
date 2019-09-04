@@ -12,7 +12,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #add_compile_options(-Wall -Wextra -Wshadow -Wpedantic)
 add_compile_options(-Wall -Wshadow)
 
-
 enable_testing()
 
 
@@ -64,8 +63,8 @@ link_directories(${GBEN_LIBRARY_DIRS})
 # CXX Lisp build
 
 # options that work on macOs address, undefined
-#add_compile_options (-fsanitize=address)
-#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=address)
+#add_compile_options (-fsanitize=undefined)
+#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=undefined)
 #set(CMAKE_LINKER ${AX_BASE_CLANG}/clang++)
 
 find_program(CLANG_TIDY_PROGRAM NAMES "clang-tidy" DOC ${AX_BASE_CLANG}/clang-tidy)

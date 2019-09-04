@@ -24,7 +24,8 @@ enum class Type {
     integer,
     list,
     function,
-    keyword
+    keyword,
+    function_ref
 };
 
 using Atom = string;
@@ -48,6 +49,7 @@ struct Expr {
         };
         Function* function;
         Keyword keyword;
+        Atom function_ref;
     };
 };
 

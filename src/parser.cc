@@ -55,44 +55,45 @@ Expr* Parser::parse_comma()
     return unquote_at;
 }
 
-// Expr Parser::parse_hash(const Token& tok)
-// {
-//     if (get<string>(tok.val) == "\\") {
-//         // character
-//         auto t = lexer.peek();
-//         if (!iswspace(t)) {
-//             switch (t) {
-//             case 's':
-//             case 'S':
-//             case 'n':
-//             case 'N': {
-//                 Token newTok = lexer.get_token();
-//                 auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
-//                 if (val == "newline") {
-//                     return Char('\n');
-//                 } else if (val == "space") {
-//                     return Char(' ');
-//                 }
-//                 t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
-//                 return Char(wchar_t(t));
-//             }
-//             default:
-//                 lexer.scan();
-//                 return Char(wchar_t(t));
-//             }
-//         }
-//         throw ParseException("#\\ expecting a character");
-//     } else if (get<string>(tok.val) == "'") {
-//         // function ref
-//         Token t = lexer.get_token();
-//         if (t.type == TokenType::atom) {
-//             return FunctionRef(get<string>(t.val));
-//         } else {
-//             throw ParseException("#' function ref unknown token "s + string(t));
-//         }
-//     }
-//     throw ParseException("# unknown "s + string(tok));
-// }
+Expr* Parser::parse_hash(const Token& tok)
+{
+    //     if (get<string>(tok.val) == "\\") {
+    //         // character
+    //         auto t = lexer.peek();
+    //         if (!iswspace(t)) {
+    //             switch (t) {
+    //             case 's':
+    //             case 'S':
+    //             case 'n':
+    //             case 'N': {
+    //                 Token newTok = lexer.get_token();
+    //                 auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
+    //                 if (val == "newline") {
+    //                     return Char('\n');
+    //                 } else if (val == "space") {
+    //                     return Char(' ');
+    //                 }
+    //                 t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
+    //                 return Char(wchar_t(t));
+    //             }
+    //             default:
+    //                 lexer.scan();
+    //                 return Char(wchar_t(t));
+    //             }
+    //         }
+    //         throw ParseException("#\\ expecting a character");
+    //     } else
+    if (get<string>(tok.val) == "'") {
+        // function ref
+        Token t = lexer.get_token();
+        if (t.type == TokenType::atom) {
+            return mk_function_ref(get<string>(t.val));
+        } else {
+            throw ParseException("#' function ref unknown token "s + string(t));
+        }
+    }
+    throw ParseException("# unknown "s + string(tok));
+}
 
 ParserResult Parser::parse_quote(Token& tok)
 {
@@ -157,9 +158,9 @@ ParserResult Parser::parse()
     case TokenType::comma:
         return { parse_comma(), false };
 
-        // case TokenType::hash: {
-        //     return { parse_hash(tok), false };
-        // }
+    case TokenType::hash: {
+        return { parse_hash(tok), false };
+    }
 
     case TokenType::eof:
         return { sF, true };

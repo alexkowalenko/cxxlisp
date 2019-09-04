@@ -125,8 +125,8 @@ string to_string(const Expr* s)
         //     return str;
     case Type::function:
         return string(*s->function);
-        // } else if (s.type() == typeid(FunctionRef)) {
-        //     return "#'" + any_cast<FunctionRef>(s);
+    case Type::function_ref:
+        return "#'" + s->function_ref;
     case Type::keyword:
         return s->keyword;
     default:

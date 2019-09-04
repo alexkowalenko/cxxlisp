@@ -57,12 +57,12 @@ BENCHMARK_CAPTURE(BM_Test, defconstant, "(defconstant a 10)"s);
 
 BENCHMARK_CAPTURE(BM_Test, fact_20, "(defun fact (x) (if (<= x 0) 1 (* x (fact (- x 1))))) (fact 20)"s);
 
-BENCHMARK_CAPTURE(BM_Test, fib_28, string(R"x( 
+BENCHMARK_CAPTURE(BM_Test, fib_26, string(R"x( 
     (defun fib (n)
 	 		(if (<= n 1)
 	 			1
 	 			(+ (fib (- n 1)) (fib (- n 2)))))
-	(fib 28) )x"));
+	(fib 26) )x"));
 
 BENCHMARK_CAPTURE(BM_Test, subst, string(R"x( 
     (defun subst (x y z)

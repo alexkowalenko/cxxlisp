@@ -39,16 +39,15 @@ inline Expr* mk_keyword(const string& k)
     return e;
 }
 
-/*
-class FunctionRef : public string {
-public:
-    FunctionRef(const string& s)
-        : string(s){};
-};
+inline Expr* mk_function_ref(const string& k)
+{
+    auto e = new (GC) Expr(Type::function_ref);
+    e->function_ref = k;
+    return e;
+}
 
-bool has_keyword(const List& args, const Keyword& k);
-Expr get_keyword_value(const List& args, const Keyword& k);
-*/
+//bool has_keyword(const List& args, const Keyword& k);
+//Expr get_keyword_value(const List& args, const Keyword& k);
 }
 
 #endif

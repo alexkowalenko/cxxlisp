@@ -59,91 +59,96 @@ Expr* lambda(const string& name, Expr* args)
     return mk_function(f);
 }
 
-/*
-Expr funct(const string& name, List& args)
+Expr* funct(const string& name, Expr* args)
 {
-    if (is_a<Atom>(args[0])) {
-        return FunctionRef(any_cast<Atom>(args[0]));
+    if (is_a<Type::atom>(args->car)) {
+        return mk_function_ref(args->car->atom);
     }
     throw EvalException(name + " function name needs to an atom");
 }
 
-template <typename T>
-Expr find_funct(const T& f, SymbolTable& a)
+Expr* find_funct(string& n, shared_ptr<SymbolTable> a)
 {
-    if (auto p = prim_table.find(any_cast<T>(f)); p != prim_table.end()) {
+    cout << n << endl;
+    if (auto p = prim_table.find(n); p != prim_table.end()) {
         return sT;
     }
-    if (auto fs = a.find(any_cast<T>(f))) {
-        if (is_a<Function>(*fs)) {
+    if (auto fs = a->find(n)) {
+        if (is_a<Type::function>(*fs)) {
             return sT;
         }
     }
     return sF;
 }
 
-Expr functionp(const string&, List& args, SymbolTable& a)
+Expr* functionp(const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    auto f = args[0];
-    if (is_a<Function>(f)) { // This is the difference
+    if (is_a<Type::function>(args->car)) { // This is the difference
         return sT;
-    } else if (is_a<FunctionRef>(f)) {
-        return find_funct<FunctionRef>(any_cast<FunctionRef>(f), a);
+    } else if (is_a<Type::function_ref>(args->car)) {
+        return find_funct(args->car->function_ref, a);
     }
     return sF;
 }
 
 // Like functionp but works on atoms
-Expr fboundp(const string&, List& args, SymbolTable& a)
+Expr* fboundp(const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    auto f = args[0];
-    if (!is_a<Atom>(f)) {
+    if (!is_a<Type::atom>(args->car)) {
         return sF;
     } else {
-        return find_funct<Atom>(any_cast<Atom>(f), a);
+        return find_funct(args->car->atom, a);
     }
     return sF;
 }
 
-List get_function(Evaluator& l, const string& name, Expr& arg, SymbolTable& a)
+Expr* get_function(Evaluator& l, const string& name, Expr* arg, shared_ptr<SymbolTable> a)
 {
     auto fn = l.eval(arg, a);
-    List ex;
-    if (is_a<FunctionRef>(fn)) {
-        ex.push_back(Atom(any_cast<FunctionRef>(fn)));
-    } else if (is_a<Function>(fn)) {
-        ex.push_back(fn);
+    if (is_a<Type::function_ref>(fn)) {
+        return mk_list(mk_atom(fn->function_ref));
+    } else if (is_a<Type::function>(fn)) {
+        return mk_list(fn);
     } else {
         throw EvalException(name + ": Not function ref or lambda expression: " + to_string(fn));
     }
-    return ex;
+    return sF;
 }
 
-Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    List ex = get_function(l, name, args[0], a);
-    auto res = l.eval(args[1], a);
-    if (is_a<List>(res)) {
-        for (auto x : any_cast<List>(res)) {
-            List elem{ quote_atom, x };
-            ex.push_back(elem);
+    auto ex = get_function(l, name, args->car, a);
+    auto res = l.eval(args->cdr->car, a);
+    if (is_a<Type::list>(res)) {
+        // new to transform list into quoted elements
+        auto new_res = mk_list();
+        auto nrt = new_res;
+        auto rt = res;
+        Expr* prev = nullptr;
+        while (!is_false(rt)) {
+            nrt->car = mk_list({ quote_at, rt->car });
+            nrt->cdr = mk_list();
+            prev = nrt;
+            nrt = nrt->cdr;
+            rt = rt->cdr;
         }
+        prev->cdr = nullptr;
+        ex->cdr = new_res;
     } else {
-        ex.push_back(res);
+        ex->cdr = res;
     }
-    Expr e{ ex };
-    return l.eval(e, a);
+    return l.eval(ex, a);
 }
 
-Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr* funcall(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    List ex = get_function(l, name, args[0], a);
-    ex.insert(ex.end(), args.begin() + 1, args.end());
-    Expr e{ ex };
-    return l.eval(e, a);
+    auto ex = get_function(l, name, args->car, a);
+    ex->cdr = args->cdr;
+    return l.eval(ex, a);
 }
 
-Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a)
+/*
+Expr mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
     List ex = get_function(l, name, args[0], a);
     List aargs(args.begin() + 1, args.end());
@@ -178,7 +183,7 @@ end:
     return result;
 }
 
-Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a)
+Expr doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
     if (!is_a<List>(args[0])) {
         throw EvalException(name + ": has no parameter list " + to_string(args[0]));
