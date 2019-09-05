@@ -31,15 +31,17 @@ BOOST_AUTO_TEST_CASE(test_eval_length)
 
         { "(length)", "Eval error: length expecting an argument" },
     };
-    //test_Evaluator(tests);
+    test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_elt)
 {
     vector<TestEval> tests = {
         { "(elt \"123\" 1)", "#\\2" },
+        { "(elt \"123\" 0)", "#\\1" },
+
         { "(elt '(1 2 3 4) 2)", "3" },
+        { "(elt '(1 2 3 4) 0)", "1" },
         //{ "(elt #(1 2 3.5) 2)", "3.5" },
 
         { "(elt \"🦑🦐🦀\" 1)", "#\\🦐" },
@@ -58,6 +60,8 @@ BOOST_AUTO_TEST_CASE(test_eval_subseq)
 {
     vector<TestEval> tests = {
         { "(subseq \"123\" 1)", "\"23\"" },
+        { "(subseq \"123\" 0)", "\"123\"" },
+
         { "(subseq '(1 2 3 4) 2)", "(3 4)" },
         // {"(subseq #(1 2 3.5) 2)", "#(3.5)"},
 
@@ -102,12 +106,14 @@ BOOST_AUTO_TEST_CASE(test_eval_copyseq)
 BOOST_AUTO_TEST_CASE(test_eval_find)
 {
     vector<TestEval> tests = {
+        { "(find #\\h \"hello\")", "#\\h" },
         { "(find #\\l \"hello\")", "#\\l" },
         { "(find #\\A \"hello\")", "nil" },
         { "(find #\\ग \"कखगघङ\")", "#\\ग" },
         { "(find 'l \"hello\")", "nil" },
 
         { "(find 'a '(a b c a b c))", "a" },
+        { "(find 'c '(a b c a b c))", "c" },
         //{ "(find 'a '(a b c a b c) :start 4)", "nil" },
         { "(find 'z '(a b c a b c))", "nil" },
 
@@ -125,6 +131,7 @@ BOOST_AUTO_TEST_CASE(test_eval_find_if)
     vector<TestEval> tests = {
         { "(find-if #'atom '(1 2 3 4))", "1" },
         { "(find-if-not #'atom '(1 2 3 4))", "nil" },
+        { "(find-if-not #'atom '(1 2 (3) 4))", "(3)" },
 
         { "(find-if (lambda (x) (eq x 'red)) '(blue green s red s))", "red" },
 
@@ -186,16 +193,19 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
 {
     vector<TestEval> tests = {
         { "(defvar x '(1 2 3))", "x" },
-        { "(setf (elt x 1) #\\b)", "(1 #\\b 3)" },
+        { "(setf (elt x 1) #\\b)", "#\\b" },
         { "x", "(1 #\\b 3)" },
-        { "(setf (elt x 0) #\\a)", "(#\\a #\\b 3)" },
-        { "(setf (elt x 2) #\\c)", "(#\\a #\\b #\\c)" },
+
+        { "(setf (elt x 0) #\\a)", "#\\a" },
+        { "(setf (elt x 2) #\\c)", "#\\c" },
         { "x", "(#\\a #\\b #\\c)" },
+
         { "(defvar x \"αβγ\")", "x" },
-        { "(setf (elt x 1) #\\b)", "\"αbγ\"" },
+        { "(setf (elt x 1) #\\b)", "#\\b" },
         { "x", "\"αbγ\"" },
-        { "(setf (elt x 0) #\\a)", "\"abγ\"" },
-        { "(setf (elt x 2) #\\c)", "\"abc\"" },
+
+        { "(setf (elt x 0) #\\a)", "#\\a" },
+        { "(setf (elt x 2) #\\c)", "#\\c" },
         { "x", "\"abc\"" },
 
         { "(setf (elt x 4) #\\a )", "Eval error: setf elt: index out of bounds" },
@@ -211,9 +221,13 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
 BOOST_AUTO_TEST_CASE(test_eval_set_elt)
 {
     vector<TestEval> tests = {
+        { "(set-elt '(1 2 3) 1 'a)", "(1 a 3)" },
+        { "(set-elt '(1 2 3) 0 'a)", "(a 2 3)" },
+        { "(set-elt '(1 2 3) 2 'c)", "(1 2 c)" },
+
         { "(defvar x '(1 2 3))", "x" },
         { "(set-elt x 1 #\\b)", "(1 #\\b 3)" },
-        { "x", "(1 2 3)" },
+        { "x", "(1 #\\b 3)" },
 
         { "(defvar x \"αβγ\")", "x" },
         { "(set-elt x 0 #\\a)", "\"aβγ\"" },
@@ -225,6 +239,7 @@ BOOST_AUTO_TEST_CASE(test_eval_set_elt)
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_fill)
 {
     vector<TestEval> tests = {
@@ -243,6 +258,7 @@ BOOST_AUTO_TEST_CASE(test_eval_fill)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_every)
 {
@@ -340,4 +356,3 @@ BOOST_AUTO_TEST_CASE(test_eval_make_sequence)
     };
     test_Evaluator(tests);
 }
-*/

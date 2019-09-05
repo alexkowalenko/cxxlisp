@@ -339,6 +339,57 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_demos)
+{
+    vector<TestEval> tests = {
+
+        { R"( (defun fib (n)
+	 		(if (<= n 1)
+	 			1
+	 			(+ (fib (- n 1)) (fib (- n 2))))) )",
+            "fib" },
+        { R"( (fib 20) )",
+            "10946" },
+
+        { R"( (defun subst-x (x y z)
+	(cond 
+		((atom z)
+			(cond ((eq z y) x)
+					(t z)))
+	(t (cons (subst-x x y (car z))
+			 (subst-x x y (cdr z)))))) )",
+            "subst-x" },
+        { R"( (subst-x 'm 'b '(a b (a b (a b c) c) d a b (a b (a b c) c) c)) )",
+            "(a m (a m (a m c) c) d a m (a m (a m c) c) c)" },
+
+        { R"( (defun firstdenomination (kindsofcoins)
+		(cond ((= kindsofcoins 1) 1)
+			  ((= kindsofcoins 2) 2)
+			  ((= kindsofcoins 3) 5)
+			  ((= kindsofcoins 4) 10)
+			  ((= kindsofcoins 5) 20)
+			  ((= kindsofcoins 6) 50)
+			  ((= kindsofcoins 7) 100)
+			  ((= kindsofcoins 8) 200))
+				)
+
+	(defun cc (amount kindsofcoins)
+		(cond ((= amount 0) 1)
+			  ((or (< amount 0) (= kindsofcoins 0)) 0)
+			   (t (+ (cc amount (- kindsofcoins 1))
+					(cc (- amount (firstdenomination kindsofcoins)) kindsofcoins)))))
+		
+	(defun countchange (amount)
+		(cc amount 5)) )",
+            R"(firstdenomination
+cc
+countchange)" },
+        { R"( (countchange 55) )",
+            "596" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_lambda)
 {
     vector<TestEval> tests = {

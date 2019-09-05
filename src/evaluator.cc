@@ -40,12 +40,12 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
 
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
-    auto evalArgs_size = size_list(evalArgs);
+    auto evalArgs_size = evalArgs->size();
     unsigned int arg_count = 0;
     bool optional = false;
     bool rest = false;
     shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
-    auto f_param_size = is_false(f->parameters) ? 0 : size_list(f->parameters);
+    auto f_param_size = is_false(f->parameters) ? 0 : f->parameters->size();
 
     for (auto param = f->parameters; !is_false(param); param = param->cdr) {
         if (is_a<Type::keyword>(param->car) && param->car->keyword == optional_atom) {
@@ -59,7 +59,7 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
         } else if (is_a<Type::list>(param->car)) {
             if (optional) {
                 // get symbol
-                if (size_list(param->car) != 2) {
+                if (param->car->size() != 2) {
                     throw EvalException(f->name + ": default argument not 2 member list " + to_string(param->car));
                 }
                 auto atom = param->car->car;
@@ -241,7 +241,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
 
         // quote
         if (name == quote_at->atom) {
-            if (size_list(e) == 2) {
+            if (e->size() == 2) {
                 return e->cdr->car;
             }
             throw EvalException("quote: requires one argument");

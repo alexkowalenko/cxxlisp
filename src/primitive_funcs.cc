@@ -28,7 +28,7 @@ Function* createFunction(const string& name, Expr* args)
         p = p->cdr;
     }
     Function* f = new (GC) Function(name, args->car);
-    if (size_list(args) > 1) {
+    if (args->size() > 1) {
         f->body = args->cdr;
     } else {
         f->body = sF;

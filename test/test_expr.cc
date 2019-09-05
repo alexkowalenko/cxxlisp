@@ -107,31 +107,31 @@ BOOST_AUTO_TEST_CASE(expr_print)
     BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
-    BOOST_CHECK_EQUAL(size_list(c), 2);
+    BOOST_CHECK_EQUAL(c->size(), 2);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there") });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there)");
-    BOOST_CHECK_EQUAL(size_list(c), 2);
+    BOOST_CHECK_EQUAL(c->size(), 2);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there jim)");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there jim)");
-    BOOST_CHECK_EQUAL(size_list(c), 3);
+    BOOST_CHECK_EQUAL(c->size(), 3);
 
     c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
     BOOST_CHECK_EQUAL(to_string(c), "(hello there jim (hello there jim))");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "(hello there jim (hello there jim))");
-    BOOST_CHECK_EQUAL(size_list(c), 4);
+    BOOST_CHECK_EQUAL(c->size(), 4);
 
     c = mk_list({ mk_list({ mk_atom("hello"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }), mk_atom("there"), mk_atom("jim") }), mk_atom("hello"), mk_atom("there"), mk_atom("jim"), mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") }) });
     BOOST_CHECK_EQUAL(to_string(c), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
     (ss = stringstream()) << c;
     BOOST_CHECK_EQUAL(ss.str(), "((hello (hello there jim) there jim) hello there jim (hello there jim))");
-    BOOST_CHECK_EQUAL(size_list(c), 5);
+    BOOST_CHECK_EQUAL(c->size(), 5);
 
     Expr* f = mk_string(L"Olá!"s);
     BOOST_CHECK_EQUAL(to_string(f), "\"Olá!\"");
@@ -208,4 +208,24 @@ BOOST_AUTO_TEST_CASE(expr_eq_test)
     BOOST_CHECK(expr_equal(mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("b") }) }),
                     mk_list({ mk_atom("a"), mk_list({ mk_atom("a"), mk_atom("c") }) }))
         == sF);
+}
+
+BOOST_AUTO_TEST_CASE(expr_index)
+{
+    auto c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") });
+    BOOST_CHECK_EQUAL(to_string((*c)[0]), "hello");
+    BOOST_CHECK_EQUAL(to_string((*c)[1]), "there");
+    BOOST_CHECK_EQUAL(to_string((*c)[2]), "jim");
+    BOOST_CHECK_EQUAL(to_string((*c)[3]), "nil");
+}
+
+BOOST_AUTO_TEST_CASE(expr_set)
+{
+    auto c = mk_list({ mk_atom("hello"), mk_atom("there"), mk_atom("jim") });
+    c->set(0, mk_atom("bonjour"));
+    BOOST_CHECK_EQUAL(to_string(c), "(bonjour there jim)");
+    c->set(1, mk_atom("lá"));
+    BOOST_CHECK_EQUAL(to_string(c), "(bonjour lá jim)");
+    c->set(2, mk_atom("jacques"));
+    BOOST_CHECK_EQUAL(to_string(c), "(bonjour lá jacques)");
 }

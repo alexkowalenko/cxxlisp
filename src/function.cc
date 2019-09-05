@@ -15,24 +15,16 @@ Function::operator string()
     return "λ:"s + name + " : " + to_string(body);
 }
 
-/*
-bool has_keyword(const List& args, const Keyword& k)
+Expr* get_keyword_value(Expr* top, const Expr* k)
 {
-    auto it = find_if(args.begin(), args.end(), [&k](const Expr& e) -> bool {
-        return is_a<Keyword>(e) && any_cast<Keyword>(e) == k;
-    });
-    return it != args.end();
-}
-
-Expr get_keyword_value(const List& args, const Keyword& k)
-{
-    auto it = find_if(args.begin(), args.end(), [&k](const Expr& e) -> bool {
-        return is_a<Keyword>(e) && any_cast<Keyword>(e) == k;
-    });
-    if (it != args.end() || it != args.end() - 1) {
-        return *(it + 1);
+    while (!is_false(top)) {
+        if (expr_eq(top->car, k) != sF) {
+            if (!is_false(top->cdr)) {
+                return arg1(top);
+            }
+        }
+        top = top->cdr;
     }
     return sF;
 }
-*/
 }

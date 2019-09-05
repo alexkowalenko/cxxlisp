@@ -36,6 +36,24 @@ Expr* mk_list(initializer_list<Expr*> p)
     return start;
 }
 
+Expr* mk_list(size_t size, Expr* const init)
+{
+    Expr* prev = nullptr;
+    auto top = mk_list();
+    auto s = top;
+    while (size > 0) {
+        s->car = init;
+        s->cdr = mk_list();
+        prev = s;
+        s = s->cdr;
+        size--;
+    }
+    if (prev) {
+        prev->cdr = nullptr;
+    }
+    return top;
+}
+
 string to_dstring(const Expr* s)
 {
     if (!s) {
@@ -56,10 +74,12 @@ string to_dstring(const Expr* s)
         res += "]";
         return res;
     }
+    case Type::string:
+    case Type::character:
+    case Type::function_ref:
     case Type::function:
-        return string(*s->function);
     case Type::keyword:
-        return s->keyword;
+        return to_string(s);
     default:
         return "<Unknown>";
     }
@@ -135,14 +155,52 @@ string to_string(const Expr* s)
     }
 }
 
-unsigned int size_list(const Expr* s)
+unsigned int Expr::size() const noexcept
 {
     unsigned int res = 0;
+    auto s = this;
     while (s && is_list(s)) {
         res++;
         s = s->cdr;
     }
     return res;
+}
+
+Expr* Expr::operator[](size_t pos)
+{
+    auto s = this;
+    while (!is_false(s)) {
+        if (pos == 0) {
+            return s->car;
+        }
+        pos--;
+        s = s->cdr;
+    }
+    return sF;
+}
+
+void Expr::set(size_t pos, Expr* r)
+{
+    auto s = this;
+    while (!is_false(s)) {
+        if (pos == 0) {
+            s->car = r;
+            return;
+        }
+        pos--;
+        s = s->cdr;
+    }
+}
+
+Expr* Expr::find(Expr* r)
+{
+    auto s = this;
+    while (!is_false(s)) {
+        if (expr_eq(s->car, r)) {
+            return s;
+        }
+    }
+    return nullptr;
 }
 
 constexpr bool same_type(Type t, const Expr* x, const Expr* y)
@@ -162,8 +220,10 @@ Expr* expr_eq(const Expr* x, const Expr* y)
             return sT;
         } else if (same_type(Type::boolean, x, y) && x->boolean == y->boolean) {
             return sT;
-            //} else if (eq_any<Char>(x, y)) {
-            //    return sT;
+        } else if (same_type(Type::character, x, y) && x->chr == y->chr) {
+            return sT;
+        } else if (same_type(Type::keyword, x, y) && x->keyword == y->keyword) {
+            return sT;
             //} else if (eq_any<Float>(x, y)) {
             //    return sT;
         }
@@ -183,23 +243,26 @@ Expr* expr_equal(const Expr* x, const Expr* y)
         return sT;
     }
     if (same_type(Type::list, x, y)) {
-        if (size_list(x) != size_list(y)) {
+        if (x->size() != y->size()) {
             return sF;
         }
         auto itx = x;
         auto ity = y;
         while (itx) {
-            if (expr_equal(itx->car, ity->car) == sF) {
-                return sF;
+            if (same_type(Type::list, itx, ity)) {
+                if (expr_equal(itx->car, ity->car) == sF) {
+                    return sF;
+                }
+                itx = itx->cdr;
+                ity = ity->cdr;
+            } else {
+                return expr_equal(itx, ity);
             }
-            itx = itx->cdr;
-            ity = ity->cdr;
         }
         return sT;
+    } else if (same_type(Type::string, x, y) && x->string == y->string) {
+        return sT;
     }
-    //if (eq_any<String>(x, y)) {
-    //    return sT;
-    //}
     return sF;
 }
 

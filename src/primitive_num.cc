@@ -141,7 +141,7 @@ PrimBasicFunct num_rem = numeric_operation(rem, 1);
 
 Expr* num_sub_init(Expr* args)
 {
-    if (size_list(args) == 1) {
+    if (args->size() == 1) {
         return mk_int(-args->car->integer);
     }
     return num_sub(args);
@@ -158,7 +158,7 @@ PrimBasicFunct check_zeros(PrimBasicFunct f)
             }
             x = x->cdr;
         }
-        if (size_list(args) == 1) {
+        if (args->size() == 1) {
             args = mk_list(mk_int(1), args);
         }
         return f(args);
@@ -210,7 +210,7 @@ Expr incf(Evaluator& l, const string& name, Expr* args, SymbolTable& a)
         throw EvalException(name + ": argument needs to be symbol");
     }
     Int incr = 1;
-    if (size_list(args) > 1) {
+    if (args->size() > 1) {
         incr = l.eval(args->cdr->car, a);
         if (!is_int(incr)) {
             throw EvalException(name + ": increment is not number");

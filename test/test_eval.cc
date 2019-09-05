@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_eval_atom)
         { "(atom (cdr '(a)))", "t" },
         { "(atom (cdr '(a b)))", "nil" },
 
-        //{ "(atom #\\c)", "t" },
+        { "(atom #\\c)", "t" },
 
         { "(atom 1)", "t" },
         { "(atom 1.273)", "t" },
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(test_eval_cons)
         { "(cons '(a b) 'c)", "((a b) . c)" },
 
         { "(cons 1 2)", "(1 . 2)" },
-        // {`(cons 1 "2")`, `(1 . "2")`},
+        { "(cons 1 \"2\")", "(1 . \"2\")" },
         { "(cons 1 's)", "(1 . s)" },
 
         { "(cons 'all (cons (cons 'these (cons 'problems '())) '()))",
@@ -490,11 +490,11 @@ BOOST_AUTO_TEST_CASE(test_eval_eq)
         { "(eq 'a '(a b))", "nil" },
 
         // Characters
-        // { "(eq #\\a #\\a)", "t" },
-        // { "(eq #\\a #\\A)", "nil" },
-        // { "(eq #\\α #\\α)", "t" },
-        // { "(eq #\\β #\\α)", "nil" },
-        // { "(eq #\\a 1)", "nil" },
+        { "(eq #\\a #\\a)", "t" },
+        { "(eq #\\a #\\A)", "nil" },
+        { "(eq #\\α #\\α)", "t" },
+        { "(eq #\\β #\\α)", "nil" },
+        { "(eq #\\a 1)", "nil" },
 
         // Int
         { "(eq 1 1)", "t" },
@@ -528,11 +528,11 @@ BOOST_AUTO_TEST_CASE(test_eval_eql)
         { "(eql '(a) '(b))", "nil" },
 
         // Characters
-        // { "(eql #\\a #\\a)", "t" },
-        // { "(eql #\\a #\\A)", "nil" },
-        // { "(eql #\\α #\\α)", "t" },
-        // { "(eql #\\β #\\α)", "nil" },
-        // { "(eql #\\a 1)", "nil" },
+        { "(eql #\\a #\\a)", "t" },
+        { "(eql #\\a #\\A)", "nil" },
+        { "(eql #\\α #\\α)", "t" },
+        { "(eql #\\β #\\α)", "nil" },
+        { "(eql #\\a 1)", "nil" },
 
         // Int
         { "(eql 1 1)", "t" },
@@ -585,11 +585,11 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // // Characters
-        // { "(equal #\\a #\\a)", "t" },
-        // { "(equal #\\a #\\A)", "nil" },
-        // { "(equal #\\α #\\α)", "t" },
-        // { "(equal #\\β #\\α)", "nil" },
-        // { "(equal #\\a 1)", "nil" },
+        { "(equal #\\a #\\a)", "t" },
+        { "(equal #\\a #\\A)", "nil" },
+        { "(equal #\\α #\\α)", "t" },
+        { "(equal #\\β #\\α)", "nil" },
+        { "(equal #\\a 1)", "nil" },
 
         // // Real
         // { "(equal 1.1 1.1)", "t" },
@@ -599,7 +599,7 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
 
         // changes from eql
         { "(equal '(a b) '(a b))", "t" },
-        // { "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
+        { "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'c))", "nil" },
         { "(equal '(a b (c)) '(a b (c)))", "t" },
@@ -607,10 +607,10 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { "(equal (quote a) (quote (a b)))", "nil" },
 
         // Strings
-        // { "(equal \"cat\" \"cat\")", "t" },
-        // { "(equal \"cat\" \"dog\")", "nil" },
-        // { "(equal \"\" \"\")", "t" },
-        // { "(equal \"cat\" 'cat)", "nil" },
+        { "(equal \"cat\" \"cat\")", "t" },
+        { "(equal \"cat\" \"dog\")", "nil" },
+        { "(equal \"\" \"\")", "t" },
+        { "(equal \"cat\" 'cat)", "nil" },
 
         // Errors
         { "(equal)", "Eval error: equal expecting 2 arguments" },
@@ -635,7 +635,7 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
         { "(defconstant z 'd)", "Runtime exception: defconstant redefined const z" },
         { "z", "c" },
 
-        //{ R"x((defconstant zz 'd "Documentation"))x", "zz" },
+        { R"x((defconstant zz 'd "Documentation"))x", "zz" },
 
         //{ R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
         //{ "my_pi", "3.14" },
@@ -664,7 +664,7 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
 
         // fail
         { "(defconstant 1 'd)", "Eval error: defconstant requires a symbol as a first argument" },
-        //{ "(defconstant \"s\" 'd)", "Error: defconstant: requires a symbol as a first argument" },
+        { "(defconstant \"s\" 'd)", "Eval error: defconstant requires a symbol as a first argument" },
         { "(defconstant n1 100 n2 200 )", "Eval error: defconstant only takes maximum of 3 arguments" },
 
     };
@@ -683,8 +683,8 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
         { "(defvar z 'd)", "z" },
         { "z", "d" },
 
-        //{`(defvar zz 'e "Doc string")`, "zz"},
-        //{"zz", "e"},
+        { "(defvar zz 'e \"Doc string\")", "zz" },
+        { "zz", "e" },
 
         { "(defvar)", "Eval error: defvar needs a name" },
         { "(defvar w)", "w" },
@@ -741,7 +741,7 @@ BOOST_AUTO_TEST_CASE(test_eval_setq)
 
         // fail
         { "(setq 1 'd)", "Eval error: setq requires a symbol as an argument" },
-        //{ "(setq \"s\" 'd)", "Error: setq: requires a var as a first argument\nnil" }
+        { "(setq \"s\" 'd)", "Eval error: setq requires a symbol as an argument" }
     };
     test_Evaluator(tests);
 }
@@ -766,7 +766,7 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
 
         // fail
         { "(setf 1 'd)", "Eval error: setf requires a symbol as an argument" },
-        //{ "(setf \"s\" 'd)", "Error: setf: requires a var or list as a first argument\nnil" },
+        { "(setf \"s\" 'd)", "Eval error: setf requires a symbol as an argument" },
     };
     test_Evaluator(tests);
 }

@@ -19,7 +19,7 @@
 namespace ax {
 
 map<string, Primitive> prim_table;
-// map<Atom, AccessorFunct> setf_accessors;
+map<Atom, AccessorFunct> setf_accessors;
 
 Expr* atom(Expr* const args)
 {
@@ -239,7 +239,7 @@ Expr* defvar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTabl
     if (is_false(args)) {
         throw EvalException(name + " needs a name");
     }
-    auto list_size = size_list(args);
+    auto list_size = args->size();
     if (list_size > 3) {
         throw EvalException(name + " only takes maximum of 3 arguments");
     }
@@ -275,7 +275,7 @@ Expr* defvar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTabl
 
 Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (size_list(args) % 2 != 0) {
+    if (args->size() % 2 != 0) {
         throw EvalException(name + " requires an even number of variables");
     }
     Expr* val = sF;
@@ -286,17 +286,16 @@ Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable>
             if (!a->set(n->atom, val)) {
                 a->put(n->atom, val);
             }
-            // } else if (is_a<Type::list>(n) && name == "setf") {
-            //     List accessor = any_cast<List>(n);
-            //     if (accessor.size() < 1 && is_a<Atom>(accessor[0])) {
-            //         throw EvalException(name + " expecting accessor name");
-            //     }
-            //     List aargs(accessor.begin() + 1, accessor.end());
-            //     if (auto setf = setf_accessors.find(any_cast<Atom>(accessor[0])); setf != setf_accessors.end()) {
-            //         val = setf->second(l, aargs, val, a);
-            //     } else {
-            //         throw EvalException(name + " accessor not found: " + any_cast<Atom>(accessor[0]));
-            //     }
+        } else if (is_a<Type::list>(n) && name == "setf") {
+            cout << n << endl;
+            if (n->size() < 1 && !is_a<Type::atom>(n->car)) {
+                throw EvalException(name + " expecting accessor name");
+            }
+            if (auto setf = setf_accessors.find(n->car->atom); setf != setf_accessors.end()) {
+                val = setf->second(l, n->cdr, val, a);
+            } else {
+                throw EvalException(name + " accessor not found: " + n->car->atom);
+            }
         } else {
             throw EvalException(name + " requires a symbol as an argument");
         }
@@ -319,7 +318,7 @@ Expr* makunbound(const string&, Expr* args, shared_ptr<SymbolTable> a)
 
 Expr* ifFunc(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    auto size = size_list(args);
+    auto size = args->size();
     if (size < 2) {
         throw EvalException("if requires 2 or 3 arguments");
     }
@@ -346,7 +345,7 @@ Expr* cond(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
                 args = args->cdr;
                 continue;
             }
-            if (size_list(args->car) == 1) {
+            if (args->car->size() == 1) {
                 return first;
             }
             return l.perform_list(args->car->cdr, a);
@@ -398,48 +397,6 @@ Expr* let(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> 
         b = b->cdr;
     }
     return l.perform_list(args->cdr, context);
-}
-
-// Strings
-
-static function<bool(String, String)> eq_str = equal_to<String>();
-static function<bool(String, String)> neq_str = not_equal_to<String>();
-static function<bool(String, String)> gt_str = greater<String>();
-static function<bool(String, String)> ge_str = greater_equal<String>();
-static function<bool(String, String)> lt_str = less<String>();
-static function<bool(String, String)> le_str = less_equal<String>();
-
-static PrimBasicFunct str_eq = predicate_str<String>(eq_str);
-static PrimBasicFunct str_neq = predicate_str<String>(neq_str);
-static PrimBasicFunct str_gt = predicate_str<String>(gt_str);
-static PrimBasicFunct str_ge = predicate_str<String>(ge_str);
-static PrimBasicFunct str_lt = predicate_str<String>(lt_str);
-static PrimBasicFunct str_le = predicate_str<String>(le_str);
-
-Expr* to_lower_str(const Expr* s)
-{
-    return mk_string(boost::algorithm::to_lower_copy(wstring(s->string)));
-}
-
-// Chars
-
-static function<bool(Char, Char)> eq_char = equal_to<Char>();
-static function<bool(Char, Char)> neq_char = not_equal_to<Char>();
-static function<bool(Char, Char)> gt_char = greater<Char>();
-static function<bool(Char, Char)> ge_char = greater_equal<Char>();
-static function<bool(Char, Char)> lt_char = less<Char>();
-static function<bool(Char, Char)> le_char = less_equal<Char>();
-
-static PrimBasicFunct char_eq = predicate_chr<Char>(eq_char);
-static PrimBasicFunct char_neq = predicate_chr<Char>(neq_char);
-static PrimBasicFunct char_gt = predicate_chr<Char>(gt_char);
-static PrimBasicFunct char_ge = predicate_chr<Char>(ge_char);
-static PrimBasicFunct char_lt = predicate_chr<Char>(lt_char);
-static PrimBasicFunct char_le = predicate_chr<Char>(le_char);
-
-Expr* to_lower_char(const Expr* s)
-{
-    return mk_char(tolower(s->chr));
 }
 
 void init_prims()
@@ -613,11 +570,11 @@ void init_prims()
 
         // // Sequence
 
-        // { "length", &length, one_arg, preEvaluate },
-        // { "elt", &elt, two_args, preEvaluate },
-        // { "set-elt", &setelt, three_arg, preEvaluate },
-        // { "subseq", &subseq, min_two, preEvaluate },
-        // { "make-sequence", &make_sequence, min_two, preEvaluate },
+        { "length", &length, one_arg, preEvaluate },
+        { "elt", &elt, two_args, preEvaluate },
+        { "set-elt", &setelt, three_arg, preEvaluate },
+        { "subseq", &subseq, min_two, preEvaluate },
+        { "make-sequence", &make_sequence, min_two, preEvaluate },
 
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },
@@ -629,6 +586,6 @@ void init_prims()
         prim_table[p.name] = p;
     }
 
-    // setf_accessors[Atom("elt")] = &setf_elt;
+    setf_accessors[Atom("elt")] = &setf_elt;
 }
 }

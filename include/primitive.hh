@@ -37,10 +37,9 @@ inline const bool preEvaluate = true;
 
 extern map<string, Primitive> prim_table;
 
-/*
-using AccessorFunct = function<Expr(Evaluator& l, Expr* args, const Expr& val, SymbolTable& a)>;
+// Accessor functions for setf
+using AccessorFunct = function<Expr*(Evaluator& l, Expr* args, Expr* val, shared_ptr<SymbolTable> a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
-*/
 
 // Numbers
 
@@ -55,15 +54,6 @@ Expr* nump(Expr* args)
 // Generates a templated function which mods compared to N.
 {
     return abs(args->car->integer % 2) == N ? sT : sF;
-}
-
-template <typename T>
-PrimBasicFunct predicate(const function<bool(T, T)>& f)
-// Returns a function with compare the first element to zero.
-{
-    return [&](Expr* args) -> Expr* {
-        return mk_int(f(args->car->integer, args->cdr->car->integer));
-    };
 }
 
 template <typename T>
@@ -140,18 +130,37 @@ Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
 
 // Strings
 
+extern PrimBasicFunct str_eq;
+extern PrimBasicFunct str_neq;
+extern PrimBasicFunct str_gt;
+extern PrimBasicFunct str_ge;
+extern PrimBasicFunct str_lt;
+extern PrimBasicFunct str_le;
+
 PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr*(const Expr*)> trans);
 Expr* string_fnct(const string& name, Expr* args);
+Expr* to_lower_str(const Expr* s);
+
+// Characters
+
+extern PrimBasicFunct char_eq;
+extern PrimBasicFunct char_neq;
+extern PrimBasicFunct char_gt;
+extern PrimBasicFunct char_ge;
+extern PrimBasicFunct char_lt;
+extern PrimBasicFunct char_le;
+
+Expr* to_lower_char(const Expr* s);
 
 // Sequences
-/*
-Expr length(Expr* args);
-Expr elt(Expr* args);
-Expr setelt(Expr* args);
-Expr subseq(Expr* args);
-Expr setf_elt(Evaluator& l, Expr* args, const Expr& r, SymbolTable& a);
-Expr make_sequence(Expr* args);
-*/
+
+Expr* length(Expr* args);
+Expr* elt(Expr* args);
+Expr* setelt(Expr* args);
+Expr* subseq(Expr* args);
+
+Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a);
+Expr* make_sequence(Expr* args);
 
 // I/O
 

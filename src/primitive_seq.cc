@@ -16,197 +16,210 @@ namespace ax {
 // Sequence functions
 //
 
-/*
-const Keyword keyword_initial_element(":initial-element");
+Expr* const keyword_initial_element = mk_keyword(":initial-element");
 
 template <typename T>
-Expr seq_length(const Expr& s)
+Expr* seq_length(const T& s)
 {
-    return Int(any_cast<T>(s).size());
+    return mk_int(s.size());
 }
 
-Expr length(List& args)
+Expr* length(Expr* args)
 {
-    if (is_false(args[0])) {
-        return Int{ 0 };
+    if (is_false(args->car)) {
+        return mk_int(0);
     }
-    if (is_seq(args[0])) {
-        if (is_a<String>(args[0])) {
-            return seq_length<String>(args[0]);
+    if (is_seq(args->car)) {
+        if (is_a<Type::string>(args->car)) {
+            return seq_length<String>(args->car->string);
         } else {
-            return seq_length<List>(args[0]);
+            return seq_length<Expr>(*args->car);
         }
     }
     throw EvalException("length: needs sequence argument");
 }
 
-template <typename T>
-Expr seq_elt(const Expr& s, size_t index)
+Expr* elt(Expr* args)
 {
-    auto seq = any_cast<T>(s);
-    if (seq.size() == 0 || seq.size() <= index) {
-        throw EvalException("elt: index out of range");
-    }
-    return any_cast<T>(s)[index];
-}
-
-Expr elt(List& args)
-{
-    if (!is_a<Int>(args[1])) {
+    if (!is_a<Type::integer>(args->cdr->car)) {
         throw EvalException("elt: index is not a integer");
     }
-    if (is_false(args[0])) {
+    if (is_false(args->car)) {
         throw EvalException("elt: index out of range");
     }
-    size_t index = any_cast<Int>(args[1]);
-    if (is_seq(args[0])) {
-        if (is_a<String>(args[0])) {
-            return seq_elt<String>(args[0], index);
+    size_t index = args->cdr->car->integer;
+    if (is_seq(args->car)) {
+        if (is_a<Type::string>(args->car)) {
+            auto seq = args->car->string;
+            if (seq.size() <= index) {
+                throw EvalException("elt: index out of range");
+            }
+            return mk_char(seq[index]);
         } else {
-            return seq_elt<List>(args[0], index);
+            auto seq = args->car;
+            if (seq->size() <= index) {
+                throw EvalException("elt: index out of range");
+            }
+            return (*seq)[index];
         }
     }
     throw EvalException("length: needs sequence argument");
 }
 
-template <typename T>
-Expr seq_subseq(const Expr& s, size_t index, size_t length)
+Expr* subseq(Expr* args)
 {
-    T sub;
-    auto seq = any_cast<T>(s);
-    if (length == 0) {
-        length = seq.size() - index;
-    }
-    copy_n(seq.begin() + index, length, back_inserter(sub));
-    return sub;
-}
-
-Expr subseq(List& args)
-{
-    if (is_false(args[0])) {
+    if (is_false(args->car)) {
         return sF;
     }
-    if (!is_a<Int>(args[1])) {
+    if (!is_a<Type::integer>(args->cdr->car)) {
         throw EvalException("elt: index is not a integer");
     }
-    size_t index = any_cast<Int>(args[1]);
+    size_t index = args->cdr->car->integer;
     size_t length = 0;
-    if (args.size() > 2) {
-        if (!is_a<Int>(args[2])) {
+    if (args->size() > 2) {
+        if (!is_a<Type::integer>(args->cdr->cdr->car)) {
             throw EvalException("elt: length is not a integer");
         }
-        length = any_cast<Int>(args[2]);
+        length = args->cdr->cdr->car->integer;
         if (length <= 0) {
             throw EvalException("elt: length must be greater than zero");
         }
     }
-    if (is_seq(args[0])) {
-        if (is_a<String>(args[0])) {
-            return seq_subseq<String>(args[0], index, length);
+    if (is_seq(args->car)) {
+        if (is_a<Type::string>(args->car)) {
+            String sub;
+            auto seq = args->car->string;
+            if (length == 0) {
+                length = seq.size() - index;
+            }
+            copy_n(seq.begin() + index, length, back_inserter(sub));
+            return mk_string(sub);
         } else {
-            return seq_subseq<List>(args[0], index, length);
+            auto top = mk_list();
+            auto s = top;
+            auto seq = args->car;
+            if (length == 0) {
+                length = seq->size() - index;
+            }
+            Expr* prev = nullptr;
+            for (unsigned int i = 0; i < args->car->size(); i++, seq = seq->cdr) {
+                if (i >= index && i < index + length) {
+                    s->car = seq->car;
+                    s->cdr = mk_list();
+                    prev = s;
+                    s = s->cdr;
+                }
+            }
+            if (prev)
+                prev->cdr = nullptr;
+            return top;
         }
     }
     throw EvalException("length: needs sequence argument");
 };
 
 template <typename T, typename S>
-Expr seq_setelt(const string& name, Expr& s, size_t index, const S& r)
+T seq_setelt(const string& name, T& s, size_t index, const S& r)
 {
-    if (index >= any_cast<T>(s).size()) {
+    if (index >= s->size()) {
         throw EvalException(name + ": index out of bounds");
     }
-    any_cast<T&>(s)[index] = r;
+    (*s)[index] = r;
     return s;
 }
 
-Expr setelt(List& args)
+void set_str_elt(string name, Expr* seq, Expr* c, size_t index)
 {
-    auto seq = args[0];
     if (!is_seq(seq)) {
-        throw EvalException("setelt: needs sequence argument");
+        throw EvalException(name + ": needs sequence argument");
     }
-    auto rindex = args[1];
-    if (!is_a<Int>(rindex)) {
-        throw EvalException("setelt: needs integer index");
+    if (!is_a<Type::character>(c)) {
+        throw EvalException(name + ": strings need char replacement");
     }
-    size_t index = any_cast<Int>(rindex);
-    Expr res;
-    if (is_a<String>(seq)) {
-        if (!is_a<Char>(args[2])) {
-            throw EvalException("setf elt: strings need char replacement");
-        }
-        res = seq_setelt<String, Char>("set-elt", seq, index, any_cast<Char>(args[2]));
+    if (index >= seq->string.size()) {
+        throw EvalException(name + ": index out of bounds");
+    }
+    seq->string[index] = c->chr;
+}
+
+void set_list_elt(string name, Expr* seq, Expr* c, size_t index)
+{
+    if (!is_seq(seq)) {
+        throw EvalException(name + ": needs sequence argument");
+    }
+    if (index >= seq->size()) {
+        throw EvalException(name + ": index out of bounds");
+    }
+    seq->set(index, c);
+}
+
+Expr* setelt(Expr* args)
+{
+    auto seq = args->car;
+    auto rindex = arg1(args);
+    if (!is_a<Type::integer>(rindex)) {
+        throw EvalException("set-elt: needs integer index");
+    }
+    size_t index = rindex->integer;
+    if (is_a<Type::string>(seq)) {
+        set_str_elt("set-elt"s, seq, arg2(args), index);
     } else {
-        res = seq_setelt<List, Expr>("set-elt", seq, index, args[2]);
-    }
-    return res;
-}
-
-// setf version
-Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a)
-{
-    if (args.size() != 2) {
-        throw EvalException("setf elt: incorrect number of arguments");
-    }
-    auto var = args[0];
-    if (!is_a<Atom>(var)) {
-        throw EvalException("setf elt: must be a reference");
-    }
-    if (auto seq = a.find(any_cast<Atom>(var))) {
-        if (!is_seq(*seq)) {
-            throw EvalException("setf elt: needs sequence argument");
-        }
-        auto rindex = l.eval(args[1], a);
-        if (!is_a<Int>(rindex)) {
-            throw EvalException("setf elt: needs integer index");
-        }
-        size_t index = any_cast<Int>(rindex);
-        Expr res;
-        if (is_a<String>(*seq)) {
-            if (!is_a<Char>(r)) {
-                throw EvalException("setf elt: strings need char replacement");
-            }
-            res = seq_setelt<String, Char>("setf elt", *seq, index, any_cast<Char>(r));
-        } else {
-            res = seq_setelt<List, Expr>("setf elt", *seq, index, r);
-        }
-        a.set(any_cast<Atom>(var), res);
-        return res;
-    } else {
-        throw EvalException("setf elt: must be a reference");
-    }
-}
-
-template <typename T, typename S>
-void fill_seq(Expr& seq, const S& e)
-{
-    fill(any_cast<T&>(seq).begin(), any_cast<T&>(seq).end(), e);
-}
-
-Expr make_sequence(List& args)
-{
-    if (!is_a<Atom>(args[0]) || !is_seq_type(any_cast<Atom>(args[0]))) {
-        throw EvalException("make-sequence: first argument must be a sequence type name");
-    }
-    if (!is_a<Int>(args[1]) || !(any_cast<Int>(args[1]) >= 0)) {
-        throw EvalException("make-sequence: size must be a positive integer");
-    }
-
-    auto seq = make_type(any_cast<Atom>(args[0]), any_cast<Int>(args[1]));
-    cout << to_string(seq) << endl;
-    if (has_keyword(args, keyword_initial_element)) {
-        Expr init = get_keyword_value(args, keyword_initial_element);
-        if (is_a<String>(seq)) {
-            if (!is_a<Char>(init)) {
-                throw EvalException("make-sequence: :initial-element must be char");
-            }
-            fill_seq<String, Char>(seq, any_cast<Char>(init));
-        } else {
-            fill_seq<List, Expr>(seq, init);
-        }
+        set_list_elt("set-elt"s, seq, arg2(args), index);
     }
     return seq;
 }
-*/
+
+// setf version
+// (var index) result
+Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
+{
+    if (args->size() != 2) {
+        throw EvalException("setf elt: incorrect number of arguments");
+    }
+    auto var = args->car;
+    if (!is_a<Type::atom>(var)) {
+        throw EvalException("setf elt: must be a reference");
+    }
+    if (auto seq = a->find(var->atom)) {
+        auto rindex = l.eval(arg1(args), a);
+        if (!is_a<Type::integer>(rindex)) {
+            throw EvalException("setf elt: needs integer index");
+        }
+        size_t index = rindex->integer;
+        if (is_a<Type::string>(*seq)) {
+            set_str_elt("setf elt", *seq, r, index);
+        } else {
+            set_list_elt("setf elt", *seq, r, index);
+        }
+    } else {
+        throw EvalException("setf elt: must be a reference");
+    }
+    return r;
+}
+
+Expr* make_sequence(Expr* args)
+{
+    if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
+        throw EvalException("make-sequence: first argument must be a sequence type name");
+    }
+    if (!is_a<Type::integer>(arg1(args)) || !(arg1(args)->integer >= 0)) {
+        throw EvalException("make-sequence: size must be a positive integer");
+    }
+
+    auto init = sF;
+    if (args->find(keyword_initial_element)) {
+        init = get_keyword_value(args, keyword_initial_element);
+    }
+    if (args->car->atom == type_string) {
+        if (init == sF) {
+            init = mk_char(' ');
+        }
+        if (!is_a<Type::character>(init)) {
+            throw EvalException("make-sequence: :initial-element must be char");
+        }
+        return mk_string(String(arg1(args)->integer, Char(init->chr)));
+    } else {
+        return mk_list(arg1(args)->integer, init);
+    }
+}
 }

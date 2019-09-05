@@ -129,7 +129,6 @@ BOOST_AUTO_TEST_CASE(test_eval_nth_tail)
     test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_fold)
 {
     vector<TestEval> tests = {
@@ -142,4 +141,3 @@ BOOST_AUTO_TEST_CASE(test_eval_fold)
     };
     test_Evaluator(tests);
 }
-*/

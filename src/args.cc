@@ -14,7 +14,7 @@ namespace ax {
 template <Type t>
 optional<string> checkType(const string& name, const Expr* args, const string& tname)
 {
-    if (size_list(args) == 1) {
+    if (args->size() == 1) {
         if (!is_a<t>(args->car)) {
             return name + " argument needs to be a " + tname;
         }
@@ -33,7 +33,7 @@ optional<string> checkTypeNumeric(const string& name, const Expr* args, const st
 {
     if (is_false(args)) {
         return {};
-    } else if (size_list(args) == 1) {
+    } else if (args->size() == 1) {
         if (!(is_a<Type::integer>(args->car) /*|| is_a<Float>(args->car) */)) {
             return name + " argument needs to be a " + tname;
         }
@@ -50,7 +50,7 @@ optional<string> checkTypeNumeric(const string& name, const Expr* args, const st
 
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const Expr* args)
 {
-    auto size = size_list(args);
+    auto size = args->size();
     switch (cons.constraint) {
     case ArgConstraintType::none:
         if (size != 0) {

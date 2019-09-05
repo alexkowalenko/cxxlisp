@@ -46,8 +46,7 @@ inline Expr* mk_function_ref(const string& k)
     return e;
 }
 
-//bool has_keyword(const List& args, const Keyword& k);
-//Expr get_keyword_value(const List& args, const Keyword& k);
+Expr* get_keyword_value(Expr* const args, const Expr* k);
 }
 
 #endif

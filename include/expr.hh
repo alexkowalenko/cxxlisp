@@ -18,6 +18,7 @@ namespace ax {
 
 using namespace std;
 
+// basic types for objects
 enum class Type {
     atom,
     boolean,
@@ -30,6 +31,7 @@ enum class Type {
     function_ref
 };
 
+// defintions of basic types
 using Atom = string;
 using Bool = bool;
 using Int = long;
@@ -39,15 +41,24 @@ using String = wstring;
 
 class Function;
 
-struct Expr {
+// Basic element in s-expressions.
+class Expr {
+public:
     Expr(Type t)
         : type(t){};
+
     Type type;
+
+    // The element can hold the basic types, as a union,
+    // This is ugly, but makes easier programming as compared to
+    // C++17 templated solution.
     union {
         Atom atom;
         Bool boolean;
         Int integer;
         struct {
+            // THis makes easier access as unamed structure,
+            // but is not standard C++.
             Expr* car;
             Expr* cdr;
         };
@@ -57,7 +68,16 @@ struct Expr {
         Keyword keyword;
         Atom function_ref;
     };
+
+    // Return the size of the list, 0 if not list.
+    unsigned int size() const noexcept;
+
+    Expr* operator[](size_t pos);
+    void set(size_t pos, Expr* r);
+    Expr* find(Expr* r);
 };
+
+// Various constructors for element types, returning a s-expression
 
 inline Expr* mk_atom(const Atom& s)
 {
@@ -89,9 +109,11 @@ inline Expr* mk_list(Expr* car = nullptr, Expr* cdr = nullptr)
 }
 
 Expr* mk_list(initializer_list<Expr*>);
+Expr* mk_list(size_t size, Expr* const init);
 
+// Test functions for s-expression types
 template <Type t>
-bool is_a(const Expr* s)
+constexpr bool is_a(const Expr* s)
 {
     return s->type == t;
 };
@@ -121,6 +143,22 @@ constexpr bool is_atomic(const Expr* s)
     return s->type != Type::list;
 }
 
+// Working on lists of arguments
+constexpr Expr* arg0(Expr* args)
+{
+    return args->car;
+}
+
+constexpr Expr* arg1(Expr* args)
+{
+    return args->cdr->car;
+}
+
+constexpr Expr* arg2(Expr* args)
+{
+    return args->cdr->cdr->car;
+}
+
 // Output
 
 string to_string(const Expr* e);
@@ -147,8 +185,6 @@ inline bool is_false(const Expr* s)
     return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
 
-unsigned int size_list(const Expr* s);
-
 Expr* expr_eq(const Expr* x, const Expr*);
 Expr* expr_eql(const Expr* x, const Expr*);
 Expr* expr_equal(const Expr* x, const Expr*);
@@ -166,6 +202,8 @@ inline Expr* mk_string(String s)
     e->string = s;
     return e;
 }
+
+// string <-> wstring conversion functions
 
 inline wstring s2ws(const std::string& str)
 {
@@ -188,12 +226,13 @@ constexpr bool is_Num(const Expr& n)
 {
     return is_a<Int>(n) || is_a<Float>(n);
 }
+*/
 
 // sequence
 
-constexpr bool is_seq(const Expr& s)
+constexpr bool is_seq(const Expr* s)
 {
-    return is_a<List>(s) || is_a<String>(s);
+    return is_a<Type::list>(s) || is_a<Type::string>(s);
 }
 
 // types
@@ -208,12 +247,9 @@ const Atom type_funct{ "function" };
 const Atom type_bool{ "boolean" };
 const Atom type_null{ "null" };
 
-Expr make_type(const Atom& t, size_t size = 0);
-
 inline bool is_seq_type(const Atom& s)
 {
     return s == type_list || s == type_string;
 }
-*/
 }
 #endif
