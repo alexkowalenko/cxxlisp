@@ -102,7 +102,6 @@ extern PrimBasicFunct num_ceil;
 extern PrimBasicFunct num_round;
 extern PrimBasicFunct num_trunc;
 
-/*
 extern PrimBasicFunct num_log;
 extern PrimBasicFunct num_exp;
 extern PrimBasicFunct num_sin;
@@ -112,9 +111,8 @@ extern PrimBasicFunct num_asin;
 extern PrimBasicFunct num_acos;
 extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
-*/
 
-//Expr incf(Evaluator& l, const string& name, Expr* args, SymbolTable& a);
+Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 
 // Functions
 

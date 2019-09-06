@@ -126,8 +126,6 @@ BOOST_AUTO_TEST_CASE(test_eval_symbolp)
     test_Evaluator(tests);
 }
 
-/*
-
 BOOST_AUTO_TEST_CASE(test_eval_typeof)
 {
     vector<TestEval> tests = {
@@ -146,7 +144,6 @@ BOOST_AUTO_TEST_CASE(test_eval_typeof)
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_null)
 {
@@ -508,10 +505,10 @@ BOOST_AUTO_TEST_CASE(test_eval_eq)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
-        // { "(eq 1.1 1.1)", "t" },
-        // { "(eq 1.1 2.1)", "nil" },
-        // { "(eq 0.0 -0.0)", "t" },
-        // { "(eq -0.9 0.09)", "nil" },
+        { "(eq 1.1 1.1)", "t" },
+        { "(eq 1.1 2.1)", "nil" },
+        { "(eq 0.0 -0.0)", "t" },
+        { "(eq -0.9 0.09)", "nil" },
 
         // Errors
         { "(eq)", "Eval error: eq expecting 2 arguments" },
@@ -546,10 +543,10 @@ BOOST_AUTO_TEST_CASE(test_eval_eql)
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
         // Real
-        // { "(eql 1.1 1.1)", "t" },
-        // { "(eql 1.1 2.1)", "nil" },
-        // { "(eql 0.0 -0.0)", "t" },
-        // { "(eql -0.9 0.09)", "nil" },
+        { "(eql 1.1 1.1)", "t" },
+        { "(eql 1.1 2.1)", "nil" },
+        { "(eql 0.0 -0.0)", "t" },
+        { "(eql -0.9 0.09)", "nil" },
 
         // Errors
         { "(eql)", "Eval error: eql expecting 2 arguments" },
@@ -592,10 +589,10 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { "(equal #\\a 1)", "nil" },
 
         // // Real
-        // { "(equal 1.1 1.1)", "t" },
-        // { "(equal 1.1 2.1)", "nil" },
-        // { "(equal 0.0 -0.0)", "t" },
-        // { "(equal -0.9 0.09)", "nil" },
+        { "(equal 1.1 1.1)", "t" },
+        { "(equal 1.1 2.1)", "nil" },
+        { "(equal 0.0 -0.0)", "t" },
+        { "(equal -0.9 0.09)", "nil" },
 
         // changes from eql
         { "(equal '(a b) '(a b))", "t" },
@@ -637,8 +634,8 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
 
         { R"x((defconstant zz 'd "Documentation"))x", "zz" },
 
-        //{ R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
-        //{ "my_pi", "3.14" },
+        { R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
+        { "my_pi", "3.14" },
 
         { "(defparameter xp '(a b c))", "xp" },
         { "(car xp)", "a" },
@@ -649,8 +646,8 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
         { "(defparameter zp 'd)", "zp" },
         { "zp", "d" },
 
-        //{ "(defparameter * my_pi * 3.1 \" My pi is better than your pi \")", " * my_pi * " },
-        //{ "*my_pi*", "3.1" },
+        { "(defparameter *my_pi* 3.1 \" My pi is better than your pi \")", "*my_pi*" },
+        { "*my_pi*", "3.1" },
 
         { "(defconstant)", "Eval error: defconstant needs a name" },
         { "(defconstant w)", "Eval error: defconstant needs a value" },
@@ -702,7 +699,7 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
 
         // fail
         { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },
-        //{ "(defvar \"s\" 'd)", "Error: defvar requires a symbol as a first argument" },
+        { "(defvar \"s\" 'd)", "Eval error: defvar requires a symbol as a first argument" },
         { "(defvar n1 100 n2 200 )", "Eval error: defvar only takes maximum of 3 arguments" },
     };
     test_Evaluator(tests);

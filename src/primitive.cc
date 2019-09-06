@@ -44,33 +44,42 @@ Expr* typep(Expr* args)
     return is_a<T>(args->car) ? sT : sF;
 }
 
-/*
-Expr type_of(List& args)
+Expr* type_of(Expr* args)
 {
-    auto e = args[0];
-    if (is_false(e)) {
-        return type_null;
+    if (is_false(args->car)) {
+        return mk_atom(type_null);
     }
-    if (is_a<Atom>(e)) {
-        return type_atom;
-    } else if (is_a<List>(e)) {
-        return type_list;
-    } else if (is_a<Int>(e)) {
-        return type_int;
-    } else if (is_a<Float>(e)) {
-        return type_float;
-    } else if (is_a<String>(e)) {
-        return type_string;
-    } else if (is_a<Char>(e)) {
-        return type_char;
-    } else if (is_a<FunctionRef>(e)) {
-        return type_funct;
-    } else if (is_a<Bool>(e)) {
-        return type_bool;
+    string ret;
+    switch (args->car->type) {
+    case Type::atom:
+        ret = type_atom;
+        break;
+    case Type::integer:
+        ret = type_int;
+        break;
+    case Type::list:
+        ret = type_list;
+        break;
+    case Type::floating:
+        ret = type_float;
+        break;
+    case Type::string:
+        ret = type_string;
+        break;
+    case Type::character:
+        ret = type_char;
+        break;
+    case Type::function_ref:
+        ret = type_funct;
+        break;
+    case Type::boolean:
+        ret = type_bool;
+        break;
+    default:
+        throw EvalException("Uknown type: " + to_string(args->car));
     }
-    throw EvalException("Uknown type: " + to_string(e));
+    return mk_atom(ret);
 }
-*/
 
 Expr* null(Expr* const args)
 {
@@ -405,7 +414,7 @@ void init_prims()
         { "atom", &atom, one_arg, preEvaluate },
         { "symbolp", &symbolp, one_arg, preEvaluate },
         { "keywordp", &typep<Type::keyword>, one_arg, preEvaluate },
-        // { "type-of", &type_of, one_arg, preEvaluate },
+        { "type-of", &type_of, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
         { "not", &null, one_arg, preEvaluate },
@@ -475,8 +484,8 @@ void init_prims()
 
         { "numberp", &numberp, one_arg, preEvaluate },
         { "integerp", &typep<Type::integer>, one_arg, preEvaluate },
-        // { "realp", &typep<Float>, one_arg, preEvaluate },
-        // { "floatp", &typep<Float>, one_arg, preEvaluate },
+        { "realp", &typep<Type::floating>, one_arg, preEvaluate },
+        { "floatp", &typep<Type::floating>, one_arg, preEvaluate },
 
         { "zerop", zerop, one_num, preEvaluate },
         { "oddp", &nump<1>, one_int, preEvaluate },
@@ -508,18 +517,18 @@ void init_prims()
         { "round", num_round, one_num, preEvaluate },
         { "truncate", num_trunc, one_num, preEvaluate },
 
-        // { "log", num_log, one_num, preEvaluate },
-        // { "exp", num_exp, one_num, preEvaluate },
-        // { "sin", num_sin, one_num, preEvaluate },
-        // { "cos", num_cos, one_num, preEvaluate },
-        // { "tan", num_tan, one_num, preEvaluate },
-        // { "asin", num_asin, one_num, preEvaluate },
-        // { "acos", num_acos, one_num, preEvaluate },
-        // { "atan", num_atan, one_num, preEvaluate },
-        // { "sqrt", num_sqrt, one_num, preEvaluate },
+        { "log", num_log, one_num, preEvaluate },
+        { "exp", num_exp, one_num, preEvaluate },
+        { "sin", num_sin, one_num, preEvaluate },
+        { "cos", num_cos, one_num, preEvaluate },
+        { "tan", num_tan, one_num, preEvaluate },
+        { "asin", num_asin, one_num, preEvaluate },
+        { "acos", num_acos, one_num, preEvaluate },
+        { "atan", num_atan, one_num, preEvaluate },
+        { "sqrt", num_sqrt, one_num, preEvaluate },
 
-        // { "incf", &incf, min_one },
-        // { "decf", &incf, min_one },
+        { "incf", &incf, min_one },
+        { "decf", &incf, min_one },
 
         // String functions
         { "stringp", &typep<Type::string>, one_arg, preEvaluate },

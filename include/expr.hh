@@ -23,6 +23,7 @@ enum class Type {
     atom,
     boolean,
     integer,
+    floating,
     list,
     character,
     string,
@@ -35,6 +36,7 @@ enum class Type {
 using Atom = string;
 using Bool = bool;
 using Int = long;
+using Float = double;
 using Keyword = string;
 using Char = wchar_t;
 using String = wstring;
@@ -56,6 +58,7 @@ public:
         Atom atom;
         Bool boolean;
         Int integer;
+        Float floating;
         struct {
             // THis makes easier access as unamed structure,
             // but is not standard C++.
@@ -97,6 +100,13 @@ inline Expr* mk_int(const Int i)
 {
     auto e = new (GC) Expr(Type::integer);
     e->integer = i;
+    return e;
+}
+
+inline Expr* mk_float(const Float f)
+{
+    auto e = new (GC) Expr(Type::floating);
+    e->floating = f;
     return e;
 }
 
@@ -217,16 +227,12 @@ inline string ws2s(const std::wstring& wstr)
     return converterX.to_bytes(wstr);
 }
 
-/*
-using Float = double;
+Float as_float(Expr* const s);
 
-Float as_Float(const Expr& s);
-
-constexpr bool is_Num(const Expr& n)
+constexpr bool is_number(Expr* n)
 {
-    return is_a<Int>(n) || is_a<Float>(n);
+    return is_a<Type::integer>(n) || is_a<Type::floating>(n);
 }
-*/
 
 // sequence
 

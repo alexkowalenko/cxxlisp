@@ -34,12 +34,12 @@ optional<string> checkTypeNumeric(const string& name, const Expr* args, const st
     if (is_false(args)) {
         return {};
     } else if (args->size() == 1) {
-        if (!(is_a<Type::integer>(args->car) /*|| is_a<Float>(args->car) */)) {
+        if (!(is_a<Type::integer>(args->car) || is_a<Type::floating>(args->car))) {
             return name + " argument needs to be a " + tname;
         }
     } else {
         while (args) {
-            if (!(is_a<Type::integer>(args->car) /* || is_a<Float>(x) */)) {
+            if (!(is_a<Type::integer>(args->car) || is_a<Type::floating>(args->car))) {
                 return name + " arguments needs to be a " + tname;
             }
             args = args->cdr;

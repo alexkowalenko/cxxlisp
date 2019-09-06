@@ -79,6 +79,7 @@ string to_dstring(const Expr* s)
     case Type::function_ref:
     case Type::function:
     case Type::keyword:
+    case Type::floating:
         return to_string(s);
     default:
         return "<Unknown>";
@@ -98,11 +99,10 @@ string to_string(const Expr* s)
         return s->atom;
     case Type::integer:
         return std::to_string(s->integer);
-        // } else if (s.type() == typeid(Float)) {
-        //     array<char, 80> buf;
-        //     sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
-        //     return string(buf.data());
-
+    case Type::floating:
+        array<char, 30> buf;
+        sprintf(buf.data(), "%.12lg", s->floating);
+        return string(buf.data());
     case Type::list: {
         if (s->car == nullptr && s->cdr == nullptr) {
             return "nil";
@@ -222,10 +222,10 @@ Expr* expr_eq(const Expr* x, const Expr* y)
             return sT;
         } else if (same_type(Type::character, x, y) && x->chr == y->chr) {
             return sT;
+        } else if (same_type(Type::floating, x, y) && x->floating == y->floating) {
+            return sT;
         } else if (same_type(Type::keyword, x, y) && x->keyword == y->keyword) {
             return sT;
-            //} else if (eq_any<Float>(x, y)) {
-            //    return sT;
         }
         return sF;
     }
@@ -266,17 +266,17 @@ Expr* expr_equal(const Expr* x, const Expr* y)
     return sF;
 }
 
-/*
-Float as_Float(const Expr& s)
+Float as_float(Expr* const s)
 {
-    if (is_a<Float>(s)) {
-        return any_cast<Float>(s);
-    } else if (is_a<Int>(s)) {
-        return Float(any_cast<Int>(s));
+    if (is_a<Type::floating>(s)) {
+        return s->floating;
+    } else if (is_a<Type::integer>(s)) {
+        return Float(s->integer);
     } else
         throw EvalException("Not number");
 }
 
+/*
 Expr make_type(const Atom& t, size_t size)
 {
     if (t == type_atom) {

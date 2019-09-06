@@ -30,14 +30,14 @@ Expr* mk_symbolInt(const string& atom)
     if (atom[0] == '&' || atom[0] == ':') {
         return mk_keyword(atom);
     }
-    // if (atom.find('.') != string::npos) {
-    //     try {
-    //         return Float(stod(atom));
-    //     } catch (invalid_argument) {
-    //     } catch (out_of_range) {
-    //     };
-    //     // fallthrough to Int.
-    // }
+    if (atom.find('.') != string::npos) {
+        try {
+            return mk_float(stod(atom));
+        } catch (invalid_argument) {
+        } catch (out_of_range) {
+        };
+        // fallthrough to Int.
+    }
     try {
         return mk_int(stol(atom));
     } catch (invalid_argument) { //fallthrough to be an atom

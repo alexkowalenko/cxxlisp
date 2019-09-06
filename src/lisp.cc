@@ -100,7 +100,7 @@ inline const string stdlib = R"stdlib(
 (defun third (x) (caddr x))
 (defun fourth (x) (cadddr x))
 
-;(defconstant pi 3.141592653589793)
+(defconstant pi 3.141592653589793)
 
 (defun member (a lat)
 	(cond

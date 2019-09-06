@@ -212,6 +212,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     switch (e->type) {
     case Type::boolean:
     case Type::integer:
+    case Type::floating:
     case Type::character:
     case Type::string:
         return e;
