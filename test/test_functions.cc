@@ -120,11 +120,11 @@ BOOST_AUTO_TEST_CASE(test_eval_defun)
         { "(hx 1)", "(z 1)" },
 
         // Doc string
-        // { R"( (defun dx (x)
-        //  	"Doc string here."
-        //  	(list 'd x)) )",
-        //     "dx" },
-        // { "(dx 1)", "(d 1)" },
+        { R"( (defun dx (x)
+          	"Doc string here."
+          	(list 'd x)) )",
+            "dx" },
+        { "(dx 1)", "(d 1)" },
 
         // defun.2
         { "(defun)", "Eval error: defun expecting at least 2 arguments" },

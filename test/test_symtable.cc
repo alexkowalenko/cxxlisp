@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(symboltable_invoker)
 {
     SymbolTable tab(nullptr);
     tab.put("a", mk_atom("hello"));
-    // tab.put("b", Int(3));
+    tab.put("b", mk_int(3));
     tab.put("c", sF);
 
     if (auto x = tab.find("a")) {
@@ -27,12 +27,12 @@ BOOST_AUTO_TEST_CASE(symboltable_invoker)
         BOOST_FAIL("a not found");
     }
 
-    // if (auto x = tab.find("b")) {
-    //     cout << to_string(*x) << " ";
-    //     BOOST_REQUIRE_EQUAL(to_string(*x), "3");
-    // } else {
-    //     BOOST_FAIL("b not found");
-    // }
+    if (auto x = tab.find("b")) {
+        cout << to_string(*x) << " ";
+        BOOST_REQUIRE_EQUAL(to_string(*x), "3");
+    } else {
+        BOOST_FAIL("b not found");
+    }
 
     if (auto x = tab.find("c")) {
         cout << to_string(*x) << " ";
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(symboltable_nested)
     SymbolTable tab(nullptr);
 
     tab.put("a", mk_atom("hello"));
-    // tab.put("b", Int(3));
+    tab.put("b", mk_int(3));
     tab.put("c", sF);
 
     SymbolTable tab2(&tab);
@@ -74,12 +74,12 @@ BOOST_AUTO_TEST_CASE(symboltable_nested)
         BOOST_FAIL("a not found");
     }
 
-    // if (auto x = tab2.find("b")) {
-    //     cout << to_string(*x) << " ";
-    //     BOOST_REQUIRE_EQUAL(to_string(*x), "3");
-    // } else {
-    //     BOOST_FAIL("b not found");
-    // }
+    if (auto x = tab2.find("b")) {
+        cout << to_string(*x) << " ";
+        BOOST_REQUIRE_EQUAL(to_string(*x), "3");
+    } else {
+        BOOST_FAIL("b not found");
+    }
 
     if (auto x = tab2.find("c")) {
         cout << to_string(*x) << " ";
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(symboltable_set)
     SymbolTable tab(nullptr);
 
     tab.put("a", mk_atom("hello"));
-    //tab.put("b", Int(3));
+    tab.put("b", mk_int(3));
     tab.put("c", sF);
 
     SymbolTable tab2(&tab);

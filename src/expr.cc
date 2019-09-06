@@ -275,34 +275,4 @@ Float as_float(Expr* const s)
     } else
         throw EvalException("Not number");
 }
-
-/*
-Expr make_type(const Atom& t, size_t size)
-{
-    if (t == type_atom) {
-        return Atom{};
-    } else if (t == type_list) {
-        List l;
-        for (int i = 0; i < size; i++) {
-            l.push_back(sF);
-        }
-        return l;
-    } else if (t == type_int) {
-        return Int{ 0 };
-    } else if (t == type_float) {
-        return Float{ 0.0 };
-    } else if (t == type_string) {
-        return String(size, U' ');
-    } else if (t == type_char) {
-        return Char{ 0 };
-    } else if (t == type_funct) {
-        throw RuntimeException("Can't make empty function ref");
-    } else if (t == type_bool) {
-        return sT;
-    } else if (t == type_null) {
-        return sF;
-    }
-    throw EvalException("Unknown type: " + to_string(t));
-}
-*/
 }

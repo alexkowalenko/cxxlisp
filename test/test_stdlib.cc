@@ -39,6 +39,15 @@ BOOST_AUTO_TEST_CASE(test_eval_second)
     };
     test_Evaluator(tests);
 }
+BOOST_AUTO_TEST_CASE(test_eval_list_length)
+{
+    vector<TestEval> tests = {
+        { "(list-length '(a b c d))", "4" },
+        { "(list-length '())", "0" },
+        { "(list-length nil)", "0" },
+    };
+    test_Evaluator(tests);
+}
 
 BOOST_AUTO_TEST_CASE(test_eval_when)
 {
