@@ -75,7 +75,9 @@ public:
     // Return the size of the list, 0 if not list.
     unsigned int size() const noexcept;
 
-    Expr* operator[](size_t pos);
+    Expr* at(size_t pos);
+    Expr* operator[](size_t pos) { return at(pos); };
+    Expr* from(size_t pos);
     void set(size_t pos, Expr* r);
     Expr* find(Expr* r);
 };

@@ -158,44 +158,44 @@ string to_string(const Expr* s)
 unsigned int Expr::size() const noexcept
 {
     unsigned int res = 0;
-    auto s = this;
-    while (s && is_list(s)) {
-        res++;
-        s = s->cdr;
+    for (auto s = this; s && is_list(s); res++, s = s->cdr) {
     }
     return res;
 }
 
-Expr* Expr::operator[](size_t pos)
+Expr* Expr::at(size_t pos)
 {
-    auto s = this;
-    while (!is_false(s)) {
-        if (pos == 0) {
+    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+        if (!pos) {
             return s->car;
         }
-        pos--;
-        s = s->cdr;
+    }
+    return sF;
+}
+
+Expr* Expr::from(size_t pos)
+{
+    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+        if (!pos) {
+            return s;
+        }
     }
     return sF;
 }
 
 void Expr::set(size_t pos, Expr* r)
 {
-    auto s = this;
-    while (!is_false(s)) {
-        if (pos == 0) {
+    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+        if (!pos) {
             s->car = r;
             return;
         }
-        pos--;
-        s = s->cdr;
     }
 }
 
 Expr* Expr::find(Expr* r)
 {
-    auto s = this;
-    while (!is_false(s)) {
+    for (auto s = this; !is_false(s); s = s->cdr) {
         if (expr_eq(s->car, r)) {
             return s;
         }

@@ -20,12 +20,10 @@ Function* createFunction(const string& name, Expr* args)
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + " needs a list of parameters");
     }
-    auto p = args->car;
-    while (!is_false(p)) {
+    for (auto p = args->car; !is_false(p); p = p->cdr) {
         if (!(is_a<Type::atom>(p->car) || is_a<Type::keyword>(p->car) || is_a<Type::list>(p->car))) {
             throw EvalException(name + " parameter needs to be an atom :" + to_string(p->car));
         }
-        p = p->cdr;
     }
     Function* f = new (GC) Function(name, args->car);
     if (args->size() > 1) {
@@ -69,7 +67,6 @@ Expr* funct(const string& name, Expr* args)
 
 Expr* find_funct(string& n, shared_ptr<SymbolTable> a)
 {
-    cout << n << endl;
     if (auto p = prim_table.find(n); p != prim_table.end()) {
         return sT;
     }
@@ -122,15 +119,12 @@ Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable
     if (is_a<Type::list>(res)) {
         // new to transform list into quoted elements
         auto new_res = mk_list();
-        auto nrt = new_res;
-        auto rt = res;
         Expr* prev = nullptr;
-        while (!is_false(rt)) {
+        auto nrt = new_res;
+        for (auto rt = res; !is_false(rt); rt = rt->cdr, nrt = nrt->cdr) {
             nrt->car = mk_list({ quote_at, rt->car });
             nrt->cdr = mk_list();
             prev = nrt;
-            nrt = nrt->cdr;
-            rt = rt->cdr;
         }
         prev->cdr = nullptr;
         ex->cdr = new_res;
@@ -147,115 +141,115 @@ Expr* funcall(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
     return l.eval(ex, a);
 }
 
-/*
-Expr mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+Expr* mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    List ex = get_function(l, name, args[0], a);
-    List aargs(args.begin() + 1, args.end());
-    auto evalargs = l.eval_list(aargs, a);
-    for (auto x : evalargs) {
-        if (!is_a<List>(x)) {
-            throw EvalException(name + ": expecting list arguments " + to_string(x));
+    auto ex = get_function(l, name, args->car, a);
+    auto evalargs = l.eval_list(args->cdr, a);
+    for (auto x = evalargs; !is_false(x); x = x->cdr) {
+        if (!is_a<Type::list>(x->car)) {
+            throw EvalException(name + ": expecting list arguments " + to_string(x->car));
         }
     }
-    List result;
+    Expr* resulttop = mk_list();
+    auto result = resulttop;
+    Expr* prev = nullptr;
     for (unsigned int i = 0;; ++i) {
-        List r = ex;
-        for (auto elem : evalargs) {
-            if (i >= any_cast<List>(elem).size()) {
+        auto topr = mk_list(ex->car);
+        auto r = topr;
+        for (auto elem = evalargs; !is_false(elem); elem = elem->cdr) {
+            if (i >= elem->car->size()) {
                 goto end;
             }
-            Expr val;
+            Expr* val;
             if (name == "mapcar") {
-                val = any_cast<List>(elem)[i];
+                val = elem->car->at(i);
             } else {
-                List list = any_cast<List>(elem);
-                val = List(list.begin() + i, list.end());
+                val = elem->car->from(i);
             }
-            List q = { quote_atom, val };
-            r.push_back(q);
+            r->cdr = mk_list(mk_list({ quote_at, val }));
+            r = r->cdr;
         }
-        Expr e{ r };
-        auto res = l.eval(e, a);
-        result.push_back(res);
+
+        auto res = l.eval(topr, a);
+        result->car = res;
+        result->cdr = mk_list();
+        prev = result;
+        result = result->cdr;
+    }
+    if (prev) {
+        prev->cdr = nullptr;
     }
 end:
-    return result;
+    return resulttop;
 }
 
-Expr doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (!is_a<List>(args[0])) {
-        throw EvalException(name + ": has no parameter list " + to_string(args[0]));
+    if (!is_a<Type::list>(args->car)) {
+        throw EvalException(name + ": has no parameter list " + to_string(args->car));
     }
-    List params = any_cast<List>(args[0]);
-    if (params.size() < 2) {
+    auto params = args->car;
+    if (params->size() < 2) {
         throw EvalException(name + ": not enough vars in parameter list");
     }
-    Expr variable = params[0];
-    Expr limit = params[1];
-    SymbolTable context(&a);
-    Expr result;
-    if (params.size() >= 3) {
-        result = params[2];
-        if (!is_a<Atom>(result)) {
+    auto variable = arg0(params);
+    auto limit = arg1(params);
+    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    Expr* result;
+    if (params->size() >= 3) {
+        result = arg2(params);
+        if (!is_a<Type::atom>(result)) {
             throw EvalException(name + ": result is not a symbol" + to_string(result));
         }
-        context.put(any_cast<Atom>(result), sF);
+        context->put(result->atom, sF);
     }
     // Eval limit
-    Expr res_limit = l.eval(limit, a);
-    Expr variable_value;
-    int counter = 0;
+    auto res_limit = l.eval(limit, a);
+    Expr* variable_value;
     int variable_max;
     if (name == "dotimes") {
-        if (!is_a<Int>(res_limit)) {
+        if (!is_a<Type::integer>(res_limit)) {
             throw EvalException(name + ": limit is not a integer " + to_string(res_limit));
         }
-        variable_value = Int(0);
-        variable_max = any_cast<Int>(res_limit);
+        variable_value = mk_int(0);
+        variable_max = res_limit->integer;
     } else {
         // dolist
-        if (!is_a<List>(res_limit)) {
+        if (!is_a<Type::list>(res_limit)) {
             throw EvalException(name + ": expecting a list " + to_string(res_limit));
         }
-        if (any_cast<List>(res_limit).empty()) {
+        if (is_false(res_limit)) {
             return sF;
         }
-        variable_value = any_cast<List>(res_limit).front();
+        variable_value = res_limit->car;
     }
-    context.put(any_cast<Atom>(variable), variable_value);
 
     while (true) {
-        if (name == "dotimes") {
-            if (any_cast<Int>(variable_value) >= variable_max) {
-                goto end;
-            }
-        }
+        context->put(variable->atom, variable_value);
 
         // perform body
-        List body(args.begin() + 1, args.end());
-        l.eval_list(body, context);
+        l.eval_list(args->cdr, context);
 
         // increment counters
         if (name == "dotimes") {
-            variable_value = Int(any_cast<Int>(variable_value) + 1);
-        } else {
-            counter++;
-            if (counter >= any_cast<List>(res_limit).size()) {
+            if (variable_value->integer >= variable_max - 1) {
                 goto end;
             }
-            variable_value = any_cast<List>(res_limit)[counter];
+            variable_value->integer++;
+        } else {
+            if (is_false(res_limit->cdr)) {
+                goto end;
+            }
+            res_limit = res_limit->cdr;
+            variable_value = res_limit->car;
         }
-        context.put(any_cast<Atom>(variable), variable_value);
     }
 end:
-    if (result.has_value()) {
-        if (auto val = context.find(any_cast<Atom>(result))) {
+    if (!is_false(result)) {
+        if (auto val = context->find(result->atom)) {
             return *val;
         }
     }
     return sF;
 }
-*/
 }

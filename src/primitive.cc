@@ -296,7 +296,6 @@ Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable>
                 a->put(n->atom, val);
             }
         } else if (is_a<Type::list>(n) && name == "setf") {
-            cout << n << endl;
             if (n->size() < 1 && !is_a<Type::atom>(n->car)) {
                 throw EvalException(name + " expecting accessor name");
             }
@@ -475,10 +474,10 @@ void init_prims()
         { "function", &funct, one_arg },
         { "apply", &apply, min_two },
         { "funcall", &funcall, min_two },
-        // { "mapcar", &mapcar, min_two },
-        // { "maplist", &mapcar, min_two },
-        // { "dotimes", &doFuncs, min_two },
-        // { "dolist", &doFuncs, min_two },
+        { "mapcar", &mapcar, min_two },
+        { "maplist", &mapcar, min_two },
+        { "dotimes", &doFuncs, min_two },
+        { "dolist", &doFuncs, min_two },
 
         // // Number functions
 

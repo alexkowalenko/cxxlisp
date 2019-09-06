@@ -211,10 +211,9 @@ inline const string stdlib = R"stdlib(
 ;	(position-if-support (complement fn) seq 0))
 
 (defun fill (seq x)
-    (let ((s seq))
-      (dotimes (n (length s))
-        (setq s (set-elt s n x)))
-      s))
+    (dotimes (n (length seq))
+        (set-elt seq n x))
+      seq)
 
 )stdlib";
 

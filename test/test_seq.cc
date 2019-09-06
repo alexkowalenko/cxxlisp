@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(test_eval_position_if)
 {
     vector<TestEval> tests = {
         { "(position-if #'atom '(1 2 3 4))", "0" },
-        //{"(position-if-not #'atom '(1 2 3 4))", "nil"},
+        // { "(position-if-not #'atom '(1 2 3 4))", "nil" },
 
         // Lambdas don't work
         //{ "(position-if (lambda (x) (eq x 'red)) '(blue green s red s))", "3" },
@@ -239,7 +239,6 @@ BOOST_AUTO_TEST_CASE(test_eval_set_elt)
     test_Evaluator(tests);
 }
 
-/*
 BOOST_AUTO_TEST_CASE(test_eval_fill)
 {
     vector<TestEval> tests = {
@@ -258,7 +257,6 @@ BOOST_AUTO_TEST_CASE(test_eval_fill)
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_every)
 {

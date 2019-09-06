@@ -663,16 +663,18 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
     test_Evaluator(tests);
 }
 
-/*
-BOOST_AUTO_TEST_CASE(test_eval_map)
+BOOST_AUTO_TEST_CASE(test_eval_mapcar)
 {
     vector<TestEval> tests = {
         { "(mapcar #'+ '(1 2 3) '(4 5 6))", "(5 7 9)" },
         { "(defun id(x) x)", "id" },
-        { "(maplist #'id '(1 2 3) )", "((1 2 3) (2 3) (3))" },
+        { "(mapcar #'id '(1 2 3) )", "(1 2 3)" },
+        { "(mapcar #'car '((1 a) (2 b) (3 c)))", "(1 2 3)" },
 
         { "(mapcar (lambda (n) (^ n n)) '(1 2 3 4) )", "(1 4 27 256)" },
         { "(mapcar #'cadr '((a b) (d e) (g h)) )", "(b e h)" },
+        { "(mapcar #'abs '(3 -4 2 -5 -6))", "(3 4 2 5 6)" },
+        { "(mapcar #'cons '(a b c) '(1 2 3))", "((a . 1) (b . 2) (c . 3))" },
 
         { "(mapcar #'list '(1 2 3))", "((1) (2) (3))" },
 
@@ -691,10 +693,32 @@ BOOST_AUTO_TEST_CASE(test_eval_map)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_maplist)
+{
+    vector<TestEval> tests = {
+        { "(maplist #'append '(1 2 3 4) '(1 2) '(1 2 3))",
+            "((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3))" },
+
+        { "(defun f(x) (cons 'foo x))", "f" },
+        { "(maplist #'f '(a b c d))",
+            "((foo a b c d) (foo b c d) (foo c d) (foo d))" },
+
+        { "(defun g(x) (if (member (car x) (cdr x)) 0 1))", "g" },
+        { "(maplist #'g '(a b a c d b c))", "(0 0 1 0 1 1 1)" },
+        { "n", "Eval error: unbound variable: n" },
+
+        { "(maplist)", "Eval error: maplist expecting at least 2 arguments" },
+        { "(maplist #'f)", "Eval error: maplist expecting at least 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_dolist)
 {
     vector<TestEval> tests = {
+
         { "(dolist (n '(α β γ δ ε) r) (setq r n))", "ε" },
+        { "(dolist (n '(alpha beta gamma) r) (setq r n))", "gamma" },
         { "(dolist (n '() r) (setq r n))", "nil" },
         { "n", "Eval error: unbound variable: n" },
         { "r", "Eval error: unbound variable: r" },
@@ -732,7 +756,6 @@ BOOST_AUTO_TEST_CASE(test_eval_dotimes)
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_keywordp)
 {

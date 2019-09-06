@@ -50,11 +50,11 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
     for (auto param = f->parameters; !is_false(param); param = param->cdr) {
         if (is_a<Type::keyword>(param->car) && param->car->keyword == optional_atom) {
             optional = true;
-            cout << "opt args " << endl;
+            // cout << "opt args " << endl;
             continue;
         } else if (is_a<Type::keyword>(param->car) && param->car->keyword == rest_atom) {
             rest = true;
-            cout << "rest args " << endl;
+            // cout << "rest args " << endl;
             continue;
         } else if (is_a<Type::list>(param->car)) {
             if (optional) {
