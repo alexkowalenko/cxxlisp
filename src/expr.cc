@@ -19,43 +19,120 @@
 
 namespace ax {
 
-ostream& operator<<(ostream& os, const Expr& s)
+Expr* mk_list(initializer_list<Expr*> p)
 {
-    return os << to_string(s);
+    if (p.size() == 0) {
+        return sF;
+    }
+    Expr* start = mk_list();
+    Expr* l = start;
+    for (auto iter = p.begin(); iter != p.end(); iter++) {
+        l->car = *iter;
+        if (iter != p.end() - 1) {
+            l->cdr = mk_list();
+            l = l->cdr;
+        }
+    }
+    return start;
 }
 
-string to_string(const Expr& s)
+Expr* mk_list(size_t size, Expr* const init)
 {
-    if (s.type() == typeid(Atom)) {
-        return any_cast<Atom>(s);
-    } else if (s.type() == typeid(Int)) {
-        return std::to_string(any_cast<Int>(s));
-    } else if (s.type() == typeid(Float)) {
-        array<char, 80> buf;
-        sprintf(buf.data(), "%.12lg", any_cast<Float>(s));
+    Expr* prev = nullptr;
+    auto top = mk_list();
+    auto s = top;
+    while (size > 0) {
+        s->car = init;
+        s->cdr = mk_list();
+        prev = s;
+        s = s->cdr;
+        size--;
+    }
+    if (prev) {
+        prev->cdr = nullptr;
+    }
+    return top;
+}
+
+string to_dstring(const Expr* s)
+{
+    if (!s) {
+        return "NULL";
+    }
+    switch (s->type) {
+    case Type::boolean:
+        return s->boolean ? "t" : "nil";
+    case Type::atom:
+        return s->atom;
+    case Type::integer:
+        return std::to_string(s->integer);
+    case Type::list: {
+        string res("[");
+        res += to_dstring(s->car);
+        res += " . ";
+        res += to_dstring(s->cdr);
+        res += "]";
+        return res;
+    }
+    case Type::string:
+    case Type::character:
+    case Type::function_ref:
+    case Type::function:
+    case Type::keyword:
+    case Type::floating:
+        return to_string(s);
+    default:
+        return "<Unknown>";
+    }
+}
+
+string to_string(const Expr* s)
+{
+    if (s == nullptr) {
+        return "";
+    }
+    switch (s->type) {
+    case Type::boolean:
+        return s->boolean ? "t" : "nil";
+
+    case Type::atom:
+        return s->atom;
+    case Type::integer:
+        return std::to_string(s->integer);
+    case Type::floating:
+        array<char, 30> buf;
+        sprintf(buf.data(), "%.12lg", s->floating);
         return string(buf.data());
-    } else if (s.type() == typeid(Bool)) {
-        return any_cast<Bool>(s) ? "t" : "nil";
-    } else if (s.type() == typeid(List)) {
-        auto l = any_cast<List>(s);
-        if (l.empty()) {
+    case Type::list: {
+        if (s->car == nullptr && s->cdr == nullptr) {
             return "nil";
         }
-        if (is_a<Atom>(l[0]) && any_cast<Atom>(l[0]) == quote_atom) {
-            return "'" + to_string(l[1]);
+        if (s->car == quote_at) {
+            return "'" + to_string(s->cdr->car);
         }
-
-        string str{ "(" };
-        for_each(l.begin(), l.end() - 1, [&](const Expr& e) {
-            str += to_string(e) + " ";
-        });
-        str += to_string(l.back()) + ')';
+        string str{ '(' };
+        str += to_string(s->car);
+        while (s->cdr != nullptr) {
+            if (is_atomic(s->cdr)) {
+                str += " . ";
+                str += to_string(s->cdr);
+                break;
+            } else {
+                s = s->cdr;
+                if (s->car != nullptr) {
+                    str += ' ';
+                    str += to_string(s->car);
+                }
+            }
+        };
+        str += ')';
         return str;
-    } else if (s.type() == typeid(String)) {
-        return "\"" + ws2s(any_cast<String>(s)) + "\"";
-    } else if (s.type() == typeid(Char)) {
+    }
+    case Type::string:
+        return "\"" + ws2s(s->string) + "\"";
+    case Type::character: {
         string str("#\\");
-        switch (any_cast<Char>(s)) {
+        switch (s->chr) {
         case ' ':
             str += "space";
             break;
@@ -63,44 +140,91 @@ string to_string(const Expr& s)
             str += "newline";
             break;
         default:
-            utf8::append(any_cast<Char>(s), str);
+            utf8::append(s->chr, str);
         }
         return str;
-    } else if (s.type() == typeid(Function)) {
-        return any_cast<Function>(s);
-    } else if (s.type() == typeid(FunctionRef)) {
-        return "#'" + any_cast<FunctionRef>(s);
-    } else if (s.type() == typeid(Keyword)) {
-        return any_cast<Keyword>(s);
-    } else {
+    }
+    case Type::function:
+        return string(*s->function);
+    case Type::function_ref:
+        return "#'" + s->function_ref;
+    case Type::keyword:
+        return s->keyword;
+    default:
         return "*Unprintable type*";
     }
 }
 
-template <typename T>
-constexpr bool same_type(const Expr& x, const Expr& y)
+unsigned int Expr::size() const noexcept
 {
-    return is_a<T>(x) && is_a<T>(y);
+    unsigned int res = 0;
+    auto s = this;
+    while (s && is_list(s)) {
+        res++;
+        s = s->cdr;
+    }
+    return res;
 }
 
-template <typename T>
-constexpr bool eq_any(const Expr& x, const Expr& y)
+Expr* Expr::operator[](size_t pos)
 {
-    return same_type<T>(x, y) && any_cast<T>(x) == any_cast<T>(y);
+    auto s = this;
+    while (!is_false(s)) {
+        if (pos == 0) {
+            return s->car;
+        }
+        pos--;
+        s = s->cdr;
+    }
+    return sF;
 }
 
-Bool expr_eq(const Expr& x, const Expr& y)
+void Expr::set(size_t pos, Expr* r)
 {
+    auto s = this;
+    while (!is_false(s)) {
+        if (pos == 0) {
+            s->car = r;
+            return;
+        }
+        pos--;
+        s = s->cdr;
+    }
+}
+
+Expr* Expr::find(Expr* r)
+{
+    auto s = this;
+    while (!is_false(s)) {
+        if (expr_eq(s->car, r)) {
+            return s;
+        }
+    }
+    return nullptr;
+}
+
+constexpr bool same_type(Type t, const Expr* x, const Expr* y)
+{
+    return t == x->type && x->type == y->type;
+}
+
+Expr* expr_eq(const Expr* x, const Expr* y)
+{
+    if (is_false(x) && is_false(y)) {
+        return sT;
+    }
     if (is_atomic(x) && is_atomic(y)) {
-        if (eq_any<Atom>(x, y)) {
+        if (same_type(Type::atom, x, y) && x->atom == y->atom) {
             return sT;
-        } else if (eq_any<Int>(x, y)) {
+        } else if (same_type(Type::integer, x, y) && x->integer == y->integer) {
             return sT;
-        } else if (eq_any<Bool>(x, y)) {
+        } else if (same_type(Type::boolean, x, y) && x->boolean == y->boolean) {
             return sT;
-        } else if (eq_any<Char>(x, y)) {
+        } else if (same_type(Type::character, x, y) && x->chr == y->chr) {
             return sT;
-        } else if (eq_any<Float>(x, y)) {
+        } else if (same_type(Type::floating, x, y) && x->floating == y->floating) {
+            return sT;
+        } else if (same_type(Type::keyword, x, y) && x->keyword == y->keyword) {
             return sT;
         }
         return sF;
@@ -108,72 +232,47 @@ Bool expr_eq(const Expr& x, const Expr& y)
     return sF;
 }
 
-Bool expr_eql(const Expr& x, const Expr& y)
+Expr* expr_eql(const Expr* x, const Expr* y)
 {
     return expr_eq(x, y);
 }
 
-Bool expr_equal(const Expr& x, const Expr& y)
+Expr* expr_equal(const Expr* x, const Expr* y)
 {
-    if (expr_eql(x, y)) {
+    if (expr_eql(x, y) == sT) {
         return sT;
     }
-    if (same_type<List>(x, y)) {
-        auto xx = any_cast<List>(x);
-        auto yy = any_cast<List>(y);
-        if (xx.size() != yy.size()) {
+    if (same_type(Type::list, x, y)) {
+        if (x->size() != y->size()) {
             return sF;
         }
-        auto itx = xx.begin();
-        auto ity = yy.begin();
-        for (; itx != xx.end(); itx++, ity++) {
-            if (!expr_equal(*itx, *ity)) {
-                return sF;
+        auto itx = x;
+        auto ity = y;
+        while (itx) {
+            if (same_type(Type::list, itx, ity)) {
+                if (expr_equal(itx->car, ity->car) == sF) {
+                    return sF;
+                }
+                itx = itx->cdr;
+                ity = ity->cdr;
+            } else {
+                return expr_equal(itx, ity);
             }
         }
         return sT;
-    }
-    if (eq_any<String>(x, y)) {
+    } else if (same_type(Type::string, x, y) && x->string == y->string) {
         return sT;
     }
     return sF;
 }
 
-Float as_Float(const Expr& s)
+Float as_float(Expr* const s)
 {
-    if (is_a<Float>(s)) {
-        return any_cast<Float>(s);
-    } else if (is_a<Int>(s)) {
-        return Float(any_cast<Int>(s));
+    if (is_a<Type::floating>(s)) {
+        return s->floating;
+    } else if (is_a<Type::integer>(s)) {
+        return Float(s->integer);
     } else
         throw EvalException("Not number");
-}
-
-Expr make_type(const Atom& t, size_t size)
-{
-    if (t == type_atom) {
-        return Atom{};
-    } else if (t == type_list) {
-        List l;
-        for (int i = 0; i < size; i++) {
-            l.push_back(sF);
-        }
-        return l;
-    } else if (t == type_int) {
-        return Int{ 0 };
-    } else if (t == type_float) {
-        return Float{ 0.0 };
-    } else if (t == type_string) {
-        return String(size, U' ');
-    } else if (t == type_char) {
-        return Char{ 0 };
-    } else if (t == type_funct) {
-        throw RuntimeException("Can't make empty function ref");
-    } else if (t == type_bool) {
-        return sT;
-    } else if (t == type_null) {
-        return sF;
-    }
-    throw EvalException("Unknown type: " + to_string(t));
 }
 }

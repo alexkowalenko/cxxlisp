@@ -120,11 +120,11 @@ BOOST_AUTO_TEST_CASE(test_eval_defun)
         { "(hx 1)", "(z 1)" },
 
         // Doc string
-        // { R"( (defun dx (x)
-        //  	"Doc string here."
-        //  	(list 'd x)) )",
-        //     "dx" },
-        // { "(dx 1)", "(d 1)" },
+        { R"( (defun dx (x)
+          	"Doc string here."
+          	(list 'd x)) )",
+            "dx" },
+        { "(dx 1)", "(d 1)" },
 
         // defun.2
         { "(defun)", "Eval error: defun expecting at least 2 arguments" },
@@ -262,10 +262,10 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
 
         // The Little Lisper, pg. 48
         { R"( (defun firsts (x)
-         (cond
-         	((null x) nil)
-         	(t (cons (caar x)
-         			 (firsts (cdr x)))))) )",
+          (cond
+          	((null x) nil)
+          	(t (cons (caar x)
+          			 (firsts (cdr x)))))) )",
             "firsts" },
         { "(firsts '())", "nil" },
         { "(firsts '((a b) (c d) (e f)))", "(a c e)" },
@@ -339,6 +339,57 @@ BOOST_AUTO_TEST_CASE(test_eval_littlelisper)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_demos)
+{
+    vector<TestEval> tests = {
+
+        { R"( (defun fib (n)
+	 		(if (<= n 1)
+	 			1
+	 			(+ (fib (- n 1)) (fib (- n 2))))) )",
+            "fib" },
+        { R"( (fib 20) )",
+            "10946" },
+
+        { R"( (defun subst-x (x y z)
+	(cond 
+		((atom z)
+			(cond ((eq z y) x)
+					(t z)))
+	(t (cons (subst-x x y (car z))
+			 (subst-x x y (cdr z)))))) )",
+            "subst-x" },
+        { R"( (subst-x 'm 'b '(a b (a b (a b c) c) d a b (a b (a b c) c) c)) )",
+            "(a m (a m (a m c) c) d a m (a m (a m c) c) c)" },
+
+        { R"( (defun firstdenomination (kindsofcoins)
+		(cond ((= kindsofcoins 1) 1)
+			  ((= kindsofcoins 2) 2)
+			  ((= kindsofcoins 3) 5)
+			  ((= kindsofcoins 4) 10)
+			  ((= kindsofcoins 5) 20)
+			  ((= kindsofcoins 6) 50)
+			  ((= kindsofcoins 7) 100)
+			  ((= kindsofcoins 8) 200))
+				)
+
+	(defun cc (amount kindsofcoins)
+		(cond ((= amount 0) 1)
+			  ((or (< amount 0) (= kindsofcoins 0)) 0)
+			   (t (+ (cc amount (- kindsofcoins 1))
+					(cc (- amount (firstdenomination kindsofcoins)) kindsofcoins)))))
+		
+	(defun countchange (amount)
+		(cc amount 5)) )",
+            R"(firstdenomination
+cc
+countchange)" },
+        { R"( (countchange 55) )",
+            "596" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_lambda)
 {
     vector<TestEval> tests = {
@@ -399,8 +450,8 @@ BOOST_AUTO_TEST_CASE(test_eval_defmacro)
         { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
         { "(test3 'b)", "(a 'b)" },
 
-        { "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
-        { "(m3 1)", "(1)" },
+        //{ "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
+        //{ "(m3 1)", "(1)" },
     };
     test_Evaluator(tests);
 }
@@ -455,10 +506,10 @@ BOOST_AUTO_TEST_CASE(test_eval_optional)
 BOOST_AUTO_TEST_CASE(test_eval_rest)
 {
     vector<TestEval> tests = {
-        { "(defun f (x &rest y) (append x y))", "f" },
-        { "(f 1)", "(1)" },
-        { "(f 1 2)", "(1 2)" },
-        { "(f 1 2 3 4)", "(1 2 3 4)" },
+        { "(defun f (x &rest y) (list x y))", "f" },
+        { "(f 1)", "(1 nil)" },
+        { "(f 1 2)", "(1 (2))" },
+        { "(f 1 2 3 4)", "(1 (2 3 4))" },
 
         { "(f)", "Eval error: unbound variable: x" },
     };
@@ -589,7 +640,6 @@ BOOST_AUTO_TEST_CASE(test_eval_apply)
         { "(apply)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply f)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply 1 1)", "Eval error: apply: Not function ref or lambda expression: 1" },
-
     };
     test_Evaluator(tests);
 }
@@ -613,6 +663,7 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
     test_Evaluator(tests);
 }
 
+/*
 BOOST_AUTO_TEST_CASE(test_eval_map)
 {
     vector<TestEval> tests = {
@@ -681,6 +732,7 @@ BOOST_AUTO_TEST_CASE(test_eval_dotimes)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_keywordp)
 {

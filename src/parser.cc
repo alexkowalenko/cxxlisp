@@ -20,7 +20,7 @@ Parser::Parser(Lexer& lex)
 {
 }
 
-Expr mkSymbolInt(const string& atom)
+Expr* mk_symbolInt(const string& atom)
 {
     if (atom == "nil") {
         return sF;
@@ -28,34 +28,34 @@ Expr mkSymbolInt(const string& atom)
         return sT;
     }
     if (atom[0] == '&' || atom[0] == ':') {
-        return Keyword(atom);
+        return mk_keyword(atom);
     }
     if (atom.find('.') != string::npos) {
         try {
-            return Float(stod(atom));
+            return mk_float(stod(atom));
         } catch (invalid_argument) {
         } catch (out_of_range) {
         };
         // fallthrough to Int.
     }
     try {
-        return Int{ stol(atom) };
+        return mk_int(stol(atom));
     } catch (invalid_argument) { //fallthrough to be an atom
     } catch (out_of_range) {
     };
-    return Atom(atom);
+    return mk_atom(atom);
 }
 
-Expr Parser::parse_comma()
+Expr* Parser::parse_comma()
 {
     if (lexer.peek() == '@') {
         lexer.get_token();
-        return splice_unquote_atom;
+        return splice_unquote_at;
     }
-    return unquote_atom;
+    return unquote_at;
 }
 
-Expr Parser::parse_hash(const Token& tok)
+Expr* Parser::parse_hash(const Token& tok)
 {
     if (get<string>(tok.val) == "\\") {
         // character
@@ -69,16 +69,16 @@ Expr Parser::parse_hash(const Token& tok)
                 Token newTok = lexer.get_token();
                 auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
                 if (val == "newline") {
-                    return Char('\n');
+                    return mk_char('\n');
                 } else if (val == "space") {
-                    return Char(' ');
+                    return mk_char(' ');
                 }
                 t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
-                return Char(wchar_t(t));
+                return mk_char(wchar_t(t));
             }
             default:
                 lexer.scan();
-                return Char(wchar_t(t));
+                return mk_char(wchar_t(t));
             }
         }
         throw ParseException("#\\ expecting a character");
@@ -86,7 +86,7 @@ Expr Parser::parse_hash(const Token& tok)
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
-            return FunctionRef(get<string>(t.val));
+            return mk_function_ref(get<string>(t.val));
         } else {
             throw ParseException("#' function ref unknown token "s + string(t));
         }
@@ -96,27 +96,33 @@ Expr Parser::parse_hash(const Token& tok)
 
 ParserResult Parser::parse_quote(Token& tok)
 {
-    List x;
+    auto x = mk_list();
     if (tok.type == TokenType::quote) {
-        x.push_back(quote_atom);
+        x->car = quote_at;
     } else {
-        x.push_back(backquote_atom);
+        x->car = backquote_at;
     }
     auto [next, eof] = parse();
-    x.push_back(next);
+    x->cdr = mk_list(next);
     return { x, eof };
 }
 
 ParserResult Parser::parse_list()
 {
     bool eof = false;
-    List top;
+    auto top = mk_list();
+    auto l = top;
     while (true) {
         try {
             auto res = parse();
             eof = res.eof;
-            if (!is_a<nullptr_t>(res.val)) {
-                top.push_back(res.val);
+            if (res.val != nullptr) {
+                if (!l->car) {
+                    l->car = res.val;
+                } else {
+                    l->cdr = mk_list(res.val);
+                    l = l->cdr;
+                }
             }
         } catch (EndBracketException) {
             return { top, eof };
@@ -129,7 +135,9 @@ ParserResult Parser::parse()
     Token tok;
     lexer >> tok;
     // BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
+
     switch (tok.type) {
+
     case TokenType::open:
         return parse_list();
 
@@ -137,21 +145,22 @@ ParserResult Parser::parse()
         throw EndBracketException();
 
     case TokenType::atom:
-        return { mkSymbolInt(get<string>(tok.val)), false };
+        return { mk_symbolInt(get<string>(tok.val)), false };
 
     case TokenType::string:
-        return { String(get<wstring>(tok.val)), false };
+        return { mk_string(get<wstring>(tok.val)), false };
 
     case TokenType::quote:
     case TokenType::backquote:
         return parse_quote(tok);
 
-    case TokenType::comma: {
+    case TokenType::comma:
         return { parse_comma(), false };
-    }
+
     case TokenType::hash: {
         return { parse_hash(tok), false };
     }
+
     case TokenType::eof:
         return { sF, true };
 

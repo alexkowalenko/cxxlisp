@@ -19,10 +19,12 @@ namespace ax {
 
 using namespace std;
 
-using PrimBasicFunct = function<Expr(List& args)>;
-using PrimSimpleFunct = function<Expr(const string& name, List& args)>;
-using PrimFunct = function<Expr(const string& name, List& args, SymbolTable& a)>;
-using PrimFullFunct = function<Expr(Evaluator& l, const string& name, List& args, SymbolTable& a)>;
+void init_prims();
+
+using PrimBasicFunct = function<Expr*(Expr* const args)>;
+using PrimSimpleFunct = function<Expr*(const string& name, Expr* const args)>;
+using PrimFunct = function<Expr*(const string& name, Expr* const args, shared_ptr<SymbolTable> a)>;
+using PrimFullFunct = function<Expr*(Evaluator& l, const string& name, Expr* const args, shared_ptr<SymbolTable> a)>;
 
 struct Primitive {
     string name;
@@ -35,32 +37,40 @@ inline const bool preEvaluate = true;
 
 extern map<string, Primitive> prim_table;
 
-void init_prims();
-
-using AccessorFunct = function<Expr(Evaluator& l, List& args, const Expr& val, SymbolTable& a)>;
+// Accessor functions for setf
+using AccessorFunct = function<Expr*(Evaluator& l, Expr* args, Expr* val, shared_ptr<SymbolTable> a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
 
 // Numbers
 
-Expr numberp(List& args);
+Expr* numberp(Expr* args);
 
 extern PrimBasicFunct zerop;
 extern PrimBasicFunct plusp;
 extern PrimBasicFunct minusp;
 
 template <Int N>
-Expr nump(List& args)
+Expr* nump(Expr* args)
 // Generates a templated function which mods compared to N.
 {
-    return abs(any_cast<Int>(args[0]) % 2) == N;
+    return abs(args->car->integer % 2) == N ? sT : sF;
 }
 
 template <typename T>
-PrimBasicFunct predicate(const function<bool(T, T)>& f)
+PrimBasicFunct predicate_str(const function<bool(T, T)>& f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](List& args) -> Expr {
-        return f(any_cast<T>(args[0]), any_cast<T>(args[1]));
+    return [&](Expr* args) -> Expr* {
+        return f(args->car->string, args->cdr->car->string) ? sT : sF;
+    };
+}
+
+template <typename T>
+PrimBasicFunct predicate_chr(const function<bool(T, T)>& f)
+// Returns a function with compare the first element to zero.
+{
+    return [&](Expr* args) -> Expr* {
+        return f(args->car->chr, args->cdr->car->chr) ? sT : sF;
     };
 }
 
@@ -78,7 +88,7 @@ extern PrimBasicFunct num_div;
 extern PrimBasicFunct num_mod;
 extern PrimBasicFunct num_rem;
 
-Expr num_sub_init(List& args);
+Expr* num_sub_init(Expr* args);
 PrimBasicFunct check_zeros(PrimBasicFunct f);
 
 extern PrimBasicFunct num_power;
@@ -102,38 +112,58 @@ extern PrimBasicFunct num_acos;
 extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
 
-Expr incf(Evaluator& l, const string& name, List& args, SymbolTable& a);
+Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 
 // Functions
 
-Expr defun(const string& name, List& args, SymbolTable& a);
-Expr lambda(const string& name, List& args);
-Expr funct(const string& name, List& args);
-Expr functionp(const string&, List& args, SymbolTable& a);
-Expr fboundp(const string&, List& args, SymbolTable& a);
-Expr apply(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr funcall(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr mapcar(Evaluator& l, const string& name, List& args, SymbolTable& a);
-Expr doFuncs(Evaluator& l, const string& name, List& args, SymbolTable& a);
+Expr* defun(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* lambda(const string& name, Expr* args);
+Expr* funct(const string& name, Expr* args);
+Expr* functionp(const string&, Expr* args, shared_ptr<SymbolTable> a);
+Expr* fboundp(const string&, Expr* args, shared_ptr<SymbolTable> a);
+Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* funcall(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 
 // Strings
 
-PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr(const Expr&)> trans);
-Expr string_fnct(const string& name, List& args);
+extern PrimBasicFunct str_eq;
+extern PrimBasicFunct str_neq;
+extern PrimBasicFunct str_gt;
+extern PrimBasicFunct str_ge;
+extern PrimBasicFunct str_lt;
+extern PrimBasicFunct str_le;
+
+PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr*(const Expr*)> trans);
+Expr* string_fnct(const string& name, Expr* args);
+Expr* to_lower_str(const Expr* s);
+
+// Characters
+
+extern PrimBasicFunct char_eq;
+extern PrimBasicFunct char_neq;
+extern PrimBasicFunct char_gt;
+extern PrimBasicFunct char_ge;
+extern PrimBasicFunct char_lt;
+extern PrimBasicFunct char_le;
+
+Expr* to_lower_char(const Expr* s);
 
 // Sequences
 
-Expr length(List& args);
-Expr elt(List& args);
-Expr setelt(List& args);
-Expr subseq(List& args);
-Expr setf_elt(Evaluator& l, List& args, const Expr& r, SymbolTable& a);
-Expr make_sequence(List& args);
+Expr* length(Expr* args);
+Expr* elt(Expr* args);
+Expr* setelt(Expr* args);
+Expr* subseq(Expr* args);
+
+Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a);
+Expr* make_sequence(Expr* args);
 
 // I/O
 
-Expr throw_error(List& args);
-Expr quit(List& args);
+Expr* throw_error(Expr* args);
+Expr* quit(Expr* args);
 }
 
 #endif

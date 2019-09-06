@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmt % numeric_limits<long>::max()), "t" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
-        //{ "(numberp (+ 2 3))", "t" },
+        { "(numberp (+ 2 3))", "t" },
         { "(numberp 'a)", "nil" },
         { "(numberp '(a b c))", "nil" },
         { "(numberp t)", "nil" },
@@ -77,8 +77,8 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { boost::str(fmp % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmp % (numeric_limits<long>::max())), "t" },
         { boost::str(fmp % (numeric_limits<long>::max() - 1)), "t" },
-        //{ "(integerp (+ 2 3))", "t" },
-        //{ "(integerp 3.145926536)", "nil" },
+        { "(integerp (+ 2 3))", "t" },
+        { "(integerp 3.145926536)", "nil" },
         //{ "(integerp #C(1 2))", "nil" },
         { "(integerp 'a)", "nil" },
         { "(integerp '(a b c))", "nil" },
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_numberp)
         { "(floatp t)", "nil" },
         { "(floatp nil)", "nil" },
 
-        // floats
+        // // floats
         { "(numberp 3.145926536)", "t" },
         { "(numberp -46846368.464)", "t" },
         { "(numberp 1.2345e-8)", "t" },
@@ -215,6 +215,7 @@ BOOST_AUTO_TEST_CASE(test_minusp)
     vector<TestEval> tests = {
         { "(minusp (- 2 3))", "t" },
         { "(minusp -1)", "t" },
+        { "(minusp 1)", "nil" },
         { boost::str(fmt % numeric_limits<long>::min()), "t" },
         { boost::str(fmt % (numeric_limits<long>::min() + 1)), "t" },
         { boost::str(fmt % numeric_limits<long>::max()), "nil" },
@@ -231,8 +232,6 @@ BOOST_AUTO_TEST_CASE(test_minusp)
         //{ "(minusp -0.0f0)", "nil" },
         //{ "(minusp -0.0d0)", "nil" },
         //{ "(minusp -0.0l0)", "nil" },
-
-        { "(minusp 1)", "nil" },
 
         // Floats
         { "(minusp 3.145926536)", "nil" },
@@ -277,7 +276,7 @@ BOOST_AUTO_TEST_CASE(test_oddp)
     auto fmt = boost::format("(oddp %1%)");
     vector<TestEval> tests = {
         { "(oddp 1)", "t" },
-        //{ "(oddp (/ 2 3))", "nil" },
+        { "(oddp (/ 2 3))", "nil" },
         { "(oddp 0)", "nil" },
         { "(oddp -1)", "t" },
 
@@ -321,14 +320,14 @@ BOOST_AUTO_TEST_CASE(test_equal)
         { boost::str(fmt % numeric_limits<double>::epsilon()), "t" },
         { boost::str(fmt % numeric_limits<double>::lowest()), "t" },
 
-        // // Mixed
+        // Mixed
         { "(= 0 0.0)", "t" },
         //{ "(= 0 0.0s0)", "t" },
         //{ "(= 0.0f0 0.0s0)", "t" },
 
         { "(= 17 17.0)", "t" },
-        // { "(= 17 17.0s0)", "t" },
-        // { "(= 17.0f0 17.0d0)", "t" },
+        //{ "(= 17 17.0s0)", "t" },
+        //{ "(= 17.0f0 17.0d0)", "t" },
 
         { "(= 's 0)", "Eval error: = arguments needs to be a number" },
         { "(= 234 'q)", "Eval error: = arguments needs to be a number" },
@@ -468,6 +467,10 @@ BOOST_AUTO_TEST_CASE(test_add)
         { "(+ 2.1 3.1)", "5.2" },
         { "(+ 2.1 3.1 1.1)", "6.3" },
 
+        // Mixed
+        { "(+ 2.1 3)", "5.1" },
+        { "(+ 2 3.1)", "5.1" },
+
         // // complex
         // { "(+ 1 #C(0 1))", "#C(1 1)" },
         // { "(+ #C(0 1) 1.5)", "#C(1.5 1)" },
@@ -543,14 +546,14 @@ BOOST_AUTO_TEST_CASE(test_div)
         { "(/ 0 2)", "0" },
         { "(/ 3 -1)", "-3" },
         { "(/ 66433345534 34684)", "1915388" },
-        { "(/ 3.0 4 5)", "0.15" },
 
         { "(/ 1 'jones)", "Eval error: / arguments needs to be a number" },
 
         // floats
         { "(/ 0.5 2)", "0.25" },
         { "(/ 1 3.0)", "0.333333333333" },
-        { "(/ 8)", "0.125" },
+        { "(/ 8.0)", "0.125" },
+        { "(/ 3.0 4 5)", "0.15" },
 
         // // Complex
         // { "(/ #C(1 0) #C(0 1))", "#C(0 -1)" },
@@ -575,6 +578,12 @@ BOOST_AUTO_TEST_CASE(test_div)
         { "(rem 13 -4)", "1" },
         { "(mod -13 -4)", "-1" },
         { "(rem -13 -4)", "-1" },
+
+        //{ "(mod 13.4 1)", "0.4" },
+        //{ "(rem 13.4 1)", "0.4" },
+        //{ "(mod -13.4 1)", "0.6" },
+        //{ "(rem -13.4 1)", "-0.4" },
+
     };
     test_Evaluator(tests);
 }
@@ -584,7 +593,7 @@ BOOST_AUTO_TEST_CASE(test_power)
     vector<TestEval> tests = {
         { "(^ 12)", "12" },
         { "(expt 2 3)", "8" },
-        //{ "(^ 3 -3)", "0.037037037037037035" },
+        { "(^ 3 -3)", "0.037037037037" },
         { "(^ 3 -3.0)", "0.037037037037" },
         { "(expt 0 0)", "1" },
         { "(^ 0 2)", "0" },
@@ -723,7 +732,7 @@ BOOST_AUTO_TEST_CASE(test_real_incf)
         { "x", "-4" },
 
         { "(incf)", "Eval error: incf expecting at least 1 arguments" },
-        { "(incf 1)", "Eval error: incf: argument needs to be symbol" },
+        { "(incf 1)", "Eval error: incf: argument needs to a reference" },
         { "(decf y)", "Eval error: decf: undefined variable y" },
 
         { "(defvar z '(1 2))", "z" },

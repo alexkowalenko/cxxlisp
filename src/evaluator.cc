@@ -25,215 +25,246 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...)->overloaded<Ts...>;
 
-const Keyword optional_atom = Keyword("&optional");
-const Keyword rest_atom = Keyword("&rest");
+const string optional_atom = string("&optional");
+const string rest_atom = string("&rest");
 
-Evaluator::Evaluator(Options& o)
-    : opt(o){};
-
-SymbolTable Evaluator::create_context(Function& f, List args, SymbolTable& a)
+shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, shared_ptr<SymbolTable> a)
 {
-    List evalArgs;
-    if (f.macro) {
+    Expr* evalArgs;
+    if (f->macro) {
         // Macro args are not evaluated
         evalArgs = args;
     } else {
         evalArgs = eval_list(args, a);
     }
 
+    // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
+
+    auto evalArgs_size = evalArgs->size();
     unsigned int arg_count = 0;
     bool optional = false;
     bool rest = false;
-    SymbolTable context(&a);
-    for (unsigned int i = 0; i < f.parameters.size(); ++i) {
-        auto param = f.parameters[i];
-        if (is_a<Keyword>(param) && any_cast<Keyword>(param) == optional_atom) {
+    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    auto f_param_size = is_false(f->parameters) ? 0 : f->parameters->size();
+
+    for (auto param = f->parameters; !is_false(param); param = param->cdr) {
+        if (is_a<Type::keyword>(param->car) && param->car->keyword == optional_atom) {
             optional = true;
+            cout << "opt args " << endl;
             continue;
-        } else if (is_a<Keyword>(param) && any_cast<Keyword>(param) == rest_atom) {
+        } else if (is_a<Type::keyword>(param->car) && param->car->keyword == rest_atom) {
             rest = true;
+            cout << "rest args " << endl;
             continue;
-        } else if (is_a<List>(param)) {
+        } else if (is_a<Type::list>(param->car)) {
             if (optional) {
                 // get symbol
-                if (any_cast<List>(param).size() != 2) {
-                    throw EvalException(f.name + ": default argument not 2 member list " + to_string(param));
+                if (param->car->size() != 2) {
+                    throw EvalException(f->name + ": default argument not 2 member list " + to_string(param->car));
                 }
-                auto pp = any_cast<List>(param)[0];
-                if (!is_a<Atom>(pp)) {
-                    throw EvalException(f.name + ": optional default argument is not an atom " + to_string(pp));
+                auto atom = param->car->car;
+                if (!is_a<Type::atom>(atom)) {
+                    throw EvalException(f->name + ": optional default argument is not an atom " + to_string(atom));
                 }
-                cout << "Args " << evalArgs.size() << " : " << i << endl;
-                if (evalArgs.size() < i) {
-                    context.put(any_cast<Atom>(pp), any_cast<List>(param)[1]);
+                if (evalArgs_size < f_param_size - 1) {
+                    context->put(atom->atom, param->car->cdr->car);
                 } else {
-                    context.put(any_cast<Atom>(pp), evalArgs[arg_count]);
+                    context->put(atom->atom, evalArgs->car);
                 }
             }
-        } else if (is_a<Atom>(param)) {
-            if (evalArgs.size() > arg_count) {
+        } else if (is_a<Type::atom>(param->car)) {
+            if (evalArgs_size > arg_count) {
                 if (rest) {
                     // Get all arguments and finish matching
-                    List restList(evalArgs.begin() + arg_count, evalArgs.end());
-                    context.put(any_cast<Atom>(f.parameters[i]), restList);
+                    context->put(param->car->atom, evalArgs);
                     break;
                 } else {
-                    context.put(any_cast<Atom>(f.parameters[i]), evalArgs[arg_count]);
+                    context->put(param->car->atom, evalArgs->car);
                 }
             } else if (optional) {
-                context.put(any_cast<Atom>(f.parameters[i]), sF);
+                context->put(param->car->atom, sF);
             } else if (rest) {
-                context.put(any_cast<Atom>(f.parameters[i]), sF);
+                context->put(param->car->atom, sF);
             }
         }
         ++arg_count;
+        if (!is_false(evalArgs->cdr)) {
+            evalArgs = evalArgs->cdr;
+        }
     }
+
+    // cout << "param count " << f_param_size << " : " << evalArgs_size << endl;
     if (rest) {
         ; // don't worry about counting pararamters
     } else if (optional) {
-        if (!(f.parameters.size() - 1 == evalArgs.size() || f.parameters.size() - 2 == evalArgs.size())) {
-            throw EvalException(f.name + ": invalid number of arguments"s);
+        f_param_size -= 1;
+        if (!(f_param_size == evalArgs_size || f_param_size - 1 == evalArgs_size)) {
+            throw EvalException(f->name + ": invalid number of arguments"s);
         }
     } else {
-        if (f.parameters.size() != evalArgs.size()) {
-            throw EvalException(f.name + ": invalid number of arguments"s);
+        if (f_param_size != evalArgs_size) {
+            throw EvalException(f->name + ": invalid number of arguments"s);
         }
     }
     return context;
 }
 
-Expr Evaluator::perform_function(Function& f, List args, SymbolTable& a)
+Expr* Evaluator::perform_function(Function* f, Expr* args, shared_ptr<SymbolTable> a)
 {
-    SymbolTable context = create_context(f, args, a);
-    auto result = perform_list(f.body, context);
-    if (f.macro) {
+    auto context = create_context(f, args, a);
+    auto result = perform_list(f->body, context);
+    if (f->macro) {
         // macros are post-evaluated
+        // BOOST_LOG_TRIVIAL(debug) << "macro expand: " << to_string(result);
         result = eval(result, a);
     }
     return result;
 }
 
-Expr Evaluator::backquote(Expr& s, SymbolTable& a)
+Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
 {
     if (is_atomic(s)) {
         return s;
     }
-    if (is_a<List>(s)) {
-        List result;
-        List slist = any_cast<List>(s);
-        for (auto iter = slist.begin(); iter != slist.end(); ++iter) {
-            auto e = *iter;
-            if (is_a<Atom>(e)
-                && (any_cast<Atom>(e) == unquote_atom || any_cast<Atom>(e) == splice_unquote_atom)) {
-                if (iter + 1 != slist.end()) {
-                    auto res = eval(*(++iter), a);
-                    if (any_cast<Atom>(e) == unquote_atom) {
-                        result.push_back(res);
-                    } else {
-                        if (is_a<List>(res)) {
-                            for (auto x : any_cast<List>(res)) {
-                                result.push_back(x);
-                            }
+    if (is_a<Type::list>(s)) {
+        auto top = mk_list();
+        Expr* p = nullptr;
+        for (auto cur = top; !is_false(s); s = s->cdr, cur = cur->cdr) {
+            if (is_a<Type::atom>(s->car)) {
+                if (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom) {
+                    if (!is_false(s->cdr)) {
+                        auto res = eval(s->cdr->car, a);
+                        if (s->car->atom == unquote_at->atom) {
+                            cur->car = res;
+                            s = s->cdr; // advance
                         } else {
-                            result.push_back(res);
+                            if (is_a<Type::list>(res)) {
+                                // splice in list
+                                while (!is_false(res)) {
+                                    cur->car = res->car;
+                                    cur->cdr = mk_list();
+                                    cur = cur->cdr;
+                                    res = res->cdr;
+                                }
+                            } else {
+                                cur->car = res;
+                            }
+                            s = s->cdr; // advance
                         }
                     }
+                } else {
+                    cur->car = s->car;
                 }
-            } else if (is_a<List>(e)) {
-                result.push_back(backquote(e, a));
+            } else if (is_a<Type::list>(s->car)) {
+                cur->car = backquote(s->car, a);
             } else {
-                result.push_back(e);
+                cur->car = s->car;
             }
+            cur->cdr = mk_list();
+            p = cur;
         }
-        return result;
+        p->cdr = nullptr;
+        return top;
     }
     return s;
 }
 
-List Evaluator::eval_list(List& l, SymbolTable& a)
+Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
 {
-    List result;
-    for_each(l.begin(), l.end(), [&](Expr& e) { result.push_back(eval(e, a)); });
+    if (is_false(e)) {
+        return sF;
+    }
+    Expr* result = mk_list();
+    Expr* rl = result;
+    while (e) {
+        if (!rl->car) {
+            rl->car = eval(e->car, a);
+        } else {
+            rl->cdr = mk_list(eval(e->car, a));
+            rl = rl->cdr;
+        }
+        e = e->cdr;
+    }
+    // cout << "eval_list: " << to_dstring(result) << endl;
     return result;
 }
 
-Expr Evaluator::perform_list(List& l, SymbolTable& a)
+Expr* Evaluator::perform_list(Expr* e, shared_ptr<SymbolTable> a)
 {
-    Expr result = sF;
-    for_each(l.begin(), l.end(), [&](Expr& e) { result = eval(e, a); });
+    auto result = sF;
+    while (e) {
+        result = eval(e->car, a);
+        e = e->cdr;
+    }
     return result;
 }
 
-Expr Evaluator::eval(Expr& e, SymbolTable& a)
+Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
 {
     if (opt.debug_expr) {
         BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
     };
 
+    if (is_false(e)) { // stops nullptrs
+        return sF;
+    }
     // Eval basic types
-    if (is_a<Bool>(e)) {
+    switch (e->type) {
+    case Type::boolean:
+    case Type::integer:
+    case Type::floating:
+    case Type::character:
+    case Type::string:
         return e;
-    }
-    if (is_a<Int>(e) || is_a<Float>(e)) {
-        return e;
-    }
-    if (is_a<Atom>(e)) {
-        if (auto val = a.find(any_cast<Atom>(e))) {
+
+    case Type::atom:
+        if (auto val = a->find(e->atom)) {
             return *val;
         }
         throw EvalException("unbound variable: "s + to_string(e));
-    }
-    if (is_a<String>(e) || is_a<Char>(e)) {
+
+    case Type::function_ref:
+    case Type::function:
+    case Type::keyword:
         return e;
-    }
-    if (is_a<FunctionRef>(e)) {
-        return e;
-    }
-    if (is_a<Keyword>(e)) {
-        return e;
+    case Type::list:; // fallthrough
     }
 
     // Test for list
-    if (!is_a<List>(e)) {
+    if (!is_list(e)) {
         throw EvalException("Can't evaluate "s + to_string(e));
     }
 
-    // Expression is a list
-    List e_list = any_cast<List>(e);
-    if (e_list.empty()) {
-        return sF;
-    }
-
-    auto e_car = e_list.front();
-    if (is_a<Atom>(e_car)) {
+    auto e_car = e->car;
+    if (is_atom(e_car)) {
         // Atom in function position
-        Atom name = any_cast<Atom>(e_car);
+        Atom name = e_car->atom;
 
         // quote
-        if (name == quote_atom) {
-            if (e_list.size() == 2) {
-                return e_list[1];
+        if (name == quote_at->atom) {
+            if (e->size() == 2) {
+                return e->cdr->car;
             }
             throw EvalException("quote: requires one argument");
         }
 
         // backquote
-        if (name == backquote_atom) {
-            return backquote(e_list[1], a);
+        if (name == backquote_at->atom) {
+            return backquote(e->cdr->car, a);
         }
 
         // Lookup symbol table for function
-        if (auto f = a.find(name)) {
-            if (!is_a<Function>(*f)) {
+        if (auto f = a->find(name)) {
+            if (!is_a<Type::function>(*f)) {
                 throw EvalException("A non function in function location "s + to_string(*f));
             }
-            Function fn = any_cast<Function>(*f);
-            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
+            auto fn = (*f)->function;
+            return perform_function(fn, e->cdr, a);
         }
 
         // Lookup primitive table
         if (auto prim = prim_table.find(name); prim != prim_table.end()) {
-            List result(e_list.begin() + 1, e_list.end());
+            auto result = e->cdr;
             if (prim->second.preEval) {
                 result = eval_list(result, a);
             }
@@ -242,25 +273,24 @@ Expr Evaluator::eval(Expr& e, SymbolTable& a)
                 throw EvalException(*check);
             }
             return visit(overloaded{
-                             [&](PrimBasicFunct pf) -> Expr { return pf(result); },
-                             [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
-                             [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
-                             [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
+                             [&](PrimBasicFunct pf) -> Expr* { return pf(result); },
+                             [&](PrimSimpleFunct pf) -> Expr* { return pf(name, result); },
+                             [&](PrimFunct pf) -> Expr* { return pf(name, result, a); },
+                             [&](PrimFullFunct pf) -> Expr* { return pf(*this, name, result, a); },
                          },
                 prim->second.pf);
         }
-    } else if (is_a<Function>(e_car)) {
-        // compiled function in function position - out put of apply.
-        Function fn = any_cast<Function>(e_car);
-        return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
-    } else if (is_a<List>(e_car)) {
+    } else if (is_a<Type::function>(e_car)) {
+        // compiled function in function position - output of apply.
+        auto fn = e_car->function;
+        return perform_function(fn, e->cdr, a);
+    } else if (is_a<Type::list>(e_car)) {
         // List in function position - eval and check for function object
-        Expr flist = any_cast<List>(e_car);
-        auto res = eval(flist, a);
-        if (is_a<Function>(res)) {
+        auto res = eval(e_car, a);
+        if (is_a<Type::function>(res)) {
             // perform function
-            Function fn = any_cast<Function>(res);
-            return perform_function(fn, List(e_list.begin() + 1, e_list.end()), a);
+            auto fn = res->function;
+            return perform_function(fn, e->cdr, a);
         }
     }
 

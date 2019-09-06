@@ -10,8 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #add_compile_options(-Wall -Wextra -Wshadow -Wpedantic)
-add_compile_options(-Wall -Wshadow -Wpedantic)
-
+add_compile_options(-Wall -Wshadow)
 
 enable_testing()
 
@@ -30,6 +29,13 @@ add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
 find_package(readline REQUIRED)
 include_directories(${Readline_INCLUDE_DIR})
 link_libraries(${Readline_LIBRARY})
+
+#Boehm Garbage collector
+set(BOEHM_INCLUDE_DIRS /usr/local/opt/bdw-gc/include)
+set(BOEHM_LIBRARY_DIRS /usr/local/opt/bdw-gc/lib)
+set(BOEHM_LIBRARIES gc gccpp)
+include_directories(${BOEHM_INCLUDE_DIRS})
+link_directories(${BOEHM_LIBRARY_DIRS})
 
 
 include_directories(include)
@@ -57,8 +63,8 @@ link_directories(${GBEN_LIBRARY_DIRS})
 # CXX Lisp build
 
 # options that work on macOs address, undefined
-#add_compile_options (-fsanitize=address)
-#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=address)
+#add_compile_options (-fsanitize=undefined)
+#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=undefined)
 #set(CMAKE_LINKER ${AX_BASE_CLANG}/clang++)
 
 find_program(CLANG_TIDY_PROGRAM NAMES "clang-tidy" DOC ${AX_BASE_CLANG}/clang-tidy)
@@ -71,7 +77,7 @@ file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
 add_library(libcxxlisp STATIC ${source_files})
 
 add_executable(cxxlisp cmd/cxxlisp.cc)
-target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES})
+target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
 
 if (CLANG_TIDY_PROGRAM)
         set_target_properties(cxxlisp PROPERTIES CXX_CLANG_TIDY "${RUN_CLANG_TIDY}")
@@ -91,7 +97,7 @@ foreach(testSrc ${test_src})
         add_executable(${testName} ${testSrc})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} libcxxlisp replxx testlib ${ICU_LIBRARIES})
+        target_link_libraries(${testName} libcxxlisp replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
 
         #I like to move testing binaries into a testBin directory
         #set_target_properties(${testName} PROPERTIES 
@@ -115,7 +121,7 @@ foreach(benSrc ${bench_src})
         add_executable(${benName} ${benSrc})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${benName} libcxxlisp replxx ${ICU_LIBRARIES} ${GBEN_LIBRARIES})
+        target_link_libraries(${benName} libcxxlisp replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} ${GBEN_LIBRARIES})
 
 endforeach(benSrc)
 

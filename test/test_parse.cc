@@ -167,15 +167,15 @@ BOOST_AUTO_TEST_CASE(test_parser_quote)
 BOOST_AUTO_TEST_CASE(test_parser_backquote)
 {
     vector<TestParser> tests = {
-        // backquote
+        // // backquote
         { "`a", "(backquote a)" },
         { "(`a `b `c)", "((backquote a) (backquote b) (backquote c))" },
         { "(`a `(b c))", "((backquote a) (backquote (b c)))" },
         { "(`(a b) `c)", "((backquote (a b)) (backquote c))" },
-        // unquote
+        // // unquote
         { ",", "unquote" },
         { "`(cons x ,a)", "(backquote (cons x unquote a))" },
-        // splice-unquote
+        // // splice-unquote
         { ",@", "splice-unquote" },
         { "`(cons x ,@ a)", "(backquote (cons x splice-unquote a))" },
     };
@@ -185,10 +185,10 @@ BOOST_AUTO_TEST_CASE(test_parser_backquote)
 BOOST_AUTO_TEST_CASE(test_parser_unicode)
 {
     vector<TestParser> tests = {
-        { "'七", "'七" },
-        { "('一 '二 '三)", "('一 '二 '三)" },
-        { "('liberté '(égalité fraternité))",
-            "('liberté '(égalité fraternité))" },
+        { "七", "七" },
+        { "(一 二 三)", "(一 二 三)" },
+        { "(liberté (égalité fraternité))",
+            "(liberté (égalité fraternité))" },
     };
     test_Parser(tests);
 }

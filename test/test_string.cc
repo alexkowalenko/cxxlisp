@@ -61,6 +61,7 @@ BOOST_AUTO_TEST_CASE(test_eval_string_eq)
     };
     test_Evaluator(tests);
 }
+
 BOOST_AUTO_TEST_CASE(test_eval_string_neq)
 {
     vector<TestEval> tests = {

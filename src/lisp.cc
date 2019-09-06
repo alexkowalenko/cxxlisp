@@ -27,8 +27,9 @@ public:
 
 Lisp::Lisp(Options& o)
     : opt(o)
-    , symboltable(nullptr)
 {
+    symboltable = make_shared<SymbolTable>(nullptr);
+    GC_INIT();
 }
 
 inline const string stdlib = R"stdlib( 
@@ -153,7 +154,6 @@ inline const string stdlib = R"stdlib(
 (defun copy-seq (s)
     (subseq s 0))
 
-
 (defun every (fn seq)
     (cond
         ((eq (length seq) 0) t)
@@ -247,7 +247,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    Evaluator evaluator(opt);
+    Evaluator evaluator(opt, symboltable);
 
     while (true) {
         ParserResult res;
@@ -257,7 +257,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
                 break;
             }
             if (opt.parse_only) {
-                cout << to_string(res.val) << endl;
+                ostr << to_string(res.val) << endl;
                 continue;
             }
 

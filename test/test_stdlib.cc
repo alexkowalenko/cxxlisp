@@ -39,6 +39,15 @@ BOOST_AUTO_TEST_CASE(test_eval_second)
     };
     test_Evaluator(tests);
 }
+BOOST_AUTO_TEST_CASE(test_eval_list_length)
+{
+    vector<TestEval> tests = {
+        { "(list-length '(a b c d))", "4" },
+        { "(list-length '())", "0" },
+        { "(list-length nil)", "0" },
+    };
+    test_Evaluator(tests);
+}
 
 BOOST_AUTO_TEST_CASE(test_eval_when)
 {
@@ -84,23 +93,6 @@ BOOST_AUTO_TEST_CASE(test_eval_member)
     test_Evaluator(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_eval_length)
-{
-    vector<TestEval> tests = {
-        { "(length \"123\")", "3" },
-        { "(length '(1 2 3 4))", "4" },
-        //{ "(length #(1 2 3.5))", "3" },
-
-        //{ "(length #())", "0" },
-        { "(length '())", "0" },
-        { "(length \"\")", "0" },
-        { "(length nil)", "0" },
-
-        { "(length)", "Eval error: length expecting an argument" },
-    };
-    test_Evaluator(tests);
-}
-
 BOOST_AUTO_TEST_CASE(test_eval_plus1)
 {
     vector<TestEval> tests = {
@@ -141,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_eval_nth_tail)
         { "(nth-tail 2 '(a b c))", "(c)" },
         { "(nth-tail 2 '(a b c d))", "(c d)" },
         { "(nth-tail 2 '(a b (c1 2) d e))", "((c1 2) d e)" },
-        { "(nth-tail 6 '(a b (c1 2) d e))", "nil" }
+        { "(nth-tail 6 '(amm b (c1 2) d e))", "nil" }
     };
     test_Evaluator(tests);
 }

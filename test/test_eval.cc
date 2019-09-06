@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
 
         { "(quote)", "Eval error: quote: requires one argument" },
         { "(quote (a b))", "(a b)" },
+        { "(quote (a b(a b)))", "(a b (a b))" },
 
         { "'a", "a" },
         { "'λ", "λ" },
@@ -76,6 +77,11 @@ BOOST_AUTO_TEST_CASE(test_eval_backquote)
         { "`(this is a var)", "(this is a var)" },
         { "`(this is a ,var)", "(this is a (more difficult test))" },
         { "`(this is a ,@var)", "(this is a more difficult test)" },
+
+        { "(defvar x '(1 2 3))", "x" },
+        { "`(0 ,@x 4)", "(0 1 2 3 4)" },
+        { "(defvar x 'a)", "x" },
+        { "`(0 ,@x 4)", "(0 a 4)" },
     };
     test_Evaluator(tests);
 }
@@ -290,7 +296,7 @@ BOOST_AUTO_TEST_CASE(test_eval_consp)
 
         // { "(consp '(a . b))", "t" },
         { "(consp '(a))", "t" },
-        // { "(consp (cons nil nil))", "t" },
+        { "(consp (cons nil nil))", "t" },
         { "(consp '(a b c))", "t" },
 
         // ;; For everything in *universe*, it is either an atom, or satisfies
@@ -328,12 +334,12 @@ BOOST_AUTO_TEST_CASE(test_eval_listp)
 BOOST_AUTO_TEST_CASE(test_eval_cons)
 {
     vector<TestEval> tests = {
-        // { "(cons t t)", "(t . t)" },
+        { "(cons t t)", "(t . t)" },
         { "(cons t nil)", "(t)" },
-        // { "(cons nil t)", "(nil . t)" },
+        { "(cons nil t)", "(nil . t)" },
         { "(cons nil nil)", "(nil)" },
 
-        // { "(cons 'a 'b)", "(a . b)" },
+        { "(cons 'a 'b)", "(a . b)" },
         { "(cons 'a nil)", "(a)" },
 
         { "(cons t '())", "(t)" },
@@ -345,11 +351,11 @@ BOOST_AUTO_TEST_CASE(test_eval_cons)
         { "(cons 'a (cons 'b (cons 'c nil)))", "(a b c)" },
 
         { "(cons 'z '())", "(z)" },
-        // { "(cons '(a b) 'c)", "((a b) . c)" },
+        { "(cons '(a b) 'c)", "((a b) . c)" },
 
-        // { "(cons 1 2)", "(1 . 2)" },
-        // {`(cons 1 "2")`, `(1. "2")`},
-        // { "(cons 1 's)", "(1 . s)" },
+        { "(cons 1 2)", "(1 . 2)" },
+        { "(cons 1 \"2\")", "(1 . \"2\")" },
+        { "(cons 1 's)", "(1 . s)" },
 
         { "(cons 'all (cons (cons 'these (cons 'problems '())) '()))",
             "(all (these problems))" },
@@ -374,6 +380,8 @@ BOOST_AUTO_TEST_CASE(test_eval_list)
     test_Evaluator(tests);
 }
 
+/*
+
 BOOST_AUTO_TEST_CASE(test_eval_reverse)
 {
     vector<TestEval> tests = {
@@ -389,6 +397,7 @@ BOOST_AUTO_TEST_CASE(test_eval_reverse)
     };
     test_Evaluator(tests);
 }
+*/
 
 BOOST_AUTO_TEST_CASE(test_eval_append)
 {
@@ -401,13 +410,12 @@ BOOST_AUTO_TEST_CASE(test_eval_append)
         { "(append '(a b) '(c) '(d))", "(a b c d)" },
         { "(append '(a) '(b (c1 2)) '(d) '(e))", "(a b (c1 2) d e)" },
         // { "(append '(a b) '(c . d))", "(a b c . d)" },
-        { "(append 'a)", "(a)" },
+        { "(append 'a)", "a" },
+        { "(append '(a b c) '(d e f) '() '(g))", "(a b c d e f g)" },
+        { "(append '(a b c) 'd)", "(a b c . d)" },
 
-        { "(append 'a nil)", "(a)" },
-        { "(append 'a '())", "(a)" },
-
-        { "(append nil '(a))", "(a)" },
-        { "(append '() '(a))", "(a)" },
+        //{ "(append nil '(a))", "(a)" },
+        // { "(append '() '(a))", "(a)" },
 
         { "(append '(a) '() '(b))", "(a b)" },
         { "(append '(a) nil '(b))", "(a b)" },
@@ -428,7 +436,7 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
         { "(setq x '(1 2))", "(1 2)" },
         { "x", "(1 2)" },
         { "(rplaca x 'x)", "(x 2)" },
-        // { "x", "(x 2)" }, // destructive modify of things in the symbol table not supported
+        { "x", "(x 2)" },
 
         { "(defun f (x) (rplaca x 'a))", "f" },
         { "(f '(1 2 3))", "(a 2 3)" },
@@ -444,16 +452,16 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 BOOST_AUTO_TEST_CASE(test_eval_rplacd)
 {
     vector<TestEval> tests = {
-        //{ "(rplacd '(a b) 'x)", "(a . x)" },
+        { "(rplacd '(a b) 'x)", "(a . x)" },
         { "(rplacd '(a b) '(x))", "(a x)" },
         //{ "(rplacd '(a . b) 'x)", "(a . x)" },
 
         { "(rplacd '((a1 a2) b) '(x))", "((a1 a2) x)" },
         { "(rplacd '(a b) '(c c))", "(a c c)" },
-        //{ "(setq x '(1 2))", "(1 2)" },
-        //{ "x", "(1 2)" },
-        //{ "(rplacd x 'x)", "(1 . x)" },
-        // {"x", "(1 . x)"}, // this does not work, due to Go's immutable lists
+        { "(setq x '(1 2))", "(1 2)" },
+        { "x", "(1 2)" },
+        { "(rplacd x 'x)", "(1 . x)" },
+        { "x", "(1 . x)" },
 
         { "(defun f (x) (rplacd x '(a b)))", "f" },
         { "(f '(1 2 3))", "(1 a b)" },
@@ -573,14 +581,14 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
         { boost::str(fmt % numeric_limits<long>::max()), "t" },
         { boost::str(fmt % (numeric_limits<long>::max() - 1)), "t" },
 
-        // Characters
+        // // Characters
         { "(equal #\\a #\\a)", "t" },
         { "(equal #\\a #\\A)", "nil" },
         { "(equal #\\α #\\α)", "t" },
         { "(equal #\\β #\\α)", "nil" },
         { "(equal #\\a 1)", "nil" },
 
-        // Real
+        // // Real
         { "(equal 1.1 1.1)", "t" },
         { "(equal 1.1 2.1)", "nil" },
         { "(equal 0.0 -0.0)", "t" },
@@ -588,7 +596,7 @@ BOOST_AUTO_TEST_CASE(test_eval_equal)
 
         // changes from eql
         { "(equal '(a b) '(a b))", "t" },
-        //{ "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
+        { "(equal (cons 'a 'b) (cons 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'b))", "t" },
         { "(equal (list 'a 'b) (list 'a 'c))", "nil" },
         { "(equal '(a b (c)) '(a b (c)))", "t" },
@@ -624,10 +632,10 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
         { "(defconstant z 'd)", "Runtime exception: defconstant redefined const z" },
         { "z", "c" },
 
-        //{ R"x((defconstant zz 'd "Documentation"))x", "zz" },
+        { R"x((defconstant zz 'd "Documentation"))x", "zz" },
 
-        //{ R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
-        //{ "my_pi", "3.14" },
+        { R"x((defconstant my_pi 3.14 "My pi is better than your pi"))x", "my_pi" },
+        { "my_pi", "3.14" },
 
         { "(defparameter xp '(a b c))", "xp" },
         { "(car xp)", "a" },
@@ -638,22 +646,22 @@ BOOST_AUTO_TEST_CASE(test_eval_const)
         { "(defparameter zp 'd)", "zp" },
         { "zp", "d" },
 
-        //{ "(defparameter * my_pi * 3.1 \" My pi is better than your pi \")", " * my_pi * " },
-        //{ "*my_pi*", "3.1" },
+        { "(defparameter *my_pi* 3.1 \" My pi is better than your pi \")", "*my_pi*" },
+        { "*my_pi*", "3.1" },
 
         { "(defconstant)", "Eval error: defconstant needs a name" },
         { "(defconstant w)", "Eval error: defconstant needs a value" },
 
         // globals - should not change
         { "(defconstant xx 1)", "xx" },
-        //{ "(defun f() (defconstant xx '2))", "f" },
+        { "(defun f() (defconstant xx '2))", "f" },
         { "xx", "1" },
-        //{ "(f)", "xx" },
-        //{ "xx", "2" },
+        { "(f)", "Runtime exception: defconstant redefined const xx" },
+        { "xx", "1" },
 
         // fail
         { "(defconstant 1 'd)", "Eval error: defconstant requires a symbol as a first argument" },
-        //{ "(defconstant \"s\" 'd)", "Error: defconstant: requires a symbol as a first argument" },
+        { "(defconstant \"s\" 'd)", "Eval error: defconstant requires a symbol as a first argument" },
         { "(defconstant n1 100 n2 200 )", "Eval error: defconstant only takes maximum of 3 arguments" },
 
     };
@@ -672,8 +680,8 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
         { "(defvar z 'd)", "z" },
         { "z", "d" },
 
-        //{`(defvar zz 'e "Doc string")`, "zz"},
-        //{"zz", "e"},
+        { "(defvar zz 'e \"Doc string\")", "zz" },
+        { "zz", "e" },
 
         { "(defvar)", "Eval error: defvar needs a name" },
         { "(defvar w)", "w" },
@@ -691,7 +699,7 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
 
         // fail
         { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },
-        //{ "(defvar \"s\" 'd)", "Error: defvar requires a symbol as a first argument" },
+        { "(defvar \"s\" 'd)", "Eval error: defvar requires a symbol as a first argument" },
         { "(defvar n1 100 n2 200 )", "Eval error: defvar only takes maximum of 3 arguments" },
     };
     test_Evaluator(tests);
@@ -730,7 +738,7 @@ BOOST_AUTO_TEST_CASE(test_eval_setq)
 
         // fail
         { "(setq 1 'd)", "Eval error: setq requires a symbol as an argument" },
-        //{ "(setq \"s\" 'd)", "Error: setq: requires a var as a first argument\nnil" }
+        { "(setq \"s\" 'd)", "Eval error: setq requires a symbol as an argument" }
     };
     test_Evaluator(tests);
 }
@@ -755,7 +763,7 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
 
         // fail
         { "(setf 1 'd)", "Eval error: setf requires a symbol as an argument" },
-        //{ "(setf \"s\" 'd)", "Error: setf: requires a var or list as a first argument\nnil" },
+        { "(setf \"s\" 'd)", "Eval error: setf requires a symbol as an argument" },
     };
     test_Evaluator(tests);
 }
@@ -961,15 +969,15 @@ BOOST_AUTO_TEST_CASE(test_eval_let)
                 y)) )",
             "5" },
 
-        { R"( (let* ((even? (lambda (n) 
-							(if (zerop n) 
-								t
-								(oddp (- n 1)))))
-					(odd? (lambda (n) 
-							(if (zerop n) 
-								nil
-								(evenp (- n 1))))))
-					(even? 88)) )",
+        { R"( (let* ((even? (lambda (n)
+         					(if (zerop n)
+         						t
+         						(oddp (- n 1)))))
+         			(odd? (lambda (n)
+         					(if (zerop n)
+         						nil
+         						(evenp (- n 1))))))
+         			(even? 88)) )",
             "t" },
 
         { "(let)", "Eval error: let expecting at least 2 arguments" },

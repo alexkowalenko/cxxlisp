@@ -13,7 +13,7 @@
 namespace ax {
 
 struct ParserResult {
-    Expr val;
+    Expr* val;
     bool eof;
 };
 
@@ -26,16 +26,16 @@ public:
 private:
     ParserResult parse_list();
 
-    Expr parse_comma();
-    Expr parse_hash(const Token&);
+    Expr* parse_comma();
+    Expr* parse_hash(const Token&);
     ParserResult parse_quote(Token&);
 
     Lexer& lexer;
 };
 
-const Atom quote_atom = Atom("quote");
-const Atom backquote_atom = Atom("backquote");
-const Atom unquote_atom = Atom("unquote");
-const Atom splice_unquote_atom = Atom("splice-unquote");
+inline Expr* quote_at = mk_atom("quote");
+inline Expr* backquote_at = mk_atom("backquote");
+inline Expr* unquote_at = mk_atom("unquote");
+inline Expr* splice_unquote_at = mk_atom("splice-unquote");
 }
 #endif

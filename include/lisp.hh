@@ -27,7 +27,7 @@ public:
 
 private:
     Options& opt;
-    SymbolTable symboltable;
+    shared_ptr<SymbolTable> symboltable;
 };
 }
 

@@ -11,60 +11,209 @@
 #include <iostream>
 #include <locale>
 #include <string>
-#include <vector>
 
-#include <any>
+#include <gc_cpp.h>
 
 namespace ax {
 
 using namespace std;
 
-using Expr = any;
+// basic types for objects
+enum class Type {
+    atom,
+    boolean,
+    integer,
+    floating,
+    list,
+    character,
+    string,
+    function,
+    keyword,
+    function_ref
+};
 
+// defintions of basic types
 using Atom = string;
 using Bool = bool;
 using Int = long;
-using List = vector<any>;
+using Float = double;
+using Keyword = string;
+using Char = wchar_t;
+using String = wstring;
 
-template <typename T>
-constexpr bool is_a(const Expr& s)
+class Function;
+
+// Basic element in s-expressions.
+class Expr {
+public:
+    Expr(Type t)
+        : type(t){};
+
+    Type type;
+
+    // The element can hold the basic types, as a union,
+    // This is ugly, but makes easier programming as compared to
+    // C++17 templated solution.
+    union {
+        Atom atom;
+        Bool boolean;
+        Int integer;
+        Float floating;
+        struct {
+            // THis makes easier access as unamed structure,
+            // but is not standard C++.
+            Expr* car;
+            Expr* cdr;
+        };
+        Char chr;
+        String string;
+        Function* function;
+        Keyword keyword;
+        Atom function_ref;
+    };
+
+    // Return the size of the list, 0 if not list.
+    unsigned int size() const noexcept;
+
+    Expr* operator[](size_t pos);
+    void set(size_t pos, Expr* r);
+    Expr* find(Expr* r);
+};
+
+// Various constructors for element types, returning a s-expression
+
+inline Expr* mk_atom(const Atom& s)
 {
-    return s.type() == typeid(T);
+    auto e = new (GC) Expr(Type::atom);
+    e->atom = s;
+    return e;
+}
+
+inline Expr* mk_bool(const bool s)
+{
+    auto e = new Expr(Type::boolean); // bools are not make often and last forever.
+    e->boolean = s;
+    return e;
+}
+
+inline Expr* mk_int(const Int i)
+{
+    auto e = new (GC) Expr(Type::integer);
+    e->integer = i;
+    return e;
+}
+
+inline Expr* mk_float(const Float f)
+{
+    auto e = new (GC) Expr(Type::floating);
+    e->floating = f;
+    return e;
+}
+
+inline Expr* mk_list(Expr* car = nullptr, Expr* cdr = nullptr)
+{
+    auto e = new (GC) Expr(Type::list);
+    e->car = car;
+    e->cdr = cdr;
+    return e;
+}
+
+Expr* mk_list(initializer_list<Expr*>);
+Expr* mk_list(size_t size, Expr* const init);
+
+// Test functions for s-expression types
+template <Type t>
+constexpr bool is_a(const Expr* s)
+{
+    return s->type == t;
+};
+
+constexpr bool is_atom(const Expr* s)
+{
+    return s->type == Type::atom;
+}
+
+constexpr bool is_bool(const Expr* s)
+{
+    return s->type == Type::boolean;
+}
+
+constexpr bool is_int(const Expr* s)
+{
+    return s->type == Type::integer;
+}
+
+constexpr bool is_list(const Expr* s)
+{
+    return s->type == Type::list;
+}
+
+constexpr bool is_atomic(const Expr* s)
+{
+    return s->type != Type::list;
+}
+
+// Working on lists of arguments
+constexpr Expr* arg0(Expr* args)
+{
+    return args->car;
+}
+
+constexpr Expr* arg1(Expr* args)
+{
+    return args->cdr->car;
+}
+
+constexpr Expr* arg2(Expr* args)
+{
+    return args->cdr->cdr->car;
 }
 
 // Output
 
-string to_string(const Expr& e);
+string to_string(const Expr* e);
+string to_dstring(const Expr* e);
+
+inline ostream& operator<<(ostream& os, const Expr* s)
+{
+    return os << to_string(s);
+}
 
 // Bool
 
-constexpr Bool sF = Bool{ false };
-constexpr Bool sT = Bool{ true };
+inline Expr* const sF = mk_bool(false);
+inline Expr* const sT = mk_bool(true);
 
-constexpr bool is_sF(const Expr& e)
+inline bool is_sF(const Expr* e)
 {
-    return is_a<Bool>(e) && !any_cast<Bool>(e);
+    return e == sF || e == nullptr;
 }
 
-constexpr bool is_false(const Expr& s)
+inline bool is_false(const Expr* s)
 // Is the Bool sF, or is the empty list
 {
-    return (s.type() == typeid(Bool) && !any_cast<Bool>(s))
-        || (s.type() == typeid(List) && any_cast<List>(s).empty());
+    return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
 
-Bool expr_eq(const Expr& x, const Expr&);
-Bool expr_eql(const Expr& x, const Expr&);
-Bool expr_equal(const Expr& x, const Expr&);
+Expr* expr_eq(const Expr* x, const Expr*);
+Expr* expr_eql(const Expr* x, const Expr*);
+Expr* expr_equal(const Expr* x, const Expr*);
 
-class Keyword : public string {
-public:
-    Keyword(const string& s)
-        : string(s){};
-};
+inline Expr* mk_char(Char c)
+{
+    auto e = new (GC) Expr(Type::character);
+    e->chr = c;
+    return e;
+}
 
-using Char = wchar_t;
-using String = wstring;
+inline Expr* mk_string(String s)
+{
+    auto e = new (GC) Expr(Type::string);
+    e->string = s;
+    return e;
+}
+
+// string <-> wstring conversion functions
 
 inline wstring s2ws(const std::string& str)
 {
@@ -78,25 +227,18 @@ inline string ws2s(const std::wstring& wstr)
     return converterX.to_bytes(wstr);
 }
 
-using Float = double;
+Float as_float(Expr* const s);
 
-Float as_Float(const Expr& s);
-
-constexpr bool is_Num(const Expr& n)
+constexpr bool is_number(Expr* n)
 {
-    return is_a<Int>(n) || is_a<Float>(n);
-}
-
-constexpr bool is_atomic(const Expr& s)
-{
-    return s.type() == typeid(Atom) || s.type() == typeid(Bool) || s.type() == typeid(Int) || s.type() == typeid(Char) || s.type() == typeid(Float);
+    return is_a<Type::integer>(n) || is_a<Type::floating>(n);
 }
 
 // sequence
 
-constexpr bool is_seq(const Expr& s)
+constexpr bool is_seq(const Expr* s)
 {
-    return is_a<List>(s) || is_a<String>(s);
+    return is_a<Type::list>(s) || is_a<Type::string>(s);
 }
 
 // types
@@ -111,12 +253,9 @@ const Atom type_funct{ "function" };
 const Atom type_bool{ "boolean" };
 const Atom type_null{ "null" };
 
-Expr make_type(const Atom& t, size_t size = 0);
-
 inline bool is_seq_type(const Atom& s)
 {
     return s == type_list || s == type_string;
 }
-} // namespace ax
-
+}
 #endif
