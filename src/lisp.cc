@@ -108,6 +108,27 @@ inline const string stdlib = R"stdlib(
 		((eq (car lat) a) lat)
         (t (member a (cdr lat)))))
 
+(defun reverse (x)
+  (cond ((null x) nil)
+        (t (append (reverse (cdr x))
+                 (list(car x))))))
+
+(defun pair (x y)
+  (cond ((and (null x) (null y)) nil)
+        ((and (not (atom x)) (not (atom y)))
+         (cons (cons (car x) (car y))
+               (pair (cdr x) (cdr y))))))
+
+(defun assoc (x y)
+  (cond ((null y) nil)
+        ((eq (caar y) x) (car y))
+        ('t (assoc x (cdr y)))))
+
+(defun remove (x list)
+  (cond ((null list) nil)
+        ((eq x (car list)) (cdr list))
+        (t (cons (car list) (remove x (cdr list)))))) 
+
 ;(defun 1+ (x) (+ 1 x))
 ;(defun 1- (x) (- x 1))
 

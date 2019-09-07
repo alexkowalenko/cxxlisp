@@ -182,6 +182,27 @@ BOOST_AUTO_TEST_CASE(test_parser_backquote)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_dot)
+{
+    vector<TestParser> tests = {
+        // Dot form
+        { "(1 . 2)", "(1 . 2)" },
+        { "((1 2) . 3)", "((1 2) . 3)" },
+        { "(1 2 . 3)", "(1 2 . 3)" },
+        { "(1 2 . (3 4))", "(1 2 3 4)" },
+        { "(1 . (2 . (3 . (4))))", "(1 2 3 4)" },
+        { "(1 . (2 . (3 . (4 . ()))))", "(1 2 3 4)" },
+        { "(1 . (2 . (3 . 4)))", "(1 2 3 . 4)" },
+
+        { "1 . 2", "1" }, // should be an error, but 2 is evaluated next
+        { "(1 . 2 3)", "(1 . 2)" }, // should be an error, but anything after 2 is ignored.
+        { "(1 . 2 3 4)", "(1 . 2)" },
+        { "(1 . 2 3 4 5)", "(1 . 2)" },
+        { ". 2 3 4 5", "2" }, // should be an error, but the dot is ignored
+    };
+    test_Parser(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_parser_unicode)
 {
     vector<TestParser> tests = {
@@ -301,7 +322,7 @@ void test_Parser(const vector<TestParser>& tests)
         Parser parser(lex);
         try {
             BOOST_TEST_CHECKPOINT(test.input);
-            auto [val, eof] = parser.parse();
+            auto [val, eof, dot] = parser.parse();
             if (eof) {
                 continue;
             }

@@ -6,7 +6,7 @@ Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `,@`, `#`
 
 * `()` marks a list structure.
 
-* `.` marks a cons pair inside a list structure - Not implemented.
+* `.` marks a cons pair inside a list structure.
 
 * `;` indicates a comment, and input is ignored from the semi-colon until the end of line.
 
@@ -40,19 +40,19 @@ Symbol `t` is defined as the standard true value, and `nil` is defined as the nu
 
 * Lists - i.e., `()` `(a b c)`.
 
-* Cons pair - i.e., `(a . b)`. Not all functions cons pairs. Not implemented.
+* Cons pair - i.e., `(a . b)`. Not all functions take cons pairs.
 
 * Integers - i.e., `1`, `-2`, `0`. All integers are 64-bit integers.
 
-* Floats - i.e. 1.2, 1.2345e-08. All floats are  
+* Floats - i.e. 1.2, 1.2345e-08. All floats are 64-bit floating-points.
 
-* Strings - i.e., `"this string"`. All floats are 64-bit floating-points.
+* Strings - i.e., `"this string"`. Strings handle unicode text. 
 
-* Characters - i.e., `#\a`, `#\newline`, `#\space`
+* Characters - i.e., `#\a`, `#\newline`, `#\space`. Characters handle unicode characters.
 
 * Function references, i.e., `#'atom`.
 
-Only symbols, integers, strings, and characters are atoms.
+All types apart from Lists are atomic.
 
 ## Basic functions
 
@@ -78,7 +78,7 @@ Only symbols, integers, strings, and characters are atoms.
 
 `(keywordp x)` - is `x` a keyword, returns `t` if so, `nil` if `x` is not an symbol.
 
-`(type-of x)` - returns a symbol representing the type of `x`.
+`(type-of x)` - returns a symbol representing the type of `x`. [Not implemented].
 
 ### Functions
 
@@ -215,13 +215,13 @@ Supported unicode characters.
 
 `(second x) (third x) (fourth x)` - return the second, third or fourth element of a list.
 
-`(last x [n])` - return the last (`n`th) element of `x` as a list.
+`(last x [n])` - return the last (`n`th) element of `x` as a list. [Not implemented]
 
 `(nth n list)` - return the nth element of the `list`. Indexing starts at 0.
 
 `(nth-tail n list)` - return the nth last element of the `list`. Indexing starts at 0.
 
-`(reverse list)` - returns the list in reverse order. (Not in standard common lisp.)
+`(reverse list)` - returns the list in reverse order.
 
 `(append [list]* x)` - appends the lists together, and if x is an atom, adds it to the list.
 
@@ -231,7 +231,7 @@ Supported unicode characters.
 
 `(mapcar f list...)`  `(maplist f list...)` - apply the function `f` to the lists `list...`, return as list. `f` is a function or a lambda expression.
 
-`(fold f list a)` - apply the function `f` (taking two elements), to the values of `list`, with initial value `a`.
+`(fold f list a)` - apply the function `f` (taking two elements), to the values of `list`, with initial value `a`. [Not implemented]
 
 # Sequences
 
@@ -248,6 +248,8 @@ Sequences are an abstraction of various types, as thus can be the arguments to f
 `(length s)` - returns the length of a sequence.
 
 `(elt seq i)` - returns the `i`th element of the sequence.
+
+`(elt-set seq i val)`, `(setf (elt seq i) val)` - sets the`i`th element of the sequence to `val`. `elt-set` not standard common lisp.
 
 `(subseq seq start [end])` - returns a subsequence of `seq` starting at `start`, until the end or optional ending at `end`.
 
@@ -290,10 +292,6 @@ Sequences are an abstraction of various types, as thus can be the arguments to f
 `(defun f (args ...) body...)` - define a function `f` with `args` and the `body` to be evaluated. Returns the value of the last in `body` or `nil` if not present.
 
 `(lambda (args ...) body...)` - define a anonymous function with `args` and the `body` to be evaluated. Returns the value of the last in `body` or `nil` if not present.
-
-Function parameter definitions
-
-* `&optional` - all parameters following this are optional. Default values are expressed using a list of two values - the parameter, and the default, i.e., (count 0)
 
 `(funcall f args...)` - apply the arguments `args...` to the function `f`. If `args` is a single list, this becomes the list of arguments. `f` is a function reference or a lambda expression.
 
@@ -374,6 +372,4 @@ Should have the function reference removed, i.e.:
 (mapcar (lambda (x) (micro-eval x environment))
 		     (rest form))
 ```
-
-* `(setf (x obj item) val)` does not work if obj is not defined in the local scope. For example, not when passed in as a function argument. Providing set-x functions that return a modified value. Functions receive a copy of the arguments, not direct references. Should convert everything to pointers.
   

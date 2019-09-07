@@ -102,9 +102,10 @@ ParserResult Parser::parse_quote(Token& tok)
     } else {
         x->car = backquote_at;
     }
-    auto [next, eof] = parse();
-    x->cdr = mk_list(next);
-    return { x, eof };
+    auto res = parse();
+    x->cdr = mk_list(res.val);
+    res.val = x;
+    return res;
 }
 
 ParserResult Parser::parse_list()
@@ -120,7 +121,11 @@ ParserResult Parser::parse_list()
                 if (!l->car) {
                     l->car = res.val;
                 } else {
-                    l->cdr = mk_list(res.val);
+                    if (res.dot) {
+                        l->cdr = res.val;
+                    } else {
+                        l->cdr = mk_list(res.val);
+                    }
                     l = l->cdr;
                 }
             }
@@ -153,6 +158,12 @@ ParserResult Parser::parse()
     case TokenType::quote:
     case TokenType::backquote:
         return parse_quote(tok);
+
+    case TokenType::dot: {
+        auto res = parse();
+        res.dot = true; // set dot to true.
+        return res;
+    }
 
     case TokenType::comma:
         return { parse_comma(), false };

@@ -169,21 +169,6 @@ Expr* rplacd(Expr* args)
     throw EvalException("rplacd first argument not a list");
 }
 
-/*
-Expr reverse(List& args)
-{
-    if (is_false(args[0])) {
-        return sF;
-    }
-    if (is_a<List>(args[0])) {
-        List l = any_cast<List>(args[0]);
-        reverse(l.begin(), l.end());
-        return l;
-    }
-    throw EvalException("reverse: argument not a list");
-}
-*/
-
 // (append x y)
 //
 // Takes two lists x, y and appends into one list
@@ -203,19 +188,20 @@ Expr* s_append(Expr* x, Expr* y)
 // (append '(a) '(b)) -> (a b)
 Expr* append(Expr* args)
 {
-    if (is_false(args->car)) {
-        return sF;
+    if (args->size() == 1) {
+        return args->car;
     }
     auto cur = mk_list();
-    while (!is_false(args)) {
+    for (; !is_false(args); args = args->cdr) {
         if (is_list(args->car)) {
             cur = s_append(cur, args->car);
         } else {
-            if (!is_false(args->car)) {
-                cur = s_append(cur, args->car);
+            if (is_false(args->car)) {
+                cur = s_append(cur, mk_list());
+            } else {
+                throw EvalException("append: is not a list: " + to_string(args->car));
             }
         }
-        args = args->cdr;
     }
     return cur;
 }
@@ -434,7 +420,6 @@ void init_prims()
         { "rplaca", &rplaca, two_args, preEvaluate },
         { "rplacd", &rplacd, two_args, preEvaluate },
 
-        // { "reverse", &reverse, one_arg, preEvaluate },
         { "append", &append, no_check, preEvaluate },
 
         // eq

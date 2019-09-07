@@ -450,8 +450,8 @@ BOOST_AUTO_TEST_CASE(test_eval_defmacro)
         { "(defmacro test3 (x) `(quote (a ,x)))", "test3" },
         { "(test3 'b)", "(a 'b)" },
 
-        //{ "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
-        //{ "(m3 1)", "(1)" },
+        { "(defmacro m3 (x) \"Doc string here\" `(list ,x))", "m3" },
+        { "(m3 1)", "(1)" },
     };
     test_Evaluator(tests);
 }
@@ -467,7 +467,6 @@ BOOST_AUTO_TEST_CASE(test_eval_macro)
         { "(when-pos 0 'positive)", "nil" },
         { "(when-pos -2 'positive)", "nil" },
         { "(when-pos (+ -2 4) 'positive)", "positive" },
-
     };
     test_Evaluator(tests);
 }
@@ -547,7 +546,7 @@ BOOST_AUTO_TEST_CASE(test_eval_functionp)
         { "(functionp #'f)", "t" },
         { "(defmacro fm (x) x)", "fm" },
         { "(functionp #'fm)", "t" },
-        // { "(functionp #'length)", "t" },
+        { "(functionp #'length)", "t" },
         { "(functionp (lambda (x) (* x x)))", "t" },
         { "(functionp '(lambda (x) (* x x)))", "nil" },
 
@@ -591,7 +590,6 @@ BOOST_AUTO_TEST_CASE(test_eval_fboundp)
         { "(g 1)", "Eval error: Can't evaluate (g 1)" },
 
         { "(fmakunbound)", "Eval error: fmakunbound expecting an argument" },
-
     };
     test_Evaluator(tests);
 }
@@ -613,7 +611,6 @@ BOOST_AUTO_TEST_CASE(test_eval_funcall)
         { "(funcall)", "Eval error: funcall expecting at least 2 arguments" },
         { "(funcall f)", "Eval error: funcall expecting at least 2 arguments" },
         { "(funcall 1 1)", "Eval error: funcall: Not function ref or lambda expression: 1" },
-
     };
     test_Evaluator(tests);
 }
@@ -701,6 +698,9 @@ BOOST_AUTO_TEST_CASE(test_eval_maplist)
 
         { "(defun f(x) (cons 'foo x))", "f" },
         { "(maplist #'f '(a b c d))",
+            "((foo a b c d) (foo b c d) (foo c d) (foo d))" },
+
+        { "(maplist (lambda (x) (cons 'foo x)) '(a b c d))",
             "((foo a b c d) (foo b c d) (foo c d) (foo d))" },
 
         { "(defun g(x) (if (member (car x) (cdr x)) 0 1))", "g" },

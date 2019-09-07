@@ -93,6 +93,39 @@ BOOST_AUTO_TEST_CASE(test_eval_member)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_assoc)
+{
+    vector<TestEval> tests = {
+        { "(pair '(1 2) '(a b))", "((1 . a) (2 . b))" },
+        { "(setq v '((x . 100) (y . 200) (z . 50)))",
+            "((x . 100) (y . 200) (z . 50))" },
+        { "(assoc 'y v)", "(y . 200)" },
+        { "(assoc 'a v)", "nil" },
+
+        { "(pair nil '(a b))", "nil" },
+        { "(pair '(a b) nil)", "nil" },
+        { "(pair nil nil)", "nil" },
+
+        { "(assoc 'z nil)", "nil" },
+        { "(assoc nil v)", "nil" },
+        { "(assoc nil nil)", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_remove)
+{
+    vector<TestEval> tests = {
+        { "(remove 's '(a v s))", "(a v)" },
+        { "(remove 'a '(a v s))", "(v s)" },
+        { "(remove 'b '(a v s))", "(a v s)" },
+        { "(remove nil '(a v s))", "(a v s)" },
+        { "(remove 's nil)", "nil" },
+        { "(remove 's nil)", "nil" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_plus1)
 {
     vector<TestEval> tests = {

@@ -14,7 +14,8 @@ namespace ax {
 
 struct ParserResult {
     Expr* val;
-    bool eof;
+    bool eof = false;
+    bool dot = false;
 };
 
 class Parser {

@@ -53,6 +53,7 @@ BOOST_AUTO_TEST_CASE(test_eval_quote)
         { "'🍊🍎🍉🍌", "🍊🍎🍉🍌" },
 
         { "a", "Eval error: unbound variable: a" },
+        { "(1 . 2)", "Eval error: Can't evaluate (1 . 2)" },
     };
     test_Evaluator(tests);
 }
@@ -262,7 +263,7 @@ BOOST_AUTO_TEST_CASE(test_eval_car)
         { "(car (quote (a b c)))", "a" },
         { "(car '(a))", "a" },
         { "(car (quote ((a b) c d)))", "(a b)" },
-        // { "(car '(a . b))", "a" },
+        { "(car '(a . b))", "a" },
     };
     test_Evaluator(tests);
 }
@@ -276,7 +277,7 @@ BOOST_AUTO_TEST_CASE(test_eval_cdr)
         { "(cdr '(a b))", "(b)" },
         { "(cdr (quote (a b c)))", "(b c)" },
         { "(cdr (quote (a (b c))))", "((b c))" },
-        // { "(cdr '(a . b))", "b" },
+        { "(cdr '(a . b))", "b" },
 
         { "(cdr '(a))", "nil" }, // not ()
     };
@@ -294,7 +295,7 @@ BOOST_AUTO_TEST_CASE(test_eval_consp)
         { "(consp '())", "nil" },
         { "(consp (list))", "nil" },
 
-        // { "(consp '(a . b))", "t" },
+        { "(consp '(a . b))", "t" },
         { "(consp '(a))", "t" },
         { "(consp (cons nil nil))", "t" },
         { "(consp '(a b c))", "t" },
@@ -323,7 +324,7 @@ BOOST_AUTO_TEST_CASE(test_eval_listp)
         { "(listp '())", "t" },
         { "(listp nil)", "t" }, // this is true as it is also the empty list
         { "(consp '(a))", "t" },
-        //{ "(listp '(a . b))", "t" },
+        { "(listp '(a . b))", "t" },
         { "(listp '(a b c d e f g h))", "t" },
 
         { "(listp)", "Eval error: listp expecting an argument" },
@@ -380,24 +381,21 @@ BOOST_AUTO_TEST_CASE(test_eval_list)
     test_Evaluator(tests);
 }
 
-/*
-
 BOOST_AUTO_TEST_CASE(test_eval_reverse)
 {
     vector<TestEval> tests = {
-        { "(reverse)", "Eval error: reverse expecting an argument" },
-        { "(reverse 'a)", "Eval error: reverse: argument not a list" },
+        { "(reverse)", "Eval error: reverse: invalid number of arguments" },
         { "(reverse '(a ))", "(a)" },
         { "(reverse '(a b))", "(b a)" },
         { "(reverse '(a b c))", "(c b a)" },
         { "(reverse '(a b c d))", "(d c b a)" },
         { "(reverse '(a b (c1 2) d e))", "(e d (c1 2) b a)" },
+
         { "(reverse '())", "nil" },
         { "(reverse nil)", "nil" },
     };
     test_Evaluator(tests);
 }
-*/
 
 BOOST_AUTO_TEST_CASE(test_eval_append)
 {
@@ -409,18 +407,20 @@ BOOST_AUTO_TEST_CASE(test_eval_append)
         { "(append '(a b) '(c))", "(a b c)" },
         { "(append '(a b) '(c) '(d))", "(a b c d)" },
         { "(append '(a) '(b (c1 2)) '(d) '(e))", "(a b (c1 2) d e)" },
-        // { "(append '(a b) '(c . d))", "(a b c . d)" },
+        { "(append '(a b) '(c . d))", "(a b c . d)" },
         { "(append 'a)", "a" },
         { "(append '(a b c) '(d e f) '() '(g))", "(a b c d e f g)" },
-        { "(append '(a b c) 'd)", "(a b c . d)" },
+        // { "(append '(a b c) 'd)", "(a b c . d)" },
 
-        //{ "(append nil '(a))", "(a)" },
-        // { "(append '() '(a))", "(a)" },
+        { "(append nil '(a))", "(a)" },
+        { "(append '() '(a))", "(a)" },
 
         { "(append '(a) '() '(b))", "(a b)" },
         { "(append '(a) nil '(b))", "(a b)" },
 
         { "(append '() '())", "nil" },
+        { "(append 's '(s s))", "Eval error: append: is not a list: s" },
+
     };
     test_Evaluator(tests);
 }
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 {
     vector<TestEval> tests = {
         { "(rplaca '(a b) 'x)", "(x b)" },
-        // {"(rplaca '(a . b) 'x)", "(x . b)"},
+        { "(rplaca '(a . b) 'x)", "(x . b)" },
 
         { "(rplaca '((a1 a2) b) 'x)", "(x b)" },
         { "(rplaca '(a b) '(c c))", "((c c) b)" },
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(test_eval_rplacd)
     vector<TestEval> tests = {
         { "(rplacd '(a b) 'x)", "(a . x)" },
         { "(rplacd '(a b) '(x))", "(a x)" },
-        //{ "(rplacd '(a . b) 'x)", "(a . x)" },
+        { "(rplacd '(a . b) 'x)", "(a . x)" },
 
         { "(rplacd '((a1 a2) b) '(x))", "((a1 a2) x)" },
         { "(rplacd '(a b) '(c c))", "(a c c)" },
