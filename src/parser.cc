@@ -15,6 +15,31 @@
 
 namespace ax {
 
+static const NotInt not_int;
+
+Int atoi(const string& str)
+{
+    Int value = 0;
+    Int sign = 1;
+    bool digits = false;
+
+    auto iter = str.begin();
+    if (*iter == '+' || *iter == '-') {
+        if (*iter == '-')
+            sign = -1;
+        iter++;
+    }
+    for (; isdigit(*iter); iter++) {
+        value *= 10;
+        value += (int)(*iter - '0');
+        digits = true;
+    }
+    if (iter != str.end() || !digits) {
+        throw not_int;
+    }
+    return value * sign;
+}
+
 Expr* mk_symbolInt(const string& atom)
 {
     if (atom == "nil") {
@@ -30,13 +55,13 @@ Expr* mk_symbolInt(const string& atom)
             return mk_float(stod(atom));
         } catch (invalid_argument) {
         } catch (out_of_range) {
+            throw NumericException("float out of range " + atom);
         };
         // fallthrough to Int.
     }
     try {
-        return mk_int(stol(atom));
-    } catch (invalid_argument) { //fallthrough to be an atom
-    } catch (out_of_range) {
+        return mk_int(ax::atoi(atom));
+    } catch (NotInt) { //fallthrough to be an atom
     };
     return mk_atom(atom);
 }

@@ -39,5 +39,8 @@ inline Expr* quote_at = mk_atom("quote");
 inline Expr* backquote_at = mk_atom("backquote");
 inline Expr* unquote_at = mk_atom("unquote");
 inline Expr* splice_unquote_at = mk_atom("splice-unquote");
+
+Int atoi(const string& str);
 }
+
 #endif

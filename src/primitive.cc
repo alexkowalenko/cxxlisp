@@ -561,6 +561,8 @@ void init_prims()
 
         { "incf", &incf, min_one },
         { "decf", &incf, min_one },
+        { "1+", &inc<1>, one_num, preEvaluate },
+        { "1-", &inc<-1>, one_num, preEvaluate },
         { "float", &float_f, one_num, preEvaluate },
 
         // String functions

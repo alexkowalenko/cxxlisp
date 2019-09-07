@@ -129,9 +129,6 @@ inline const string stdlib = R"stdlib(
         ((eq x (car list)) (cdr list))
         (t (cons (car list) (remove x (cdr list)))))) 
 
-;(defun 1+ (x) (+ 1 x))
-;(defun 1- (x) (- x 1))
-
 (defun gcd (x y)
   (defun gcd (x y)
     (cond ((= 0 x) y)
@@ -147,7 +144,7 @@ inline const string stdlib = R"stdlib(
 (defun nthcdr (n a)
   (if (= 0 n)
       a
-      (nthcdr (- n 1) (cdr a))))
+      (nthcdr (1- n) (cdr a))))
 
 (defun nth (n a) (car (nthcdr n a)))
 
@@ -159,7 +156,7 @@ inline const string stdlib = R"stdlib(
       (defun last-x (l n)
             (cond ((null l) nil)
                   ((= n 1) l)
-                  (t (last-x (cdr l) (- n 1)))))
+                  (t (last-x (cdr l) (1- n)))))
       (last-x l (length l)))
 
 (defun fold (f b a)

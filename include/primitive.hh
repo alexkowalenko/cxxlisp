@@ -118,6 +118,12 @@ extern PrimBasicFunct num_sqrt;
 Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* float_f(Expr*);
 
+template <Int d>
+Expr* inc(const string& name, Expr* args)
+{
+    return mk_float(as_float(args->car) + d);
+}
+
 // Functions
 
 Expr* defun(const string& name, Expr* args, shared_ptr<SymbolTable> a);

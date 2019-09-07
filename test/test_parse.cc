@@ -55,6 +55,9 @@ BOOST_AUTO_TEST_CASE(test_parser)
         { "(a b (c))", "(a b (c))" },
         { "(atom a)", "(atom a)" },
 
+        { "(1+ a)", "(1+ a)" },
+        { "(1- a)", "(1- a)" },
+
         { R"x((a 
 			(b) c))x",
             "(a (b) c)" },
@@ -344,4 +347,34 @@ void test_Parser(const vector<TestParser>& tests)
             BOOST_ERROR("Unknown exception thrown on : " << test.input);
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_atoi)
+{
+    string a{ "1" };
+    BOOST_CHECK_EQUAL(ax::atoi(a), 1);
+    a = "12"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), 12);
+    a = "+12"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), 12);
+    a = "-12"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), -12);
+    a = "0"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
+    a = "-0"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
+    a = "+0"s;
+    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
+
+    a = "1+"s;
+    try {
+        BOOST_CHECK_EQUAL(ax::atoi(a), -12);
+    } catch (NotInt) {
+    };
+
+    a = "+"s;
+    try {
+        BOOST_CHECK_EQUAL(ax::atoi(a), -12);
+    } catch (NotInt) {
+    };
 }

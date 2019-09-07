@@ -24,6 +24,9 @@ public:
     char tok;
 };
 
+class NotInt : public exception {
+};
+
 class AXException : public exception {
 public:
     AXException(const string& s)
