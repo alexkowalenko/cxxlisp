@@ -50,7 +50,11 @@ optional<string> checkTypeNumeric(const string& name, const Expr* args, const st
 
 optional<string> checkArgs(const ArgConstraint& cons, const string& name, const Expr* args)
 {
-    auto size = args->size();
+    size_t size = 0;
+    if (args) {
+        size = args->size();
+    };
+
     switch (cons.constraint) {
     case ArgConstraintType::none:
         if (size != 0) {

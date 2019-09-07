@@ -8,7 +8,7 @@
 
 namespace ax {
 
-optional<Expr*> SymbolTable::find(const string& name)
+optional<Expr*> SymbolTable::find(const string& name) const
 {
     if (auto x = table.find(name); x != table.end()) {
         return x->second;
@@ -43,7 +43,7 @@ void SymbolTable::remove(const string& name)
     }
 }
 
-void SymbolTable::dump(ostream& os)
+void SymbolTable::dump(ostream& os) const
 {
     os << "Dump symbol table: " << endl;
     for (auto x : table) {

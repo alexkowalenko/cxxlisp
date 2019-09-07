@@ -54,7 +54,7 @@ Expr* mk_list(size_t size, Expr* const init)
     return top;
 }
 
-string to_dstring(const Expr* s)
+string to_dstring(const Expr* const s)
 {
     if (!s) {
         return "NULL";
@@ -86,7 +86,7 @@ string to_dstring(const Expr* s)
     }
 }
 
-string to_string(const Expr* s)
+string to_string(const Expr* const s)
 {
     if (s == nullptr) {
         return "";
@@ -112,16 +112,17 @@ string to_string(const Expr* s)
         }
         string str{ '(' };
         str += to_string(s->car);
-        while (s->cdr != nullptr) {
-            if (is_atomic(s->cdr)) {
+        auto x = s;
+        while (x->cdr != nullptr) {
+            if (is_atomic(x->cdr)) {
                 str += " . ";
-                str += to_string(s->cdr);
+                str += to_string(x->cdr);
                 break;
             } else {
-                s = s->cdr;
-                if (s->car != nullptr) {
+                x = x->cdr;
+                if (x->car != nullptr) {
                     str += ' ';
-                    str += to_string(s->car);
+                    str += to_string(x->car);
                 }
             }
         };
@@ -163,7 +164,7 @@ unsigned int Expr::size() const noexcept
     return res;
 }
 
-Expr* Expr::at(size_t pos)
+Expr* Expr::at(size_t pos) const noexcept
 {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
@@ -173,7 +174,7 @@ Expr* Expr::at(size_t pos)
     return sF;
 }
 
-Expr* Expr::from(size_t pos)
+Expr* Expr::from(size_t pos) noexcept
 {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
@@ -183,7 +184,7 @@ Expr* Expr::from(size_t pos)
     return sF;
 }
 
-void Expr::set(size_t pos, Expr* r)
+void Expr::set(size_t pos, Expr* r) noexcept
 {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
@@ -193,7 +194,7 @@ void Expr::set(size_t pos, Expr* r)
     }
 }
 
-Expr* Expr::find(Expr* r)
+Expr* Expr::find(Expr* r) noexcept
 {
     for (auto s = this; !is_false(s); s = s->cdr) {
         if (expr_eq(s->car, r)) {
@@ -208,7 +209,7 @@ constexpr bool same_type(Type t, const Expr* x, const Expr* y)
     return t == x->type && x->type == y->type;
 }
 
-Expr* expr_eq(const Expr* x, const Expr* y)
+Expr* expr_eq(const Expr* const x, const Expr* const y)
 {
     if (is_false(x) && is_false(y)) {
         return sT;
@@ -232,12 +233,12 @@ Expr* expr_eq(const Expr* x, const Expr* y)
     return sF;
 }
 
-Expr* expr_eql(const Expr* x, const Expr* y)
+Expr* expr_eql(const Expr* const x, const Expr* const y)
 {
     return expr_eq(x, y);
 }
 
-Expr* expr_equal(const Expr* x, const Expr* y)
+Expr* expr_equal(const Expr* const x, const Expr* const y)
 {
     if (expr_eql(x, y) == sT) {
         return sT;
@@ -266,7 +267,7 @@ Expr* expr_equal(const Expr* x, const Expr* y)
     return sF;
 }
 
-Float as_float(Expr* const s)
+Float as_float(const Expr* const s)
 {
     if (is_a<Type::floating>(s)) {
         return s->floating;

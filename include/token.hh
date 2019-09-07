@@ -34,10 +34,10 @@ public:
         : type(TokenType::eof){};
     Token(TokenType t)
         : type(t){};
-    Token(TokenType t, string s)
+    Token(TokenType t, const string& s)
         : type(t)
         , val(s){};
-    Token(TokenType t, wstring ws)
+    Token(TokenType t, const wstring& ws)
         : type(t)
         , val(ws){};
 

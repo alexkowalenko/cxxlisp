@@ -243,10 +243,13 @@ BOOST_AUTO_TEST_CASE(test_eval_fill)
 {
     vector<TestEval> tests = {
         { "(fill \"hello\" #\\1)", "\"11111\"" },
+        { "(fill \"\" #\\1)", "nil" },
+
         // { "(fill \"hello\" #\\1 :start 1 :end 4)", "\"h111o\"" },
         // { "(fill \"hello" #\\👾 :start 1 :end 4)", ""h👾👾👾o"" },
 
         { "(fill '(a b c d) 'symbol)", "(symbol symbol symbol symbol)" },
+        { "(fill '() 'symbol)", "nil" },
         //{ "(fill '(a b c d e) 'symbol :start 1 :end 4)", "(a symbol symbol symbol e)" },
 
         //{ "(fill '#(a b c d)' 1)", "#(1 1 1 1)" },

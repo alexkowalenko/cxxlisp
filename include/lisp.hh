@@ -9,7 +9,6 @@
 
 #include <iostream>
 
-#include "lexer.hh"
 #include "options.hh"
 #include "symboltable.hh"
 

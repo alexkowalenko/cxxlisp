@@ -20,7 +20,8 @@ struct ParserResult {
 
 class Parser {
 public:
-    Parser(Lexer&);
+    Parser(Lexer& lex)
+        : lexer(lex){};
 
     ParserResult parse();
 
@@ -29,7 +30,7 @@ private:
 
     Expr* parse_comma();
     Expr* parse_hash(const Token&);
-    ParserResult parse_quote(Token&);
+    ParserResult parse_quote(const Token&);
 
     Lexer& lexer;
 };

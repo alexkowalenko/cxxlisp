@@ -14,7 +14,9 @@ namespace ax {
 
 class Lexer {
 public:
-    Lexer(LineReader&);
+    Lexer(LineReader& r)
+        : lineReader(r){};
+
     Token get_token();
 
     uint32_t peek();

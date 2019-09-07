@@ -22,7 +22,7 @@ public:
         , opt(o){};
 
     Expr* eval(Expr* const e, shared_ptr<SymbolTable> a);
-    Expr* perform_list(Expr* const e, shared_ptr<SymbolTable> a);
+    Expr* perform_list(const Expr* e, shared_ptr<SymbolTable> a);
     Expr* eval_list(const Expr* e, shared_ptr<SymbolTable> a);
 
     shared_ptr<SymbolTable> globalTable;

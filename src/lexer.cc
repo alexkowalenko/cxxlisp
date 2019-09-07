@@ -58,11 +58,6 @@ static const Token at_token(TokenType::at);
 static const Token dot_token(TokenType::dot);
 static const Token null_token = Token();
 
-Lexer::Lexer(LineReader& r)
-    : lineReader(r)
-{
-}
-
 Token Lexer::get_token()
 {
     try {

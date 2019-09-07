@@ -233,6 +233,10 @@ Supported unicode characters.
 
 `(fold f list a)` - apply the function `f` (taking two elements), to the values of `list`, with initial value `a`. [Not implemented]
 
+`(pair x y)` - create an associative list with the lists `x` and `y`.
+
+`(assoc x list)` - return the element cons pair from the associative list `list` which is `eq` to `x`.
+
 # Sequences
 
 Sequences are an abstraction of various types, as thus can be the arguments to functions that work on sequences. Strings, and lists sequences.

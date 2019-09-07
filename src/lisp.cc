@@ -232,9 +232,11 @@ inline const string stdlib = R"stdlib(
 ;	(position-if-support (complement fn) seq 0))
 
 (defun fill (seq x)
-    (dotimes (n (length seq))
-        (set-elt seq n x))
-      seq)
+    (if (eq (length seq) 0) 
+        nil
+        (progn (dotimes (n (length seq))
+                 (set-elt seq n x))
+                seq)))
 
 )stdlib";
 
@@ -257,7 +259,8 @@ void Lisp::init()
 };
 
 void Lisp::repl(istream& istr, ostream& ostr)
-{
+{ 
+    
     unique_ptr<LineReader> rl;
     if (opt.readline) {
         // rl = make_unique<LineReaderReadLine>();
@@ -268,7 +271,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     Lexer lex(*rl);
     Parser parser(lex);
     Evaluator evaluator(opt, symboltable);
-
+    
     while (true) {
         ParserResult res;
         try {

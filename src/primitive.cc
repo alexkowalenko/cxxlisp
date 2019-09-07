@@ -92,7 +92,7 @@ Expr* andor(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable
         return name == "and" ? sT : sF;
     }
     auto last = sF;
-    while (args) {
+    for (; args; args = args->cdr) {
         last = l.eval(args->car, a);
         if (name == "and") {
             // BOOST_LOG_TRIVIAL(trace) << "and: " << to_string(last) << " : " << is_false(last);
@@ -105,7 +105,6 @@ Expr* andor(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable
                 return last;
             }
         }
-        args = args->cdr;
     }
     return name == "and" ? last : sF;
 }
@@ -270,6 +269,9 @@ Expr* defvar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTabl
 
 Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
+    if (!args) {
+        return sF;
+    }
     if (args->size() % 2 != 0) {
         throw EvalException(name + " requires an even number of variables");
     }
@@ -312,7 +314,10 @@ Expr* makunbound(const string&, Expr* args, shared_ptr<SymbolTable> a)
 
 Expr* ifFunc(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    auto size = args->size();
+    size_t size = 0;
+    if (args) {
+        size = args->size();
+    }
     if (size < 2) {
         throw EvalException("if requires 2 or 3 arguments");
     }

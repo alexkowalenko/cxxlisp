@@ -75,11 +75,11 @@ public:
     // Return the size of the list, 0 if not list.
     unsigned int size() const noexcept;
 
-    Expr* at(size_t pos);
-    Expr* operator[](size_t pos) { return at(pos); };
-    Expr* from(size_t pos);
-    void set(size_t pos, Expr* r);
-    Expr* find(Expr* r);
+    Expr* at(size_t pos) const noexcept;
+    Expr* operator[](size_t pos) const noexcept { return at(pos); };
+    Expr* from(size_t pos) noexcept;
+    void set(size_t pos, Expr* r) noexcept;
+    Expr* find(Expr* r) noexcept;
 };
 
 // Various constructors for element types, returning a s-expression
@@ -125,58 +125,58 @@ Expr* mk_list(size_t size, Expr* const init);
 
 // Test functions for s-expression types
 template <Type t>
-constexpr bool is_a(const Expr* s)
+constexpr bool is_a(const Expr* const s)
 {
     return s->type == t;
 };
 
-constexpr bool is_atom(const Expr* s)
+constexpr bool is_atom(const Expr* const s)
 {
     return s->type == Type::atom;
 }
 
-constexpr bool is_bool(const Expr* s)
+constexpr bool is_bool(const Expr* const s)
 {
     return s->type == Type::boolean;
 }
 
-constexpr bool is_int(const Expr* s)
+constexpr bool is_int(const Expr* const s)
 {
     return s->type == Type::integer;
 }
 
-constexpr bool is_list(const Expr* s)
+constexpr bool is_list(const Expr* const s)
 {
     return s->type == Type::list;
 }
 
-constexpr bool is_atomic(const Expr* s)
+constexpr bool is_atomic(const Expr* const s)
 {
     return s->type != Type::list;
 }
 
 // Working on lists of arguments
-constexpr Expr* arg0(Expr* args)
+constexpr Expr* arg0(const Expr* const args)
 {
     return args->car;
 }
 
-constexpr Expr* arg1(Expr* args)
+constexpr Expr* arg1(const Expr* const args)
 {
     return args->cdr->car;
 }
 
-constexpr Expr* arg2(Expr* args)
+constexpr Expr* arg2(const Expr* const args)
 {
     return args->cdr->cdr->car;
 }
 
 // Output
 
-string to_string(const Expr* e);
-string to_dstring(const Expr* e);
+string to_string(const Expr* const e);
+string to_dstring(const Expr* const e);
 
-inline ostream& operator<<(ostream& os, const Expr* s)
+inline ostream& operator<<(ostream& os, const Expr* const s)
 {
     return os << to_string(s);
 }
@@ -186,20 +186,20 @@ inline ostream& operator<<(ostream& os, const Expr* s)
 inline Expr* const sF = mk_bool(false);
 inline Expr* const sT = mk_bool(true);
 
-inline bool is_sF(const Expr* e)
+inline bool is_sF(const Expr* const e)
 {
     return e == sF || e == nullptr;
 }
 
-inline bool is_false(const Expr* s)
+inline bool is_false(const Expr* const s)
 // Is the Bool sF, or is the empty list
 {
     return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
 
-Expr* expr_eq(const Expr* x, const Expr*);
-Expr* expr_eql(const Expr* x, const Expr*);
-Expr* expr_equal(const Expr* x, const Expr*);
+Expr* expr_eq(const Expr* const x, const Expr* const y);
+Expr* expr_eql(const Expr* const x, const Expr* const y);
+Expr* expr_equal(const Expr* const x, const Expr* const);
 
 inline Expr* mk_char(Char c)
 {
@@ -208,7 +208,7 @@ inline Expr* mk_char(Char c)
     return e;
 }
 
-inline Expr* mk_string(String s)
+inline Expr* mk_string(const String& s)
 {
     auto e = new (GC) Expr(Type::string);
     e->string = s;
@@ -229,16 +229,16 @@ inline string ws2s(const std::wstring& wstr)
     return converterX.to_bytes(wstr);
 }
 
-Float as_float(Expr* const s);
+Float as_float(const Expr* const s);
 
-constexpr bool is_number(Expr* n)
+constexpr bool is_number(const Expr* const n)
 {
     return is_a<Type::integer>(n) || is_a<Type::floating>(n);
 }
 
 // sequence
 
-constexpr bool is_seq(const Expr* s)
+constexpr bool is_seq(const Expr* const s)
 {
     return is_a<Type::list>(s) || is_a<Type::string>(s);
 }

@@ -28,20 +28,15 @@ overloaded(Ts...)->overloaded<Ts...>;
 const string optional_atom = string("&optional");
 const string rest_atom = string("&rest");
 
-shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, shared_ptr<SymbolTable> a)
+shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, shared_ptr<SymbolTable> a)
 {
-    Expr* evalArgs;
-    if (f->macro) {
-        // Macro args are not evaluated
-        evalArgs = args;
-    } else {
-        evalArgs = eval_list(args, a);
-    }
-
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
-    auto evalArgs_size = evalArgs->size();
-    unsigned int arg_count = 0;
+    size_t evalArgs_size = 0;
+    if (evalArgs) {
+        evalArgs_size = evalArgs->size();
+    };
+    size_t arg_count = 0;
     bool optional = false;
     bool rest = false;
     shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
@@ -111,8 +106,17 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* args, share
 
 Expr* Evaluator::perform_function(Function* f, Expr* args, shared_ptr<SymbolTable> a)
 {
-    auto context = create_context(f, args, a);
+    Expr* evalArgs;
+    if (f->macro) {
+        // Macro args are evaluated later
+        evalArgs = args;
+    } else {
+        evalArgs = eval_list(args, a);
+    }
+
+    auto context = create_context(f, evalArgs, a);
     auto result = perform_list(f->body, context);
+
     if (f->macro) {
         // macros are post-evaluated
         // BOOST_LOG_TRIVIAL(debug) << "macro expand: " << to_string(result);
@@ -176,25 +180,23 @@ Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
     }
     Expr* result = mk_list();
     Expr* rl = result;
-    while (e) {
+    for (; e; e = e->cdr) {
         if (!rl->car) {
             rl->car = eval(e->car, a);
         } else {
             rl->cdr = mk_list(eval(e->car, a));
             rl = rl->cdr;
         }
-        e = e->cdr;
     }
     // cout << "eval_list: " << to_dstring(result) << endl;
     return result;
 }
 
-Expr* Evaluator::perform_list(Expr* e, shared_ptr<SymbolTable> a)
+Expr* Evaluator::perform_list(const Expr* e, shared_ptr<SymbolTable> a)
 {
     auto result = sF;
-    while (e) {
+    for (; e; e = e->cdr) {
         result = eval(e->car, a);
-        e = e->cdr;
     }
     return result;
 }

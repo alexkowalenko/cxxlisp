@@ -195,7 +195,7 @@ Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
     auto variable = arg0(params);
     auto limit = arg1(params);
     shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
-    Expr* result;
+    Expr* result = nullptr;
     if (params->size() >= 3) {
         result = arg2(params);
         if (!is_a<Type::atom>(result)) {

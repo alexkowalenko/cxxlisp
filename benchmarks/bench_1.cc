@@ -21,7 +21,7 @@ namespace logging = boost::log;
 
 class NullBuffer : public std::streambuf {
 public:
-    int overflow(int c) { return c; }
+    int overflow(int c) { return 0; }
 };
 
 static void BM_Atom(benchmark::State& state)

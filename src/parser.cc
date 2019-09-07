@@ -15,11 +15,6 @@
 
 namespace ax {
 
-Parser::Parser(Lexer& lex)
-    : lexer(lex)
-{
-}
-
 Expr* mk_symbolInt(const string& atom)
 {
     if (atom == "nil") {
@@ -94,7 +89,7 @@ Expr* Parser::parse_hash(const Token& tok)
     throw ParseException("# unknown "s + string(tok));
 }
 
-ParserResult Parser::parse_quote(Token& tok)
+ParserResult Parser::parse_quote(const Token& tok)
 {
     auto x = mk_list();
     if (tok.type == TokenType::quote) {
@@ -110,10 +105,10 @@ ParserResult Parser::parse_quote(Token& tok)
 
 ParserResult Parser::parse_list()
 {
-    bool eof = false;
     auto top = mk_list();
     auto l = top;
     while (true) {
+        bool eof = false;
         try {
             auto res = parse();
             eof = res.eof;

@@ -19,7 +19,7 @@ using namespace std;
 
 class SymbolTable {
 public:
-    SymbolTable(SymbolTable* s)
+    SymbolTable(SymbolTable* const s)
         : next(s){};
 
     SymbolTable(const SymbolTable&) = delete; // stop copying
@@ -29,15 +29,15 @@ public:
         table[name] = val;
     };
 
-    optional<Expr*> find(const string& name);
+    optional<Expr*> find(const string& name) const;
     bool set(const string& name, Expr* const val);
     void remove(const string& name);
 
-    void dump(ostream& os);
+    void dump(ostream& os) const;
 
 private:
     map<string, Expr*> table;
-    SymbolTable* next;
+    SymbolTable* const next;
 };
 }
 
