@@ -144,15 +144,23 @@ inline const string stdlib = R"stdlib(
   (let ((cd (gcd x y)))
     (abs (* cd (div x cd) (div y cd)))))
 
-(defun nth-tail (n a)
+(defun nthcdr (n a)
   (if (= 0 n)
       a
-      (nth-tail (- n 1) (cdr a))))
+      (nthcdr (- n 1) (cdr a))))
 
-(defun nth (n a) (car (nth-tail n a)))
+(defun nth (n a) (car (nthcdr n a)))
 
 (defun list-length (x) 
 	(length x))
+
+
+(defun last (l)
+      (defun last-x (l n)
+            (cond ((null l) nil)
+                  ((= n 1) l)
+                  (t (last-x (cdr l) (- n 1)))))
+      (last-x l (length l)))
 
 (defun fold (f b a)
   (defun fl (a r)
@@ -259,8 +267,8 @@ void Lisp::init()
 };
 
 void Lisp::repl(istream& istr, ostream& ostr)
-{ 
-    
+{
+
     unique_ptr<LineReader> rl;
     if (opt.readline) {
         // rl = make_unique<LineReaderReadLine>();
@@ -271,7 +279,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     Lexer lex(*rl);
     Parser parser(lex);
     Evaluator evaluator(opt, symboltable);
-    
+
     while (true) {
         ParserResult res;
         try {

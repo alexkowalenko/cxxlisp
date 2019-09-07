@@ -205,6 +205,33 @@ Expr* append(Expr* args)
     return cur;
 }
 
+Expr* push(Evaluator& l, const string& name, Expr* const args, shared_ptr<SymbolTable> a)
+{
+    auto x = l.eval(args->car, a);
+    auto val = get_reference("push", arg1(args), a);
+    if (is_a<Type::list>(val)) {
+        val = mk_list(x, val);
+        a->set(arg1(args)->atom, val);
+        return val;
+    }
+    throw EvalException("push: is not a list: " + to_string(arg1(args)));
+}
+
+Expr* pop(const string& name, Expr* const args, shared_ptr<SymbolTable> a)
+{
+    auto val = get_reference("pop", args->car, a);
+    if (is_a<Type::list>(val)) {
+        auto ret = val->car;
+        val = val->cdr == nullptr ? sF : val->cdr;
+        a->set(args->car->atom, val);
+        return ret;
+    }
+    if (is_false(val)) {
+        return sF;
+    }
+    throw EvalException("pop: is not a list: " + to_string(args->car));
+}
+
 //
 // eq functions
 //
@@ -398,6 +425,19 @@ Expr* let(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> 
     return l.perform_list(args->cdr, context);
 }
 
+// get a reference, in order to modify it.
+Expr* get_reference(const string& name, Expr* ref, shared_ptr<SymbolTable> a)
+{
+    if (!is_a<Type::atom>(ref)) {
+        throw EvalException(name + ": argument needs to a reference");
+    }
+    if (auto val = a->find(ref->atom)) {
+        return *val;
+    } else {
+        throw EvalException(name + ": undefined variable " + ref->atom);
+    }
+}
+
 void init_prims()
 {
     vector<Primitive> defs{
@@ -426,6 +466,9 @@ void init_prims()
         { "rplacd", &rplacd, two_args, preEvaluate },
 
         { "append", &append, no_check, preEvaluate },
+
+        { "push", &push, two_args },
+        { "pop", &pop, one_arg },
 
         // eq
 
@@ -518,6 +561,7 @@ void init_prims()
 
         { "incf", &incf, min_one },
         { "decf", &incf, min_one },
+        { "float", &float_f, one_num, preEvaluate },
 
         // String functions
         { "stringp", &typep<Type::string>, one_arg, preEvaluate },

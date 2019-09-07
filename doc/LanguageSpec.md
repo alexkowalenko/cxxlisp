@@ -96,6 +96,8 @@ Supported number types are integers and reals (same as floats).
 
 `pi` - the value π.
 
+`(float n)` - turns the number `n` into a float. Look at `round` and others for integer conversion.
+
 ### Predicate Functions
 
 `(= n m)` `(/= n m)` - returns `t` or `nil` if `n` and `m` are equal, not equal.
@@ -217,11 +219,13 @@ Supported unicode characters.
 
 `(last x [n])` - return the last (`n`th) element of `x` as a list. [Not implemented]
 
-`(nth n list)` - return the nth element of the `list`. Indexing starts at 0.
+`(nthcdr n list)` - return the nth last elements of the `list` as a list. Indexing starts at 0.
 
 `(nth-tail n list)` - return the nth last element of the `list`. Indexing starts at 0.
 
 `(reverse list)` - returns the list in reverse order.
+
+`(last list)` - returns the last element.
 
 `(append [list]* x)` - appends the lists together, and if x is an atom, adds it to the list.
 
@@ -236,6 +240,12 @@ Supported unicode characters.
 `(pair x y)` - create an associative list with the lists `x` and `y`.
 
 `(assoc x list)` - return the element cons pair from the associative list `list` which is `eq` to `x`.
+
+`(push item list)` - pushes `item` on the start of `list`. `list` has to be a reference. This is a destructive operation. Returns the new list.
+
+`(pop list)` - pops an item off the start of `list`. `list` has to be a reference. This is a destructive operation. Returns the item popded.
+
+
 
 # Sequences
 

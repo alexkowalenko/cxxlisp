@@ -148,7 +148,8 @@ BOOST_AUTO_TEST_CASE(test_eval_nth)
         { "(nth 2 '(a b c))", "c" },
         { "(nth 2 '(a b c d))", "c" },
         { "(nth 2 '(a b (c1 2) d e))", "(c1 2)" },
-        { "(nth 6 '(a b (c1 2) d e))", "nil" }
+        { "(nth 6 '(a b (c1 2) d e))", "nil" },
+        { "(nth 50 '(a b c))", "nil" },
     };
     test_Evaluator(tests);
 }
@@ -156,17 +157,17 @@ BOOST_AUTO_TEST_CASE(test_eval_nth)
 BOOST_AUTO_TEST_CASE(test_eval_nth_tail)
 {
     vector<TestEval> tests = {
-        { "(nth-tail)", "Eval error: nth-tail: invalid number of arguments" },
-        { "(nth-tail '())", "Eval error: nth-tail: invalid number of arguments" },
-        { "(nth-tail 'a '(a b))", "Eval error: = arguments needs to be a number" },
+        { "(nthcdr)", "Eval error: nthcdr: invalid number of arguments" },
+        { "(nthcdr '())", "Eval error: nthcdr: invalid number of arguments" },
+        { "(nthcdr 'a '(a b))", "Eval error: = arguments needs to be a number" },
 
-        { "(nth-tail 1 'a)", "nil" },
-        { "(nth-tail 0 '(a))", "(a)" },
-        { "(nth-tail 1 '(a b))", "(b)" },
-        { "(nth-tail 2 '(a b c))", "(c)" },
-        { "(nth-tail 2 '(a b c d))", "(c d)" },
-        { "(nth-tail 2 '(a b (c1 2) d e))", "((c1 2) d e)" },
-        { "(nth-tail 6 '(amm b (c1 2) d e))", "nil" }
+        { "(nthcdr 1 'a)", "nil" },
+        { "(nthcdr 0 '(a))", "(a)" },
+        { "(nthcdr 1 '(a b))", "(b)" },
+        { "(nthcdr 2 '(a b c))", "(c)" },
+        { "(nthcdr 2 '(a b c d))", "(c d)" },
+        { "(nthcdr 2 '(a b (c1 2) d e))", "((c1 2) d e)" },
+        { "(nthcdr 6 '(amm b (c1 2) d e))", "nil" }
     };
     test_Evaluator(tests);
 }
@@ -180,6 +181,18 @@ BOOST_AUTO_TEST_CASE(test_eval_fold)
         { "(fold #'+ 0 '())", "0" },
 
         { "(fold 'a 0 '( 1))", "Eval error: funcall: Not function ref or lambda expression: a" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_last)
+{
+    vector<TestEval> tests = {
+        { "(last '(1 2 3 4))", "(4)" },
+        { "(last nil)", "nil" },
+
+        { "(last 1)", "Eval error: length: needs sequence argument" },
+
     };
     test_Evaluator(tests);
 }

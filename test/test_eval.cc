@@ -425,6 +425,42 @@ BOOST_AUTO_TEST_CASE(test_eval_append)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_push)
+{
+    vector<TestEval> tests = {
+        { "(defvar x '(b c d))", "x" },
+        { "(push 'a x)", "(a b c d)" },
+        { "x", "(a b c d)" },
+
+        { "(push 'a '())", "Eval error: push: argument needs to a reference" },
+
+        { "(push 'a 1)", "Eval error: push: argument needs to a reference" },
+        { "(push 'a)", "Eval error: push expecting 2 arguments" },
+        { "(push)", "Eval error: push expecting 2 arguments" },
+    };
+    test_Evaluator(tests);
+}
+BOOST_AUTO_TEST_CASE(test_eval_pop)
+{
+    vector<TestEval> tests = {
+        { "(defvar x '(b c d))", "x" },
+        { "(pop x)", "b" },
+        { "x", "(c d)" },
+        { "(pop x)", "c" },
+        { "x", "(d)" },
+        { "(pop x)", "d" },
+        { "x", "nil" },
+        { "(pop x)", "nil" },
+        { "x", "nil" },
+
+        { "(pop ())", "Eval error: pop: argument needs to a reference" },
+
+        { "(pop 1)", "Eval error: pop: argument needs to a reference" },
+        { "(pop)", "Eval error: pop expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_rplaca)
 {
     vector<TestEval> tests = {

@@ -41,6 +41,9 @@ extern map<string, Primitive> prim_table;
 using AccessorFunct = function<Expr*(Evaluator& l, Expr* args, Expr* val, shared_ptr<SymbolTable> a)>;
 extern map<Atom, AccessorFunct> setf_accessors;
 
+// get a reference, in order to modify it.
+Expr* get_reference(const string& name, Expr* ref, shared_ptr<SymbolTable> a);
+
 // Numbers
 
 Expr* numberp(Expr* args);
@@ -113,6 +116,7 @@ extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
 
 Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* float_f(Expr*);
 
 // Functions
 

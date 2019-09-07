@@ -230,9 +230,7 @@ PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqr
 
 Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
-    if (!is_a<Type::atom>(args->car)) {
-        throw EvalException(name + ": argument needs to a reference");
-    }
+    auto val = get_reference(name, args->car, a);
     auto incr = mk_int(1);
     if (args->size() > 1) {
         incr = l.eval(args->cdr->car, a);
@@ -240,15 +238,16 @@ Expr* incf(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable>
             throw EvalException(name + ": increment is not number");
         }
     }
-    if (auto val = a->find(args->car->atom)) {
-        if (!is_number(*val)) {
-            throw EvalException(name + ": value is not a number " + to_string(*val));
-        }
-        auto result = mk_float(as_float(*val) + (as_float(incr)) * (name == "incf" ? 1 : -1));
-        a->set(args->car->atom, result);
-        return result;
-    } else {
-        throw EvalException(name + ": undefined variable " + to_string(args->car));
+    if (!is_number(val)) {
+        throw EvalException(name + ": value is not a number " + to_string(val));
     }
+    auto result = mk_float(as_float(val) + (as_float(incr)) * (name == "incf" ? 1 : -1));
+    a->set(args->car->atom, result);
+    return result;
+}
+
+Expr* float_f(Expr* args)
+{
+    return mk_float(as_float(args->car));
 }
 };

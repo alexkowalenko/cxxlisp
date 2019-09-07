@@ -740,3 +740,17 @@ BOOST_AUTO_TEST_CASE(test_real_incf)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_float)
+{
+    vector<TestEval> tests = {
+        { "(float 1)", "1" }, // should print as float.
+        { "(float -2.2)", "-2.2" },
+        { "(/ 1 2)", "0" },
+        { "(/ (float 1) 2)", "0.5" },
+
+        { "(float 'a)", "Eval error: float argument needs to be a number" },
+        { "(float)", "Eval error: float expecting an argument" },
+    };
+    test_Evaluator(tests);
+}

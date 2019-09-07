@@ -176,23 +176,16 @@ Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
     if (args->size() != 2) {
         throw EvalException("setf elt: incorrect number of arguments");
     }
-    auto var = args->car;
-    if (!is_a<Type::atom>(var)) {
-        throw EvalException("setf elt: must be a reference");
+    auto seq = get_reference("setf elt", args->car, a);
+    auto rindex = l.eval(arg1(args), a);
+    if (!is_a<Type::integer>(rindex)) {
+        throw EvalException("setf elt: needs integer index");
     }
-    if (auto seq = a->find(var->atom)) {
-        auto rindex = l.eval(arg1(args), a);
-        if (!is_a<Type::integer>(rindex)) {
-            throw EvalException("setf elt: needs integer index");
-        }
-        size_t index = rindex->integer;
-        if (is_a<Type::string>(*seq)) {
-            set_str_elt("setf elt", *seq, r, index);
-        } else {
-            set_list_elt("setf elt", *seq, r, index);
-        }
+    size_t index = rindex->integer;
+    if (is_a<Type::string>(seq)) {
+        set_str_elt("setf elt", seq, r, index);
     } else {
-        throw EvalException("setf elt: must be a reference");
+        set_list_elt("setf elt", seq, r, index);
     }
     return r;
 }

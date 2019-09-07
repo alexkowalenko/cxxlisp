@@ -18,7 +18,7 @@ using namespace std;
 struct TestEval;
 void test_Evaluator(const vector<TestEval>& tests);
 
-BOOST_AUTO_TEST_CASE(test_chapter_1)
+BOOST_AUTO_TEST_CASE(test_chapter_2)
 {
     vector<TestEval> tests = {
         { "(+ 3.14 2.71)", "5.85" },
@@ -105,35 +105,62 @@ BOOST_AUTO_TEST_CASE(test_chapter_1)
         { "new-front", "a" },
         { "list-to-be-changed", "(a b c)" },
         { "(setf new-front 'a list-to-be-changed '(b c))", "(b c)" },
-        // { "(push new-front list-to-be-changed)", "(a b c)" },
-        // { "list-to-be-changed", "(a b c)" },
-        // { "(pop list-to-be-changed)", "a" },
-        // { "list-to-be-changed", "(b c)" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
-        { "", "" },
+        { "(push new-front list-to-be-changed)", "(a b c)" },
+        { "list-to-be-changed", "(a b c)" },
+        { "(pop list-to-be-changed)", "a" },
+        { "list-to-be-changed", "(b c)" },
 
+        // pg.28
+        { "(setf abc-list '(a b c))", "(a b c)" },
+        { "(rest abc-list)", "(b c)" },
+        { "(nthcdr 2 abc-list)", "(c)" },
+        { "(setf abc-list '(a b c))", "(a b c)" },
+        { "(nthcdr 50 abc-list)", "nil" },
+        { "(setf abc-list '(a b c))", "(a b c)" },
+        //{ "(butlast abc-list 2)", "(a)" },
+        { "(setf f 'front b 'back abc-list '(a b c))", "(a b c)" },
+        { "(cons f abc-list)", "(front a b c)" },
+        { "(append abc-list (list b))", "(a b c back)" },
+        { "(setf abc-list '(a b c) ab-cd-list '((a b) (c d)))", "((a b) (c d))" },
+        { "(last abc-list)", "(c)" },
+        { "(last ab-cd-list)", "((c d))" },
+        { "(last 'abc-list)", "Eval error: length: needs sequence argument" },
+        { "(setf ab-list '(a b) ab-cd-list '((a b) (c d)))", "((a b) (c d))" },
+        { "(length ab-list)", "2" },
+        { "(length ab-cd-list)", "2" },
+        { "(length (append ab-cd-list ab-cd-list))", "4" },
+        { "(reverse ab-list)", "(b a)" },
+        { "(reverse ab-cd-list)", "((c d) (a b))" },
+        { "(reverse (append ab-list ab-list))", "(b a b a)" },
+        // pg.31
+        { "(setf sarah '((height .54) (weight 4.4)))", "((height 0.54) (weight 4.4))" },
+        { "(assoc 'weight sarah)", "(weight 4.4)" },
+        // pg. 32
+        { "(/ 1.234321 1.111)", "1.111" },
+        { "(/ 27 9)", "3" },
+        // { "(/ 22 7)", "22/7" }, //rationals not supported
+        { "(float (/ 22.0 7))", "3.14285714286" },
+        { "(round (/ 22 7))", "3" }, // this should return two values 3, 1/7
+        { "(+ (round (/ 22.0 7)) (round (/ 7.0 3)))", "5" },
+        // { "(round 5 2)", "2" }, // rounds towards even integer, not supported
+        { "(+ 2 1.5)", "3.5" },
+        { "(+ (float 2) (float 1.5))", "3.5" },
+        { "(- 8)", "-8" },
+        { "(- -8)", "8" },
+        // { "(/ 1 2)", "" }, rationals
+        // { "(/ 2)", "1/2" }, this works as a float
+
+        // pg 34
+        { "(max 2 4 3)", "4" },
+        { "(min 2 4 3)", "2" },
+        { "(expt 2 3)", "8" },
+        { "(expt 3 2)", "9" },
+        { "(expt 3.3 2.2)", "13.827086118" },
+        { "(expt 2.2 3.3)", "13.4894687605" },
+        { "(sqrt 9)", "3" },
+        { "(expt 3 2)", "9" },
+        { "(abs 5)", "5" },
+        { "(abs -5)", "5" },
     };
     test_Evaluator(tests);
 }
