@@ -86,6 +86,22 @@ Expr* null(Expr* const args)
     return is_false(args->car) ? sT : sF;
 }
 
+// must be a list, zero size or nil.
+Expr* endp(Expr* const args)
+{
+    cout << to_dstring(args->car) << endl;
+    if (is_a<Type::list>(args->car)) {
+        if (args->car->size() == 0 || args->car->car == nullptr) {
+            return sT;
+        }
+        return sF;
+    }
+    if (args->car == sF) {
+        return sT;
+    }
+    throw EvalException("end: must be a list " + to_string(args->car));
+}
+
 Expr* andor(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
     if (is_false(args)) {
@@ -447,6 +463,8 @@ void init_prims()
         { "type-of", &type_of, one_arg, preEvaluate },
 
         { "null", &null, one_arg, preEvaluate },
+        { "endp", &endp, one_arg, preEvaluate },
+
         { "not", &null, one_arg, preEvaluate },
         { "and", &andor, no_check },
         { "or", &andor, no_check },

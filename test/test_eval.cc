@@ -164,6 +164,24 @@ BOOST_AUTO_TEST_CASE(test_eval_null)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_endp)
+{
+    vector<TestEval> tests = {
+        { "(endp nil)", "t" },
+        { "(endp '())", "t" },
+
+        { "(endp 'a)", "Eval error: end: must be a list a" },
+        { "(endp t)", "Eval error: end: must be a list t" },
+        { "(endp 1)", "Eval error: end: must be a list 1" },
+        { "(endp '(a b))", "nil" },
+        { "(endp (list))", "t" },
+
+        { "(endp)", "Eval error: endp expecting an argument" },
+        { "(endp nil nil)", "Eval error: endp expecting an argument" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_not)
 {
     vector<TestEval> tests = {
@@ -732,6 +750,10 @@ BOOST_AUTO_TEST_CASE(test_eval_defvar)
         // locally defined
         { "(defun g () (defvar y 1) y)", "g" },
         { "(g)", "1" },
+
+        // vars are not functions
+        { "(defvar zzz '(a b c))", "zzz" },
+        { "(zzz 1)", "Eval error: A non function in function location (a b c)" },
 
         // fail
         { "(defvar 1 'd)", "Eval error: defvar requires a symbol as a first argument" },

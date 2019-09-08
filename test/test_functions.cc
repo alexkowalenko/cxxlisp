@@ -126,6 +126,9 @@ BOOST_AUTO_TEST_CASE(test_eval_defun)
             "dx" },
         { "(dx 1)", "(d 1)" },
 
+        // functions are not variables
+        { "(+ dx 1)", "Eval error: + arguments needs to be a number" },
+
         // defun.2
         { "(defun)", "Eval error: defun expecting at least 2 arguments" },
         { "(defun x)", "Eval error: defun expecting at least 2 arguments" },
@@ -607,6 +610,9 @@ BOOST_AUTO_TEST_CASE(test_eval_funcall)
         { "(funcall #'f 1)", "nil" },
         { "(funcall #'f 0)", "t" },
         { "(funcall #'f -1)", "nil" },
+
+        { "(defvar x #'atom )", "x" },
+        { "(funcall x 1)", "t" },
 
         { "(funcall)", "Eval error: funcall expecting at least 2 arguments" },
         { "(funcall f)", "Eval error: funcall expecting at least 2 arguments" },
