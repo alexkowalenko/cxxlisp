@@ -46,6 +46,7 @@ const ArgConstraint min_one = { ArgConstraintType::min, 1 };
 const ArgConstraint min_two = { ArgConstraintType::min, 2 };
 const ArgConstraint min_three = { ArgConstraintType::min, 3 };
 
+const ArgConstraint max_one = { ArgConstraintType::max, 1 };
 const ArgConstraint max_two = { ArgConstraintType::max, 2 };
 
 const ArgConstraint no_check = { ArgConstraintType::no_check, 0 };

@@ -25,3 +25,28 @@ BOOST_AUTO_TEST_CASE(test_eval_error)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_io)
+{
+    vector<TestEval> tests = {
+        { "*standard-output*", "<stream:output>" },
+        { "(streamp *standard-output*)", "t" },
+        { "(output-stream-p *standard-output*)", "t" },
+        { "(input-stream-p *standard-output*)", "nil" },
+
+        { "*standard-input*", "<stream:input>" },
+        { "(streamp *standard-input*)", "t" },
+        { "(output-stream-p *standard-input*)", "nil" },
+        { "(input-stream-p *standard-input*)", "t" },
+
+        { "*error-output*", "<stream:output>" },
+        { "(streamp *error-output*)", "t" },
+        { "(output-stream-p *error-output*)", "t" },
+        { "(input-stream-p *error-output*)", "nil" },
+
+        { "(streamp 1)", "nil" },
+        { "(output-stream-p 'a)", "nil" },
+        { "(input-stream-p nil)", "nil" },
+    };
+    test_Evaluator(tests);
+}

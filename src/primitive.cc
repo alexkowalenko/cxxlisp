@@ -665,7 +665,14 @@ void init_prims()
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },
         { "quit", &quit, no_check, preEvaluate },
+        { "streamp", &typep<Type::stream>, one_arg, preEvaluate },
+        { "output-stream-p", &stream_typep<StreamType::output>, one_arg, preEvaluate },
+        { "input-stream-p", &stream_typep<StreamType::input>, one_arg, preEvaluate },
 
+        { "prin1", print, max_two, preEvaluate },
+        { "print", print, max_two, preEvaluate },
+        { "princ", print, max_two, preEvaluate },
+        { "terpri", terpri, max_one, preEvaluate },
     };
 
     for (auto p : defs) {

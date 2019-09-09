@@ -11,6 +11,7 @@
 #include <iostream>
 #include <locale>
 #include <string>
+#include <variant>
 
 #include <gc_cpp.h>
 
@@ -29,7 +30,8 @@ enum class Type {
     string,
     function,
     keyword,
-    function_ref
+    function_ref,
+    stream
 };
 
 // defintions of basic types
@@ -42,6 +44,7 @@ using Char = wchar_t;
 using String = wstring;
 
 class Function;
+class Stream;
 
 // Basic element in s-expressions.
 class Expr {
@@ -70,6 +73,7 @@ public:
         Function* function;
         Keyword keyword;
         Atom function_ref;
+        Stream* stream;
     };
 
     // Return the size of the list, 0 if not list.
@@ -175,6 +179,7 @@ constexpr Expr* arg2(const Expr* const args)
 
 string to_string(const Expr* const e);
 string to_dstring(const Expr* const e);
+string to_pstring(const Expr* const s);
 
 inline ostream& operator<<(ostream& os, const Expr* const s)
 {
@@ -258,6 +263,50 @@ const Atom type_null{ "null" };
 inline bool is_seq_type(const Atom& s)
 {
     return s == type_list || s == type_string;
+}
+
+inline Expr* mk_stream(Stream* s)
+{
+    auto e = new (GC) Expr(Type::stream);
+    e->stream = s;
+    return e;
+}
+
+enum class StreamType {
+    input,
+    output
+};
+
+class Stream {
+public:
+    Stream(istream* s)
+        : stream_type(StreamType::input)
+        , str(s){};
+
+    Stream(ostream* s)
+        : stream_type(StreamType::output)
+        , str(s){};
+
+    string to_string();
+    bool is_input() { return stream_type == StreamType::input; };
+    bool is_output() { return stream_type == StreamType::output; };
+
+    StreamType stream_type;
+    variant<istream*, ostream*> str;
+};
+
+inline Expr* mk_stream(istream* s)
+{
+    auto e = new (GC) Expr(Type::stream);
+    e->stream = new (GC) Stream(s);
+    return e;
+}
+
+inline Expr* mk_stream(ostream* s)
+{
+    auto e = new (GC) Expr(Type::stream);
+    e->stream = new (GC) Stream(s);
+    return e;
 }
 }
 #endif

@@ -261,6 +261,10 @@ void Lisp::init()
     opt.debug_expr = false;
     repl(in, out);
     opt.pop_options();
+
+    symboltable->put("*standard-output*", mk_stream(&cout));
+    symboltable->put("*standard-input*", mk_stream(&cin));
+    symboltable->put("*error-output*", mk_stream(&cerr));
 };
 
 void Lisp::repl(istream& istr, ostream& ostr)

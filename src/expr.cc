@@ -80,6 +80,7 @@ string to_dstring(const Expr* const s)
     case Type::function:
     case Type::keyword:
     case Type::floating:
+    case Type::stream:
         return to_string(s);
     default:
         return "<Unknown>";
@@ -151,8 +152,25 @@ string to_string(const Expr* const s)
         return "#'" + s->function_ref;
     case Type::keyword:
         return s->keyword;
+    case Type::stream:
+        return s->stream->to_string();
     default:
         return "*Unprintable type*";
+    }
+}
+
+string to_pstring(const Expr* const s)
+{
+    if (!s) {
+        return "NULL";
+    }
+    switch (s->type) {
+    case Type::string:
+        return ws2s(s->string);
+    case Type::character:
+        return string(1, s->chr);
+    default:
+        return to_string(s);
     }
 }
 
@@ -275,5 +293,16 @@ Float as_float(const Expr* const s)
         return Float(s->integer);
     } else
         throw EvalException("Not number");
+}
+
+string Stream::to_string()
+{
+    string res = "<stream:";
+    if (stream_type == StreamType::input) {
+        res += "input>";
+    } else {
+        res += "output>";
+    }
+    return res;
 }
 }

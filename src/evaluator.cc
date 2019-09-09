@@ -217,6 +217,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     case Type::floating:
     case Type::character:
     case Type::string:
+    case Type::stream:
         return e;
 
     case Type::atom:

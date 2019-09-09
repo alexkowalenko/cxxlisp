@@ -181,6 +181,20 @@ Expr* make_sequence(Expr* args);
 
 Expr* throw_error(Expr* args);
 Expr* quit(Expr* args);
+
+Expr* const std_out = mk_atom("*standard-output*");
+Expr* const std_in = mk_atom("*standard-input*");
+Expr* const std_err = mk_atom("*error-output*");
+
+template <StreamType N>
+Expr* stream_typep(Expr* args)
+{
+    return is_a<Type::stream>(args->car) && args->car->stream->stream_type == N
+        ? sT
+        : sF;
 }
 
+Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+}
 #endif
