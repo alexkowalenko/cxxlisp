@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_eval_when)
         { "(when nil 'true)", "nil" },
         { "(when (not (atom 's)) 'is-not-atom)", "nil" },
         { "(when (not (atom '(a b))) 'is-not-atom)", "is-not-atom" },
-        { "(when t (progn 1 2 3 4))", "4" },
+        { "(when t 1 2 3 4)", "4" },
     };
     test_Evaluator(tests);
 }
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(test_eval_unless)
         { "(unless nil 'true)", "true" },
         { "(unless (not (atom 's)) 'is-not-atom)", "is-not-atom" },
         { "(unless (not (atom '(a b))) 'is-not-atom)", "nil" },
-        { "(unless nil (progn 1 2 3 4))", "4" },
+        { "(unless nil 1 2 3 4)", "4" },
     };
     test_Evaluator(tests);
 }

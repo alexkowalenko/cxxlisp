@@ -128,7 +128,7 @@ T seq_setelt(const string& name, T& s, size_t index, const S& r)
     return s;
 }
 
-void set_str_elt(string name, Expr* seq, Expr* c, size_t index)
+void set_str_elt(const string& name, Expr* seq, Expr* c, size_t index)
 {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
@@ -142,7 +142,7 @@ void set_str_elt(string name, Expr* seq, Expr* c, size_t index)
     seq->string[index] = c->chr;
 }
 
-void set_list_elt(string name, Expr* seq, Expr* c, size_t index)
+void set_list_elt(const string& name, Expr* seq, Expr* c, size_t index)
 {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
@@ -153,18 +153,18 @@ void set_list_elt(string name, Expr* seq, Expr* c, size_t index)
     seq->set(index, c);
 }
 
-Expr* setelt(Expr* args)
+Expr* setelt(const string& name, Expr* args)
 {
     auto seq = args->car;
     auto rindex = arg1(args);
     if (!is_a<Type::integer>(rindex)) {
-        throw EvalException("set-elt: needs integer index");
+        throw EvalException(name + ": needs integer index");
     }
     size_t index = rindex->integer;
     if (is_a<Type::string>(seq)) {
-        set_str_elt("set-elt"s, seq, arg2(args), index);
+        set_str_elt(name, seq, arg2(args), index);
     } else {
-        set_list_elt("set-elt"s, seq, arg2(args), index);
+        set_list_elt(name, seq, arg2(args), index);
     }
     return seq;
 }
@@ -173,20 +173,8 @@ Expr* setelt(Expr* args)
 // (var index) result
 Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
 {
-    if (args->size() != 2) {
-        throw EvalException("setf elt: incorrect number of arguments");
-    }
-    auto seq = get_reference("setf elt", args->car, a);
-    auto rindex = l.eval(arg1(args), a);
-    if (!is_a<Type::integer>(rindex)) {
-        throw EvalException("setf elt: needs integer index");
-    }
-    size_t index = rindex->integer;
-    if (is_a<Type::string>(seq)) {
-        set_str_elt("setf elt", seq, r, index);
-    } else {
-        set_list_elt("setf elt", seq, r, index);
-    }
+    auto newargs = mk_list({ args->car, arg1(args), r });
+    setelt("setf elt", newargs);
     return r;
 }
 

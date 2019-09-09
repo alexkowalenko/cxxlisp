@@ -19,7 +19,7 @@
 namespace ax {
 
 map<string, Primitive> prim_table;
-map<Atom, AccessorFunct> setf_accessors;
+map<Atom, Accessor> setf_accessors;
 
 Expr* atom(Expr* const args)
 {
@@ -165,23 +165,37 @@ Expr* list(Expr* args)
 }
 
 // (rplaca '(a b) 'x) -> (x b)
-Expr* rplaca(Expr* args)
+Expr* rplaca(const string& name, Expr* args)
 {
     if (is_list(args->car)) {
         args->car->car = args->cdr->car;
         return args->car;
     }
-    throw EvalException("rplaca first argument not a list");
+    throw EvalException(name + ": first argument not a list");
+}
+
+Expr* setf_car(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
+{
+    auto res = mk_list({ args->car, r });
+    rplaca("setf car", res);
+    return r;
 }
 
 // (rplacd '(a b) 'x) -> (a . x)
-Expr* rplacd(Expr* args)
+Expr* rplacd(const string& name, Expr* args)
 {
     if (is_list(args->car)) {
         args->car->cdr = args->cdr->car;
         return args->car;
     }
-    throw EvalException("rplacd first argument not a list");
+    throw EvalException(name + ": first argument not a list");
+}
+
+Expr* setf_cdr(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
+{
+    auto res = mk_list({ args->car, r });
+    rplacd("setf cdr", res);
+    return r;
 }
 
 // (append x y)
@@ -331,7 +345,17 @@ Expr* setq(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable>
                 throw EvalException(name + " expecting accessor name");
             }
             if (auto setf = setf_accessors.find(n->car->atom); setf != setf_accessors.end()) {
-                val = setf->second(l, n->cdr, val, a);
+                auto accessor_def = setf->second;
+                auto result = n->cdr;
+                if (accessor_def.preEval) {
+                    cout << "setf preEval" << endl;
+                    result = l.eval_list(result, a);
+                }
+                auto check = checkArgs(accessor_def.cons, "setf " + n->car->atom, result);
+                if (check) {
+                    throw EvalException(*check);
+                }
+                accessor_def.af(l, result, val, a);
             } else {
                 throw EvalException(name + " accessor not found: " + n->car->atom);
             }
@@ -647,7 +671,15 @@ void init_prims()
     for (auto p : defs) {
         prim_table[p.name] = p;
     }
+    // setup accessor functions
+    vector<Accessor> accessor_defs{
+        { "elt", &setf_elt, two_args, preEvaluate },
+        { "car", &setf_car, one_arg, preEvaluate },
+        { "cdr", &setf_cdr, one_arg, preEvaluate }
+    };
 
-    setf_accessors[Atom("elt")] = &setf_elt;
+    for (auto p : accessor_defs) {
+        setf_accessors[p.name] = p;
+    }
 }
 }

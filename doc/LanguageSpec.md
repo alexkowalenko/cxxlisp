@@ -209,9 +209,9 @@ Supported unicode characters.
 
 `(list-length x) (length x)` - return the length of the list `x`.
 
-`(car x) (first x)` - return the first element of the list `x`. If `x` is `nil` return `nil`.
+`(car x) (first x)` - return the first element of the list `x`. If `x` is `nil` return `nil`. `car` can be used in `setf`.
 
-`(cdr x)` `(rest x)` - return the rest of the list `x`. If `x` is `nil` return `nil`.
+`(cdr x)` `(rest x)` - return the rest of the list `x`. If `x` is `nil` return `nil`. `cdr` can be used in `setf`.
 
 `(c[ad]r x)` - return the function combination of car/cdr - to 4 levels.
 
@@ -261,7 +261,7 @@ Sequences are an abstraction of various types, as thus can be the arguments to f
 
 `(length s)` - returns the length of a sequence.
 
-`(elt seq i)` - returns the `i`th element of the sequence.
+`(elt seq i)` - returns the `i`th element of the sequence. `elt` can be used in `setf`.
 
 `(elt-set seq i val)`, `(setf (elt seq i) val)` - sets the`i`th element of the sequence to `val`. `elt-set` not standard common lisp.
 
@@ -376,13 +376,16 @@ These are the options in running the executable:
 
 Apart from what is not implemented.
 
-* Don't support `#'(lambda ....)`. Use `(lambda ...)` directly.
-```
+* Don't support `#'(lambda ....)`. Use `(lambda ...)` directly. Common Lisp says that this should be the case, and not this implementation.
+
+```lisp
 (mapcar #'(lambda (x) (micro-eval x environment))
 		     (rest form))
 ```
+
 Should have the function reference removed, i.e.:
-```
+
+```lisp
 (mapcar (lambda (x) (micro-eval x environment))
 		     (rest form))
 ```

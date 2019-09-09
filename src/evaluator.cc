@@ -134,28 +134,27 @@ Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
         auto top = mk_list();
         Expr* p = nullptr;
         for (auto cur = top; !is_false(s); s = s->cdr, cur = cur->cdr) {
-            if (is_a<Type::atom>(s->car)) {
-                if (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom) {
-                    if (!is_false(s->cdr)) {
-                        auto res = eval(s->cdr->car, a);
-                        if (s->car->atom == unquote_at->atom) {
-                            cur->car = res;
-                            s = s->cdr; // advance
-                        } else {
-                            if (is_a<Type::list>(res)) {
-                                // splice in list
-                                while (!is_false(res)) {
-                                    cur->car = res->car;
-                                    cur->cdr = mk_list();
-                                    cur = cur->cdr;
-                                    res = res->cdr;
-                                }
-                            } else {
-                                cur->car = res;
-                            }
-                            s = s->cdr; // advance
+            if (is_a<Type::atom>(s->car)
+                && (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom)) {
+                if (!is_false(s->cdr)) {
+                    auto res = eval(s->cdr->car, a);
+                    if (s->car->atom == unquote_at->atom) {
+                        cur->car = res;
+                    } else if (is_a<Type::list>(res)) {
+                        // splice in list
+                        Expr* prev = nullptr;
+                        for (; !is_false(res); cur = cur->cdr, res = res->cdr) {
+                            cur->car = res->car;
+                            cur->cdr = mk_list();
+                            prev = cur;
                         }
+                        if (prev) {
+                            cur = prev;
+                        }
+                    } else {
+                        cur->car = res;
                     }
+                    s = s->cdr; // advance
                 } else {
                     cur->car = s->car;
                 }
@@ -173,6 +172,7 @@ Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
     return s;
 }
 
+// eval_list makes a copy of the list.
 Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
 {
     if (is_false(e)) {

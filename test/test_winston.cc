@@ -329,11 +329,11 @@ BOOST_AUTO_TEST_CASE(test_chapter_4)
         { "(setf day-or-date 9)", "9" },
         { "(if (symbolp day-or-date) 'day 'date)", "date" },
         { "(setf high 98 temperature 102)", "102" },
-        // { R"((when (> temperature high) when macro should accept any number of lines
-        //         (setf high temperature)
-        //         'new-record))",
-        // "new-record" },
-        //{ "high", "102" },
+        { R"((when (> temperature high) 
+                 (setf high temperature)
+                 'new-record))",
+            "new-record" },
+        { "high", "102" },
         { "(setf thing 'sphere r 1)", "1" },
         { R"((cond ((eq thing 'circle) (* pi r r))
                     ((eq thing 'sphere) (* 4 pi r r))))",

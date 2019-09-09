@@ -209,8 +209,8 @@ BOOST_AUTO_TEST_CASE(test_eval_setf)
         { "x", "\"abc\"" },
 
         { "(setf (elt x 4) #\\a )", "Eval error: setf elt: index out of bounds" },
-        { "(setf (elt x ) #\\a )", "Eval error: setf elt: incorrect number of arguments" },
-        { "(setf (elt y 4) #\\a)", "Eval error: setf elt: undefined variable y" },
+        { "(setf (elt x ) #\\a )", "Eval error: setf elt expecting 2 arguments" },
+        { "(setf (elt y 4) #\\a)", "Eval error: unbound variable: y" },
         { "(setf (elt y 4))", "Eval error: setf requires an even number of variables" },
         { "(setf (elt y))", "Eval error: setf requires an even number of variables" },
         { "(setf 1)", "Eval error: setf requires an even number of variables" },

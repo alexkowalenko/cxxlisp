@@ -81,6 +81,9 @@ BOOST_AUTO_TEST_CASE(test_eval_backquote)
 
         { "(defvar x '(1 2 3))", "x" },
         { "`(0 ,@x 4)", "(0 1 2 3 4)" },
+        { "(length `(0 ,@x 4))", "5" },
+        { "`(0 ,@x )", "(0 1 2 3)" },
+        { "(length `(0 ,@x))", "4" },
         { "(defvar x 'a)", "x" },
         { "`(0 ,@x 4)", "(0 a 4)" },
     };
@@ -498,7 +501,7 @@ BOOST_AUTO_TEST_CASE(test_eval_rplaca)
         // errors
         { "(rplaca '(a b))", "Eval error: rplaca expecting 2 arguments" },
         { "(rplaca)", "Eval error: rplaca expecting 2 arguments" },
-        { "(rplaca nil 'x)", "Eval error: rplaca first argument not a list" },
+        { "(rplaca nil 'x)", "Eval error: rplaca: first argument not a list" },
     };
     test_Evaluator(tests);
 }
@@ -1042,6 +1045,26 @@ BOOST_AUTO_TEST_CASE(test_eval_let)
         { "(let 1)", "Eval error: let expecting at least 2 arguments" },
         { "(let 1 2)", "Eval error: let: expecting a list of bindings" },
         { "(let (1 2) 1)", "Eval error: let: expecting a binding 1" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_setfcar)
+{
+    vector<TestEval> tests = {
+        { "(defvar x '(1 2))", "x" },
+        { "x", "(1 2)" },
+        { "(setf (car x) 'a)", "a" },
+        { "x", "(a 2)" },
+        { "(setf (cdr x) '(b))", "(b)" },
+        { "x", "(a b)" },
+        { "(setf (car x) '(1 2))", "(1 2)" },
+        { "x", "((1 2) b)" },
+
+        { "(defvar x 'a)", "x" },
+        { "(setf (car x) 'a)", "Eval error: setf car: first argument not a list" },
+        { "(setf (car) 'a)", "Eval error: setf car expecting an argument" },
+
     };
     test_Evaluator(tests);
 }

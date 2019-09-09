@@ -39,7 +39,14 @@ extern map<string, Primitive> prim_table;
 
 // Accessor functions for setf
 using AccessorFunct = function<Expr*(Evaluator& l, Expr* args, Expr* val, shared_ptr<SymbolTable> a)>;
-extern map<Atom, AccessorFunct> setf_accessors;
+
+struct Accessor {
+    string name;
+    AccessorFunct af;
+    ArgConstraint cons;
+    bool preEval = false;
+};
+extern map<Atom, Accessor> setf_accessors;
 
 // get a reference, in order to modify it.
 Expr* get_reference(const string& name, Expr* ref, shared_ptr<SymbolTable> a);
@@ -164,7 +171,7 @@ Expr* to_lower_char(const Expr* s);
 
 Expr* length(Expr* args);
 Expr* elt(Expr* args);
-Expr* setelt(Expr* args);
+Expr* setelt(const string& name, Expr* args);
 Expr* subseq(Expr* args);
 
 Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a);

@@ -167,11 +167,11 @@ inline const string stdlib = R"stdlib(
             (funcall f r (car a)))))
   (fl a b))
 
-(defmacro when (cond result) 
-	`(if ,cond ,result)) 
+(defmacro when (cond &rest result) 
+	`(if ,cond (progn ,@result))) 
 
-(defmacro unless (cond result) 
-	`(if (not ,cond) ,result)) 
+(defmacro unless (cond &rest result) 
+	`(if (not ,cond) (progn ,@result))) 
 
 (defun identity (x) x)
 (defmacro constantly (x) `(lambda (&optional s) ,x))
