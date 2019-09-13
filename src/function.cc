@@ -15,7 +15,7 @@ Function::operator string()
     return "λ:"s + name + " : " + to_string(body);
 }
 
-Expr* get_keyword_value(Expr* top, const Expr* k)
+optional<Expr*> get_keyword_value(Expr* top, const Expr* k)
 {
     while (!is_false(top)) {
         if (expr_eq(top->car, k) != sF) {
@@ -25,6 +25,6 @@ Expr* get_keyword_value(Expr* top, const Expr* k)
         }
         top = top->cdr;
     }
-    return sF;
+    return {};
 }
 }

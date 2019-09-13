@@ -188,8 +188,8 @@ Expr* make_sequence(Expr* args)
     }
 
     auto init = sF;
-    if (args->find(keyword_initial_element)) {
-        init = get_keyword_value(args, keyword_initial_element);
+    if (auto opt = get_keyword_value(args, keyword_initial_element)) {
+        init = *opt;
     }
     if (args->car->atom == type_string) {
         if (init == sF) {

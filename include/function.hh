@@ -9,6 +9,8 @@
 
 #include "expr.hh"
 
+#include <optional>
+
 namespace ax {
 
 class Function {
@@ -46,7 +48,7 @@ inline Expr* mk_function_ref(const string& k)
     return e;
 }
 
-Expr* get_keyword_value(Expr* const args, const Expr* k);
+optional<Expr*> get_keyword_value(Expr* const args, const Expr* k);
 }
 
 #endif

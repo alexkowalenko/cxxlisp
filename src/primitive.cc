@@ -669,6 +669,9 @@ void init_prims()
         { "output-stream-p", &stream_typep<StreamType::output>, one_arg, preEvaluate },
         { "input-stream-p", &stream_typep<StreamType::input>, one_arg, preEvaluate },
 
+        { "open", &open, min_one, preEvaluate },
+        { "close", &close, one_arg, preEvaluate },
+
         { "prin1", print, max_two, preEvaluate },
         { "print", print, max_two, preEvaluate },
         { "princ", print, max_two, preEvaluate },

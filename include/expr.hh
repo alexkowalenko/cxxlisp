@@ -287,12 +287,15 @@ public:
         : stream_type(StreamType::output)
         , str(s){};
 
+Stream() {};
+
+
     string to_string();
     bool is_input() { return stream_type == StreamType::input; };
     bool is_output() { return stream_type == StreamType::output; };
 
     StreamType stream_type;
-    variant<istream*, ostream*> str;
+    variant<istream*, ostream*, fstream*> str;
 };
 
 inline Expr* mk_stream(istream* s)
@@ -308,5 +311,7 @@ inline Expr* mk_stream(ostream* s)
     e->stream = new (GC) Stream(s);
     return e;
 }
+
+Expr* mk_stream(fstream * const s, ios_base::openmode m);
 }
 #endif

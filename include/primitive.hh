@@ -196,5 +196,8 @@ Expr* stream_typep(Expr* args)
 
 Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+
+Expr* open(Expr* args);
+Expr* close(Expr* args);
 }
 #endif
