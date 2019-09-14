@@ -245,8 +245,6 @@ Supported unicode characters.
 
 `(pop list)` - pops an item off the start of `list`. `list` has to be a reference. This is a destructive operation. Returns the item popded.
 
-
-
 # Sequences
 
 Sequences are an abstraction of various types, as thus can be the arguments to functions that work on sequences. Strings, and lists sequences.
@@ -354,6 +352,61 @@ The list of arguments to function, lambda, macro definitions can be a sequence o
 
 `(dolist (var list [result]) expr expr ...)` - Performs the sequence of expressions, with `var` bound to the successive elements of `list`, returning the value of `result` if present or `nil`. `result` needs to be assigned to in the evaluations.
 
+# I/O
+
+## Constants
+
+`*standard-output*` - the standard output stream.
+
+`*standard-input*` - the standard input stream.
+
+`*error-output*` - the standard error output.
+
+## Predicates
+
+`(streamp x)` - is `x` is a stream?
+
+`(output-stream-p x)` - is `x` is a output stream?
+
+`(input-stream-p x)` - is `x` is a input stream?
+
+## File Operations 
+
+`(open filename [:direction {:input|:output}])` - open a file with the string/symbol `filename`. Set the direction with the optional `:direction` keyword, default is `:input`. Returns the stream.
+
+`(close x)` - close the stream.
+
+## Ouput functions
+
+`(prin1 x [stream])` - output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument.
+
+`(print x [stream])` - print a newline and then output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument.
+
+`(princ x [stream])` - output the object `x` in a human acceptable version (strings, and characters print without lisp delimiters)  Default is `*standard-output*`, but can be optional `stream` argument.
+
+`(terpri [stream])` - output a newline.
+
+## Input functions
+
+`(read-char [stream])` - read a character from `*standard-input*`, but can be optional `stream` argument. Not UTF-8 compatible.
+
+`(read-line [stream])` - read a line until `\n` from `*standard-input*`, but can be optional `stream` argument. Not UTF-8 compatible.
+
+## Format function
+
+`(format output str args ...)` - creates a formated string using the format in `str` and outputs the result. If `output` is:
+
+* `t` then the output is sent to standard output.
+* `nil` then the output is returned as a string.
+* is a stream then the formatted string is sent to the stream.
+
+The format string can contain:
+
+* `~%`, `~&` - generates a new line.
+* `~S` - replaces this with value of the corresponding argument.
+* `~A` - replaces this a non-escape version of the corresponding argument. With strings the enclosing `"` is not written. With characters the `#\` is not written.
+
+
 # Programming functions
 
 `(error msg)` - throws an error `msg` and returns to the REPL, or exits the runtime with an error.
@@ -389,4 +442,3 @@ Should have the function reference removed, i.e.:
 (mapcar (lambda (x) (micro-eval x environment))
 		     (rest form))
 ```
-  

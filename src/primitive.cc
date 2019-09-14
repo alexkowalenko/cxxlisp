@@ -89,7 +89,6 @@ Expr* null(Expr* const args)
 // must be a list, zero size or nil.
 Expr* endp(Expr* const args)
 {
-    cout << to_dstring(args->car) << endl;
     if (is_a<Type::list>(args->car)) {
         if (args->car->size() == 0 || args->car->car == nullptr) {
             return sT;
@@ -675,7 +674,11 @@ void init_prims()
         { "prin1", print, max_two, preEvaluate },
         { "print", print, max_two, preEvaluate },
         { "princ", print, max_two, preEvaluate },
+        { "write-char", print, max_two, preEvaluate },
         { "terpri", terpri, max_one, preEvaluate },
+        { "read-line", read, max_one, preEvaluate },
+        { "read-char", read_char, max_one, preEvaluate },
+        { "format", format, min_two, preEvaluate },
     };
 
     for (auto p : defs) {

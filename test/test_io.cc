@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_eval_stream2)
         { "(terpri x)", "t" },
         { R"((princ "string2" x))", "t" },
         { R"((print "string3" x))", "t" },
-        //{ "(write-char #\\x x)", "t" },
+        { "(write-char #\\x x)", "t" },
         { "(terpri x)", "t" },
         { "(close x)", "t" },
     };
@@ -93,15 +93,75 @@ BOOST_AUTO_TEST_CASE(test_eval_stream3)
     vector<TestEval> tests = {
         { R"( (defvar x (open "/var/tmp/z.tmp" :direction :output)) )",
             "x" },
-        { R"( (princ "string 🦑🦐🦀" x) )", "t" },
+        { R"( (princ "Here there! 🍌🍊🍎" x) )", "t" },
         { "(terpri x)", "t" },
         { "(close x)",
             "t" },
         { R"( (defvar y (open "/var/tmp/z.tmp" :direction :input)) )",
             "y" },
-        // { "(read-char y)", "#\\s" },
-        //{ "(read-char y)", "#\\t" },
+        { "(read-char y)", "#\\H" },
+        { "(read-line y)", "\"ere there! 🍌🍊🍎\"" },
         { "(close y)", "t" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_format_1)
+{
+    vector<TestEval> tests = {
+        { R"((format nil ""))", R"("")" },
+        { R"((format nil "x"))", "\"x\"" },
+
+        { R"((format nil "Hello,~%"))", "\"Hello,\n\"" },
+        { R"((format nil "~&Hello,~%"))", "\"\nHello,\n\"" },
+
+        { R"((format nil "Hello,~"))", "Eval error: format: incomplete ~" },
+
+        { R"((format nil))", "Eval error: format expecting at least 2 arguments" },
+        { R"((format nil 1))", "Eval error: format: format is not a string 1" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_format_2)
+{
+    vector<TestEval> tests = {
+        { R"((format nil "Hello, ~S!~%" 'jones))", "\"Hello, jones!\n\"" },
+        { R"((format nil "Hello, ~S!~%" 'jones 1))", "\"Hello, jones!\n\"" },
+        { R"((format nil "Hello, ~S!~%" '(bob jim anne) 1))", "\"Hello, (bob jim anne)!\n\"" },
+
+        { R"((format nil "Hello, ~S!~%" "jones"))", "\"Hello, \"jones\"!\n\"" },
+        { R"((format nil "Hello, ~S!~%" #\j))", "\"Hello, #\\j!\n\"" },
+
+        { R"((format nil "Hello, ~A!~%" 'jones))", "\"Hello, jones!\n\"" },
+        { R"((format nil "Hello, ~A!~%" 'jones 1))", "\"Hello, jones!\n\"" },
+        { R"((format nil "Hello, ~A!~%" '(bob jim anne) 1))", "\"Hello, (bob jim anne)!\n\"" },
+
+        { R"((format nil "Hello, ~A!~%" "jones"))", "\"Hello, jones!\n\"" },
+        { R"((format nil "Hello, ~A!~%" #\j))", "\"Hello, j!\n\"" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_format_3)
+{
+    vector<TestEval> tests = {
+        { R"((format nil "Hello, ~S, ~S, ~S!~%" 1 2 3))", "\"Hello, 1, 2, 3!\n\"" },
+
+        { R"((format nil "Hello, ~S, ~S, ~S!~%" 1 2 3 4))", "\"Hello, 1, 2, 3!\n\"" },
+        { R"((format nil "Hello, ~S, ~S, ~S!~%" 1 2))", "Eval error: format: no argument ~S 3" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_format_4)
+{
+    vector<TestEval> tests = {
+        { R"((format nil "Hello, ~S, ~S, ~S!~%" 1 2 3))", "\"Hello, 1, 2, 3!\n\"" },
+        { R"((format t "Hello, ~S, ~S, ~S!~%" 1 2 3))", "t" },
+        { R"((defvar x (open "/tmp/format.tmp" :direction :output)))", "x" },
+        { R"((format x "Hello, ~S, ~S, ~S!~%" 1 2 3))", "t" },
+        { R"((close x))", "t" },
     };
     test_Evaluator(tests);
 }

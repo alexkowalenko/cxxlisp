@@ -194,10 +194,13 @@ Expr* stream_typep(Expr* args)
         : sF;
 }
 
-Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a);
-Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a);
-
 Expr* open(Expr* args);
 Expr* close(Expr* args);
+
+Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* read(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* read_char(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* format(const string& name, Expr* args, shared_ptr<SymbolTable> a);
 }
 #endif

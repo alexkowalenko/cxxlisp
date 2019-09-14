@@ -7,6 +7,9 @@
 #include "primitive.hh"
 
 #include <fstream>
+#include <numeric>
+
+#include <boost/algorithm/string/replace.hpp>
 
 #include "exceptions.hh"
 
@@ -56,63 +59,6 @@ Expr* quit(Expr* args)
     throw ExceptionQuit(0);
 }
 
-Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a)
-{
-    Stream* output;
-    if (args->size() == 1) {
-        output = get_reference(name, std_out, a)->stream;
-    } else {
-        if (is_a<Type::stream>(arg1(args)) && arg1(args)->stream->is_output()) {
-            output = arg1(args)->stream;
-        } else {
-            throw EvalException(name + ": argument is not an output stream");
-        }
-    }
-
-    string out_str;
-    if (name == "prin1" || name == "print") {
-        if (name == "print") {
-            out_str.push_back('\n');
-        }
-        out_str += to_string(args->car);
-    } else {
-        out_str += to_pstring(args->car);
-    }
-    cout << "write this : " << out_str << endl;
-    visit(overloaded{
-              [&name](istream* arg) {
-                  throw EvalException(name + ": can't write to a input stream");
-              },
-              [&out_str](ostream* arg) { (*arg) << out_str; },
-              [&out_str](fstream* arg) { (*arg) << out_str; },
-          },
-        output->str);
-    return sT;
-}
-
-Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a)
-{
-    Stream* output;
-    if (args->size() == 0) {
-        output = get_reference(name, std_out, a)->stream;
-    } else {
-        if (is_a<Type::stream>(args->car) && args->car->stream->is_output()) {
-            output = args->car->stream;
-        } else {
-            throw EvalException(name + ": argument is not an output stream");
-        }
-    }
-    visit(overloaded{
-              [&name](istream* arg) {
-                  throw EvalException(name + ": can't write to a input stream");
-              },
-              [](fstream* arg) { (*arg) << endl; },
-              [](ostream* arg) { (*arg) << endl; },
-          },
-        output->str);
-    return sT;
-}
-
 Expr* open(Expr* args)
 {
     cout << "open args " << args << endl;
@@ -150,5 +96,186 @@ Expr* close(Expr* args)
         }
     }
     throw EvalException("close: not a stream");
+}
+
+Stream* get_output(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* output;
+    if (args->size() == 1) {
+        output = get_reference(name, std_out, a)->stream;
+    } else {
+        if (is_a<Type::stream>(arg1(args)) && arg1(args)->stream->is_output()) {
+            output = arg1(args)->stream;
+        } else {
+            throw EvalException(name + ": argument is not an output stream");
+        }
+    }
+    return output;
+}
+
+Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* output = get_output(name, args, a);
+
+    string out_str;
+    if (name == "prin1" || name == "print") {
+        if (name == "print") {
+            out_str.push_back('\n');
+        }
+        out_str += to_string(args->car);
+    } else if (name == "princ") {
+        out_str += to_pstring(args->car);
+    } else if (name == "write-char") {
+        if (is_a<Type::character>(args->car)) {
+            out_str += args->car->chr;
+        } else {
+            EvalException(name + ": argument is not a character");
+        }
+    }
+    visit(overloaded{
+              [&name](istream* arg) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&out_str](ostream* arg) { (*arg) << out_str; },
+              [&out_str](fstream* arg) { (*arg) << out_str; },
+          },
+        output->str);
+    return sT;
+}
+
+Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* output;
+    if (args->size() == 0) {
+        output = get_reference(name, std_out, a)->stream;
+    } else {
+        if (is_a<Type::stream>(args->car) && args->car->stream->is_output()) {
+            output = args->car->stream;
+        } else {
+            throw EvalException(name + ": argument is not an output stream");
+        }
+    }
+    visit(overloaded{
+              [&name](istream* arg) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [](fstream* arg) { (*arg) << endl; },
+              [](ostream* arg) { (*arg) << endl; },
+          },
+        output->str);
+    return sT;
+}
+
+Stream* get_input(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* input;
+    if (args->size() == 0) {
+        input = get_reference(name, std_in, a)->stream;
+    } else {
+        if (is_a<Type::stream>(args->car) && args->car->stream->is_input()) {
+            input = args->car->stream;
+        } else {
+            throw EvalException(name + ": argument is not an input stream");
+        }
+    }
+    return input;
+};
+
+Expr* read(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* input = get_input(name, args, a);
+    array<char, 255> buf;
+    visit(overloaded{
+              [&buf](istream* arg) { (*arg).getline(&buf[0], 255); },
+              [&name](ostream* arg) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&buf](fstream* arg) { (*arg).getline(&buf[0], 255); },
+          },
+        input->str);
+    return mk_string(s2ws(string(&buf[0], strlen(&buf[0]))));
+}
+
+Expr* read_char(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    Stream* input = get_input(name, args, a);
+
+    char c;
+    visit(overloaded{
+              [&c](istream* arg) { (*arg).get(c); },
+              [&name](ostream* arg) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&c](fstream* arg) { (*arg).get(c); },
+          },
+        input->str);
+    return mk_char(Char(c));
+}
+
+Expr* format(const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    if (!is_a<Type::string>(arg1(args))) {
+        throw EvalException("format: format is not a string " + to_string(arg1(args)));
+    }
+    String format = arg1(args)->string;
+    boost::replace_all(format, "~%", "\n");
+    boost::replace_all(format, "~&", "\n");
+
+    auto s_arg = args->cdr->cdr;
+    for (int index = 1;; index++) {
+        if (auto p = format.find('~', index); p != string::npos) {
+            if (p + 1 < format.size()) {
+                String sub;
+                switch (format[p + 1]) {
+                case 'S':
+                    if (!is_false(s_arg)) {
+                        sub = s2ws(to_string(s_arg->car));
+                        s_arg = s_arg->cdr;
+                    } else {
+                        throw EvalException("format: no argument ~S " + std::to_string(index));
+                    }
+                    break;
+                case 'A':
+                    if (!is_false(s_arg)) {
+                        sub = s2ws(to_pstring(s_arg->car));
+                        s_arg = s_arg->cdr;
+                    } else {
+                        throw EvalException("format: no argument ~A " + std::to_string(index));
+                    }
+                    break;
+                }
+                format.replace(p, 2, sub);
+            } else {
+                throw EvalException("format: incomplete ~");
+            }
+        } else {
+            // not found
+            break;
+        }
+    }
+
+    if (args->car == sF) {
+        return mk_string(format);
+    }
+
+    Stream* output;
+    if (args->car == sT) {
+        output = get_reference("format", std_out, a)->stream;
+    } else {
+        if (is_a<Type::stream>(args->car) && args->car->stream->is_output()) {
+            output = args->car->stream;
+        } else {
+            throw EvalException(name + ": argument is not an output stream");
+        }
+    }
+    visit(overloaded{
+              [&name](istream* arg) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&format](ostream* arg) { (*arg) << ws2s(format); },
+              [&format](fstream* arg) { (*arg) << ws2s(format); },
+          },
+        output->str);
+    return sT;
 }
 }

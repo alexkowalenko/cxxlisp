@@ -402,6 +402,103 @@ BOOST_AUTO_TEST_CASE(test_chapter_4)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_chapter_5)
+{
+    vector<TestEval> tests = {
+        { R"((defun both-ends (whole-list)
+            (combine-elements
+                (extract-first-element whole-list)
+                (extract-last-element whole-list)
+                )))",
+            "both-ends" },
+        { R"((defun combine-elements (e1 e2)
+            (list e1 e2)))",
+            "combine-elements" },
+        { R"((defun extract-first-element (l)
+            (first l)))",
+            "extract-first-element" },
+        { R"((defun extract-last-element (l)
+            (first (last l))))",
+            "extract-last-element" },
+        { "(both-ends '(1 2 3 4 5))", "(1 5)" },
+        { R"((defun recursive-expt (m n)
+                (if (zerop n) 
+                    1
+                    (* m (recursive-expt m (- n 1))))) )",
+            "recursive-expt" },
+        { "(recursive-expt 2 3)", "8" },
+        { "(recursive-expt 2 0)", "1" },
+        { "(recursive-expt 3 3)", "27" },
+        { R"((defun fibonacci (n)
+                (if (or (= n 0) (= n 1))
+                    1
+                    (+ (fibonacci (- n 1))
+                        (fibonacci (- n 2))))) )",
+            "fibonacci" },
+        { "(fibonacci 4)", "5" },
+        { "(fibonacci 10)", "89" },
+        { R"((defun count-elements (l)
+                (if (endp l)
+                    0
+                    (+ 1 (count-elements (rest l))))) )",
+            "count-elements" },
+        { "(count-elements '(fast computers are nice))", "4" },
+        { R"((defun count-elements-cleverly (l)
+                (count-elements-aux l 0)) )",
+            "count-elements-cleverly" },
+        { R"((defun count-elements-aux (l result)
+                (if (endp l)
+                    result
+                    (count-elements-aux (rest l) (+ 1 result)))) )",
+            "count-elements-aux" },
+        { "(count-elements-cleverly '(fast computers are nice))", "4" },
+        { R"((defun count-elements-mutually (l)
+                (count-elements-indirectly l 0))
+
+            (defun count-elements-indirectly (l result)
+                (if (endp l)
+                    result
+                    (count-elements-buffer (rest l) (+ 1 result))))
+
+            (defun count-elements-buffer (l result)
+                (count-elements-indirectly l result)) )",
+            "count-elements-mutually\ncount-elements-indirectly\ncount-elements-buffer" },
+        { "(count-elements-mutually '(fast computers are nice))", "4" },
+        // pg. 79
+        { R"( (defun count-atoms (l)
+                (cond ((null l) 0)
+                    ((atom l) 1)
+                    (t (+ (count-atoms (first l))
+                            (count-atoms (rest l)))))) )",
+            "count-atoms" },
+        { "(count-atoms '(fsqrt (expr x 2) (expr y 2)))", "7" },
+        // pg. 83
+        { R"( (defun root (x &optional n)
+                (if n (expt x (/ 1.0 n)) ; need 1.0 to make the result float
+                        (sqrt x))) )",
+            "root" },
+        { "(root 9 )", "3" },
+        { "(root 9 2)", "3" },
+        { "(root 27 3)", "3" },
+        { R"( (defun root (x &optional (n 2))
+               (expt x (/ 1.0 n))) ; need 1.0 to make the result float
+              )",
+            "root" },
+        { "(root 9 )", "3" },
+        { "(root 9 2)", "3" },
+        { "(root 27 3)", "3" },
+        { R"((defun count-elements-optional (l &optional (result 0))
+                (if (endp l)
+                    result
+                    (count-elements-optional (rest l) (+ 1 result)))) )",
+            "count-elements-optional" },
+        { "(count-elements-optional '(fast computers are nice))", "4" },
+        // pg. 87
+
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_chapter_A)
 {
     vector<TestEval> tests = {
