@@ -8,6 +8,7 @@
 #define LISP_HH
 
 #include <iostream>
+#include <set>
 
 #include "options.hh"
 #include "symboltable.hh"
@@ -27,6 +28,7 @@ public:
 private:
     Options& opt;
     shared_ptr<SymbolTable> symboltable;
+    set<Atom> trace_functions;
 };
 }
 

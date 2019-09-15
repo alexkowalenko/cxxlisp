@@ -406,12 +406,19 @@ The format string can contain:
 * `~S` - replaces this with value of the corresponding argument.
 * `~A` - replaces this a non-escape version of the corresponding argument. With strings the enclosing `"` is not written. With characters the `#\` is not written.
 
+# Execution functions
 
-# Programming functions
+`(quit [n])` - stops the runtime, and exits with code `n` if provided or 0.
 
 `(error msg)` - throws an error `msg` and returns to the REPL, or exits the runtime with an error.
 
-`(quit [n])` - stops the runtime, and exits with code `n` if provided or 0.
+# Debugging
+
+`(trace f ...)` `(untrace f ...)` - adds/removes the following functions to be traced.
+
+`(trace)` - lists the functions traced.
+
+`(untrace)` - removes all functions from being traced.
 
 # Running the Executable
 

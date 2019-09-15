@@ -27,6 +27,7 @@ public:
 
 Lisp::Lisp(Options& o)
     : opt(o)
+    , trace_functions()
 {
     symboltable = make_shared<SymbolTable>(nullptr);
     GC_INIT();
@@ -151,13 +152,17 @@ inline const string stdlib = R"stdlib(
 (defun list-length (x) 
 	(length x))
 
-
 (defun last (l)
       (defun last-x (l n)
             (cond ((null l) nil)
                   ((= n 1) l)
                   (t (last-x (cdr l) (1- n)))))
       (last-x l (length l)))
+
+(defun butlast (l)
+      (cond ((null (cdr l)) nil)
+            (t (cons (car l) 
+                     (butlast (cdr l))))))
 
 (defun fold (f b a)
   (defun fl (a r)
@@ -279,7 +284,7 @@ void Lisp::repl(istream& istr, ostream& ostr)
     }
     Lexer lex(*rl);
     Parser parser(lex);
-    Evaluator evaluator(opt, symboltable);
+    Evaluator evaluator(opt, symboltable, trace_functions);
 
     while (true) {
         ParserResult res;

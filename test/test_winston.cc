@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(test_chapter_2)
         { "(setf abc-list '(a b c))", "(a b c)" },
         { "(nthcdr 50 abc-list)", "nil" },
         { "(setf abc-list '(a b c))", "(a b c)" },
-        //{ "(butlast abc-list 2)", "(a)" },
+        // { "(butlast abc-list 2)", "(a)" },
         { "(setf f 'front b 'back abc-list '(a b c))", "(a b c)" },
         { "(cons f abc-list)", "(front a b c)" },
         { "(append abc-list (list b))", "(a b c back)" },
@@ -494,6 +494,82 @@ BOOST_AUTO_TEST_CASE(test_chapter_5)
             "count-elements-optional" },
         { "(count-elements-optional '(fast computers are nice))", "4" },
         // pg. 87
+        { R"((defun raise-aux (result number-list)
+                (if (endp number-list)
+                    result
+                    (raise-aux (expt result (first number-list))
+                                (rest number-list)))) )",
+            "raise-aux" },
+        { R"((defun raise (x &rest numbers)
+                (raise-aux x numbers)) )",
+            "raise" },
+        { "(raise 2)", "2" },
+        { "(raise 2 3)", "8" },
+        { "(raise 2 3 5)", "32768" },
+
+        { R"((defun rotate-list (l &key direction distance)
+                (if (eq direction 'left)
+                    (rotate-list-left l (if distance distance 1))
+                    (rotate-list-right l (if distance distance 1)))) )",
+            "rotate-list" },
+        { R"((defun rotate-list-right (l n)
+                (if (zerop n )
+                    l
+                    (rotate-list-right (append (last l) (butlast l))
+                                      (- n 1)))) )",
+            "rotate-list-right" },
+        { R"((defun rotate-list-left (l n)
+                (if (zerop n )
+                    l
+                    (rotate-list-left (append (rest l) (list (first l)))
+                                      (- n 1)))) )",
+            "rotate-list-left" },
+        { "(rotate-list '(a b c d e))", "(e a b c d)" },
+        { "(rotate-list '(a b c d e) :direction 'left)", "(b c d e a)" },
+        { "(rotate-list '(a b c d e) :distance 2)", "(d e a b c)" },
+        { "(rotate-list '(a b c d e) :direction 'left :distance 2)", "(c d e a b)" },
+        { "(rotate-list '(a b c d e) :distance 2 :direction 'left)", "(c d e a b)" },
+        { R"( (defun rotate-list (l &key direction (distance 1))
+                (if (eq direction 'left)
+                    (rotate-list-left l distance)
+                    (rotate-list-right l distance))) )",
+            "rotate-list" },
+        { "(rotate-list '(a b c d e))", "(e a b c d)" },
+        { "(rotate-list '(a b c d e) :direction 'left)", "(b c d e a)" },
+        { "(rotate-list '(a b c d e) :distance 2)", "(d e a b c)" },
+        { "(rotate-list '(a b c d e) :direction 'left :distance 2)", "(c d e a b)" },
+        { "(rotate-list '(a b c d e) :distance 2 :direction 'left)", "(c d e a b)" },
+        { R"( (defun both-ends-with-aux 
+                    (whole-list &aux
+                                (element (first whole-list))
+                                (trailer (last whole-list)))
+                    (cons element trailer)) )",
+            "both-ends-with-aux" },
+        // { "(both-ends-with-aux '(a b c d e))", "(e a b c d)" }, // no &aux parameters
+
+        { R"( (defun user-defined-length (l)
+                    (if (endp l)
+                    0
+                    (+ 1 (user-defined-length (rest l))))) )",
+            "user-defined-length" },
+        { "(user-defined-length '(a b c d e))", "5" },
+        { R"( (defun user-defined-append2 (l1 l2)
+                    (if (endp l1)
+                    l2
+                    (cons (first l1) (user-defined-append2 (rest l1) l2)))) )",
+            "user-defined-append2" },
+        { "(user-defined-append2 '(a b c d e) '(1 2 3))", "(a b c d e 1 2 3)" },
+        { R"( (defun user-defined-append (&rest lists)
+                    (append-aux lists)) )",
+            "user-defined-append" },
+        { R"( (defun append-aux (lists)
+                (if (endp lists)
+                    nil
+                    (user-defined-append2 (first lists) (append-aux (rest lists))))) )",
+            "append-aux" },
+        { "(user-defined-append '(a b c d e) '(1 2 3))", "(a b c d e 1 2 3)" },
+        { "(user-defined-append '(a b c d e) '(1 2 3) '(red green blue))",
+            "(a b c d e 1 2 3 red green blue)" },
 
     };
     test_Evaluator(tests);

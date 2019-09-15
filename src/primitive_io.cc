@@ -278,4 +278,53 @@ Expr* format(const string& name, Expr* args, shared_ptr<SymbolTable> a)
         output->str);
     return sT;
 }
+
+Expr* trace(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    if (args->size() > 0) {
+        for (auto cur = args; !is_false(cur); cur = cur->cdr) {
+            if (!is_atom(cur->car)) {
+                throw EvalException("trace: function is not an atom " + to_string(cur->car));
+            }
+            if (l.has_function(cur->car->atom)) {
+                l.trace_functions.insert(cur->car->atom);
+            } else {
+                throw EvalException("trace: not a function " + cur->car->atom);
+            }
+        }
+    }
+    if (l.trace_functions.size() == 0) {
+        return sF;
+    }
+    auto top = mk_list();
+    Expr* prev = nullptr;
+    auto cur = top;
+    for (auto iter = l.trace_functions.begin(); iter != l.trace_functions.end(); iter++) {
+        cur->car = mk_atom(*iter);
+        cur->cdr = mk_list();
+        prev = cur;
+        cur = cur->cdr;
+    }
+    if (prev) {
+        prev->cdr = nullptr;
+    }
+    return top;
+}
+
+Expr* untrace(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    if (args->size() > 0) {
+        for (auto cur = args; !is_false(cur); cur = cur->cdr) {
+            if (!is_atom(cur->car)) {
+                throw EvalException("trace: function is not an atom " + to_string(cur->car));
+            }
+            if (auto iter = l.trace_functions.find(cur->car->atom); iter != l.trace_functions.end())
+                l.trace_functions.erase(iter);
+        }
+    } else {
+        // remove all function names
+        l.trace_functions.clear();
+    }
+    return sT;
+}
 }

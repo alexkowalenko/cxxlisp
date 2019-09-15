@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(test_eval_remove)
 BOOST_AUTO_TEST_CASE(test_eval_plus1)
 {
     vector<TestEval> tests = {
-        //{ "(1+ 1)", "2" },
-        //{ "(1- 2)", "1" },
+        { "(1+ 1)", "2" },
+        { "(1- 2)", "1" },
     };
     test_Evaluator(tests);
 }
@@ -192,6 +192,19 @@ BOOST_AUTO_TEST_CASE(test_eval_last)
         { "(last nil)", "nil" },
 
         { "(last 1)", "Eval error: length: needs sequence argument" },
+
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_butlast)
+{
+    vector<TestEval> tests = {
+        { "(butlast '(1 2 3 4))", "(1 2 3)" },
+        { "(butlast '(1))", "nil" },
+        { "(butlast nil)", "nil" },
+
+        { "(butlast)", "Eval error: butlast: invalid number of arguments" },
 
     };
     test_Evaluator(tests);

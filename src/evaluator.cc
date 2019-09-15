@@ -12,6 +12,7 @@
 #include "function.hh"
 #include "parser.hh"
 #include "primitive.hh"
+#include "tracer.hh"
 
 // 👾
 
@@ -27,6 +28,34 @@ overloaded(Ts...)->overloaded<Ts...>;
 
 const string optional_atom = string("&optional");
 const string rest_atom = string("&rest");
+const string key_atom = string("&key");
+
+void process_keyword(const string& name, Expr* params, Expr* args, shared_ptr<SymbolTable> a)
+{
+    for (auto cur = params; !is_false(cur); cur = cur->cdr) {
+        if (is_a<Type::atom>(cur->car)) {
+            Atom param = cur->car->atom;
+            if (auto res = get_keyword_value(args, mk_keyword(":" + param))) {
+                a->put(param, (*res));
+            } else {
+                a->put(param, sF);
+            }
+        } else if (is_a<Type::list>(cur->car)) {
+            if (cur->car->size() != 2) {
+                throw EvalException(name + ": default argument not 2 member list " + to_string(cur->car));
+            }
+            if (!is_a<Type::atom>(cur->car->car)) {
+                throw EvalException(name + ": default argument name not an atom " + to_string(cur->car->car));
+            }
+            Atom param = cur->car->car->atom;
+            if (auto res = get_keyword_value(args, mk_keyword(":" + param))) {
+                a->put(param, (*res));
+            } else {
+                a->put(param, cur->car->cdr->car);
+            }
+        }
+    }
+}
 
 shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, shared_ptr<SymbolTable> a)
 {
@@ -51,6 +80,10 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, s
             rest = true;
             // cout << "rest args " << endl;
             continue;
+        } else if (is_a<Type::keyword>(param->car) && param->car->keyword == key_atom) {
+            // process all the remain arguments as keyword arguments
+            process_keyword(f->name, param->cdr, evalArgs, context);
+            return context;
         } else if (is_a<Type::list>(param->car)) {
             if (optional) {
                 // get symbol
@@ -256,6 +289,15 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
             return backquote(e->cdr->car, a);
         }
 
+        TracerGuard guard;
+        // Check traced functions
+        if (trace_functions.size() > 0) {
+            if (trace_functions.find(name) != trace_functions.end()) {
+                // make a tracer
+                guard.add_trace(new Tracer(name, to_string(e->cdr)));
+            }
+        }
+
         // Lookup symbol table for function
         if (auto f = a->find(name)) {
             if (!is_a<Type::function>(*f)) {
@@ -298,5 +340,19 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
     }
 
     throw EvalException("Can't evaluate "s + to_string(e));
+}
+
+bool Evaluator::has_function(const Atom& name)
+{
+    if (auto f = globalTable->find(name)) {
+        if (is_a<Type::function>(*f)) {
+            return true;
+        }
+        return false;
+    }
+    if (auto p = prim_table.find(name); p != prim_table.end()) {
+        return true;
+    }
+    return false;
 }
 }

@@ -518,6 +518,36 @@ BOOST_AUTO_TEST_CASE(test_eval_rest)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_keyword)
+{
+    vector<TestEval> tests = {
+        { R"((defun particle(&key(charge 0) spin)
+                (list charge spin)) )",
+            "particle" },
+        { "(particle :charge 1 :spin 'up)",
+            "(1 up)" },
+        { "(particle :charge -1 :spin 'up)", "(-1 up)" },
+        { "(particle :charge -1 :spin 'down)", "(-1 down)" },
+        { "(particle :spin 'up :charge 1)", "(1 up)" },
+        { "(particle :charge 1)", "(1 nil)" },
+        { "(particle :spin 'up)", "(0 up)" },
+        { "(particle)", "(0 nil)" },
+
+        { "(defun f (&key) 1)", "f" },
+        { "(f)", "1" },
+
+        { "(defun g (x &key) x)", "g" },
+        { "(g 7)", "7" },
+        { "(g)", "Eval error: unbound variable: x" },
+
+        { "(defun h (x &key y) y)", "h" },
+        { "(h 8)", "nil" },
+        { "(h 8 :y 7)", "7" },
+        { "(h)", "nil" }, // x not used
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_function)
 {
     vector<TestEval> tests = {

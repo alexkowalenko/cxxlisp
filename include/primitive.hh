@@ -202,5 +202,8 @@ Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* read(const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* read_char(const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* format(const string& name, Expr* args, shared_ptr<SymbolTable> a);
+
+Expr* trace(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* untrace(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 }
 #endif

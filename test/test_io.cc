@@ -165,3 +165,25 @@ BOOST_AUTO_TEST_CASE(test_eval_format_4)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_trace)
+{
+    vector<TestEval> tests = {
+        { "(trace)", "nil" },
+        { "(defun f (x) x)", "f" },
+        { "(defun g(x ) (f x))", "g" },
+        { "(trace f g)", "(f g)" },
+        { "(trace h)", "Eval error: trace: not a function h" },
+        { "(trace)", "(f g)" },
+
+        { "(g 2)", "2" },
+
+        { "(untrace g)", "t" },
+        { "(untrace f)", "t" },
+        { "(untrace h)", "t" },
+
+        { "(untrace)", "t" },
+        { "(trace)", "nil" },
+    };
+    test_Evaluator(tests);
+}
