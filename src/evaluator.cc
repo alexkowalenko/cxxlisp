@@ -116,7 +116,7 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, s
             }
         }
         ++arg_count;
-        if (!is_false(evalArgs->cdr)) {
+        if (!is_false(evalArgs)) {
             evalArgs = evalArgs->cdr;
         }
     }

@@ -692,6 +692,11 @@ BOOST_AUTO_TEST_CASE(test_eval_identity)
         { "(funcall d 1)", "nil" },
         { "(funcall d '(1 2))", "t" },
 
+        { "(funcall (complement #'zerop) 1)", "t" },
+        { "(funcall (complement #'characterp) #\\A)", "nil" },
+        { "(funcall (complement #'member) 'a '(a b c))", "nil" },
+        { "(funcall (complement #'member) 'd '(a b c))", "t" },
+
     };
     test_Evaluator(tests);
 }

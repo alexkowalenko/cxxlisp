@@ -275,7 +275,11 @@ Sequences are an abstraction of various types, as thus can be the arguments to f
 
 `(position x seq)` - find the position of `x` in `seq`. If `seq` is `string` then `x` must be a character.
 
-`(position-if f seq)` `(position-if-not f seq)`- if `f` returns `t`/ or not `t` return the position of that element. If `seq` is `string` then `x` must be a character.
+`(position-if f seq)` `(position-if-not f seq)`-  returns the position of the element which satifies `f`/ or not `f`. If `seq` is `string` then `x` must be a character.
+
+`(count-if f seq)` `(count-if-not f seq)`- returns the number of elements in the sequence which satifies `f`/ not `f`. 
+
+`(remove-if f seq)` `(remove-if-not f seq)`- removes the elements from the sequence which satifies `f`/or not `f`.
 
 `(make-sequence type-name size [:initial-element c])` - constructs a new sequence of type `type-name`, and size `size`. Optional initial elements `c` to be filled in the sequence.
 

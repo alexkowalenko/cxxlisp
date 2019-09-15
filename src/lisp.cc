@@ -238,8 +238,27 @@ inline const string stdlib = R"stdlib(
 (defun position-if (fn seq)
 	(position-if-support fn seq 0))
 
-;(defun position-if-not (fn seq)
-;	(position-if-support (complement fn) seq 0))
+(defmacro position-if-not (fn seq)
+	`(position-if-support (complement ,fn) ,seq 0))
+
+(defun count-if (fn seq)
+    (cond
+         ((eq (length seq) 0) 0)
+         ((funcall fn (elt seq 0)) 
+            (+ 1 (count-if fn (cdr seq))))
+	   (t (count-if fn (cdr seq)))))
+
+(defmacro count-if-not (fn seq)
+    `(count-if (complement ,fn) ,seq))   
+
+(defun remove-if (fn seq) 
+      (cond ((eq (length seq) 0) nil)
+            ((funcall fn (elt seq 0)) (remove-if fn (cdr seq)))
+            (t (cons (car seq)
+                        (remove-if fn (cdr seq)))))) 
+
+(defmacro remove-if-not (fn seq)
+    `(remove-if (complement ,fn) ,seq))   
 
 (defun fill (seq x)
     (if (eq (length seq) 0) 

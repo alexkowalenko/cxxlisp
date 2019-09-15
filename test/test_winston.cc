@@ -575,6 +575,149 @@ BOOST_AUTO_TEST_CASE(test_chapter_5)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_chapter_6)
+{
+    vector<TestEval> tests = {
+        { R"( (setf book-example-1 '((Artifical Intelligence)
+                                    (Patrick Henry Winston)
+                                    (Technical AI))) )",
+            "((Artifical Intelligence) (Patrick Henry Winston) (Technical AI))" },
+        { "(second book-example-1)", "(Patrick Henry Winston)" },
+        { R"( (setf book-example-2 '((title (Artifical Intelligence))
+                                    (author (Patrick Henry Winston))
+                                    (classification (Technical AI)))) )",
+            "((title (Artifical Intelligence)) (author (Patrick Henry Winston)) (classification (Technical AI)))" },
+        { "(second (assoc 'author book-example-2))", "(Patrick Henry Winston)" },
+        { R"( (setf book-example-3 '((title (Artifical Intelligence))
+                                    (author (Patrick Henry Winston))
+                                    (classification (Technical AI))
+                                    (loaned-to (Karen Prendergast))
+                                    (loaned-on (26 May 88)))) )",
+            "((title (Artifical Intelligence)) (author (Patrick Henry Winston)) (classification (Technical AI)) (loaned-to (Karen Prendergast)) (loaned-on (26 May 88)))" },
+        { R"( (defun book-author (book) 
+                    (second book)) )",
+            "book-author" },
+        { "(book-author book-example-1)", "(Patrick Henry Winston)" },
+        { R"( (defun book-author (book) 
+                    (second (assoc 'author book))) )",
+            "book-author" },
+        { "(book-author book-example-2)", "(Patrick Henry Winston)" },
+        { "(book-author book-example-3)", "(Patrick Henry Winston)" },
+        { R"( (defun make-book (title author classification) 
+                    (list (list 'title title)
+                        (list 'author author)
+                        (list 'classification classification))) )",
+            "make-book" },
+        { R"( (setf book-example-4 (make-book '(Common Lisp)
+                                    '(Guy Steele)
+                                    '(Technical Lisp))) )",
+            "((title (Common Lisp)) (author (Guy Steele)) (classification (Technical Lisp)))" },
+        { R"( (defun book-title (book) 
+                    (second (assoc 'title book))) )",
+            "book-title" },
+        { R"( (defun book-author (book) 
+                    (second (assoc 'author book))) )",
+            "book-author" },
+        { R"( (defun book-classification (book) 
+                    (second (assoc 'classification book))) )",
+            "book-classification" },
+        { R"( (defun book-author-writer (book author) 
+                    (cons  (list 'author author) book)) )",
+            "book-author-writer" },
+        { R"( (setf book-example-4 (book-author-writer book-example-4 '(Guy L Steele)
+                                    )) )",
+            "((author (Guy L Steele)) (title (Common Lisp)) (author (Guy Steele)) (classification (Technical Lisp)))" },
+        { "(book-author book-example-4)", "(Guy L Steele)" },
+        { R"( (defun book-author-writer (book author) 
+                    (if (eql 'author (first (first book)))
+                        (cons (list 'author author) (rest book))
+                        (cons (first book)
+                              (book-author-writer (rest book author))))) )",
+            "book-author-writer" },
+        { R"( (setf book-example-4 (book-author-writer book-example-4 '(Guy L Steele)
+                                    )) )",
+            "((author (Guy L Steele)) (title (Common Lisp)) (author (Guy Steele)) (classification (Technical Lisp)))" },
+        { "(book-author book-example-4)", "(Guy L Steele)" },
+
+        // pg. 99
+        { R"( (setf books
+                    (list 
+                        (make-book '(artificial intelligence)
+                                    '(patrick henry winston)
+                                    '(technical ai))
+                        (make-book '(common lisp)
+                                    '(guy l steele)
+                                    '(technical lisp))
+                         (make-book '(moby dick)
+                                    '(herman melville)
+                                    '(fiction))
+                         (make-book '(tom sayer)
+                                    '(mark twain)
+                                    '(fiction))
+                         (make-book '(the black orchid)
+                                    '(rex stout)
+                                    '(fiction mystery))
+                                     )) )",
+            "(((title (artificial intelligence)) (author (patrick henry winston)) (classification (technical ai))) ((title (common lisp)) (author (guy l steele)) (classification (technical lisp))) ((title (moby dick)) (author (herman melville)) (classification (fiction))) ((title (tom sayer)) (author (mark twain)) (classification (fiction))) ((title (the black orchid)) (author (rex stout)) (classification (fiction mystery))))" },
+        { R"( (defun list-authors (books)
+                (if (endp books)
+                    nil
+                    (cons (book-author (first books))
+                            (list-authors (rest books))))) )",
+            "list-authors" },
+        { "(list-authors books)", "((patrick henry winston) (guy l steele) (herman melville) (mark twain) (rex stout))" },
+        { R"( (defun fictionp (book)
+                (member 'fiction (book-classification book))) )",
+            "fictionp" },
+        { "(fictionp '((title (tom sayer)) (author (mark twain)) (classification (fiction))))", "(fiction)" },
+        { "(fictionp '((title (common lisp)) (author (guy l steele)) (classification (technical lisp))))", "nil" },
+        { R"( (defun list-fiction-books (books)
+                (cond ((endp books) nil)
+                      ((fictionp (first books))
+                          (cons (first books)
+                                 (list-fiction-books (rest books))))
+                       (t (list-fiction-books (rest books))))) )",
+            "list-fiction-books" },
+        { "(list-fiction-books books)", "(((title (moby dick)) (author (herman melville)) (classification (fiction))) ((title (tom sayer)) (author (mark twain)) (classification (fiction))) ((title (the black orchid)) (author (rex stout)) (classification (fiction mystery))))" },
+        // pg. 101
+        { "(length (list-fiction-books books))", "3" },
+        { "(first (list-fiction-books books))", "((title (moby dick)) (author (herman melville)) (classification (fiction)))" },
+        { R"( (defun count-fiction-books (books)
+                (cond ((endp books) 0)
+                      ((fictionp (first books))
+                          (+ 1  (count-fiction-books (rest books))))
+                       (t (count-fiction-books (rest books))))) )",
+            "count-fiction-books" },
+        { R"( (defun find-first-fiction-books (books)
+                (cond ((endp books) nil)
+                      ((fictionp (first books))
+                          (first books))
+                       (t (find-first-fiction-books (rest books))))) )",
+            "find-first-fiction-books" },
+        { "(count-fiction-books books)", "3" },
+        { "(find-first-fiction-books books)", "((title (moby dick)) (author (herman melville)) (classification (fiction)))" },
+
+        //pg. 104
+        { "(mapcar #'oddp '(1 2 3))", "(t nil t)" },
+        { "(mapcar #'= '(1 2 3) '(3 2 1))", "(nil t nil)" },
+        { "(list-authors books)",
+            "((patrick henry winston) (guy l steele) (herman melville) (mark twain) (rex stout))" },
+
+        { "(mapcar #'book-author books)",
+            "((patrick henry winston) (guy l steele) (herman melville) (mark twain) (rex stout))" },
+
+        { "(remove-if-not #'fictionp books)", "(((title (moby dick)) (author (herman melville)) (classification (fiction))) ((title (tom sayer)) (author (mark twain)) (classification (fiction))) ((title (the black orchid)) (author (rex stout)) (classification (fiction mystery))))" },
+
+        { "(remove-if #'fictionp books)", "(((title (artificial intelligence)) (author (patrick henry winston)) (classification (technical ai))) ((title (common lisp)) (author (guy l steele)) (classification (technical lisp))))" },
+
+        { "(count-if #'fictionp books)", "3" },
+        { "(find-if #'fictionp books)",
+            "((title (moby dick)) (author (herman melville)) (classification (fiction)))" },
+
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_chapter_A)
 {
     vector<TestEval> tests = {

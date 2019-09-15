@@ -171,8 +171,10 @@ BOOST_AUTO_TEST_CASE(test_eval_position)
 BOOST_AUTO_TEST_CASE(test_eval_position_if)
 {
     vector<TestEval> tests = {
-        { "(position-if #'atom '(1 2 3 4))", "0" },
-        // { "(position-if-not #'atom '(1 2 3 4))", "nil" },
+        { "(position-if #'atom '(1 (2) 3 4))", "0" },
+        { "(position-if-not #'atom '(1 (2) 3 4))", "1" },
+        { "(position-if #'atom nil)", "nil" },
+        { "(position-if-not #'atom nil)", "nil" },
 
         // Lambdas don't work
         //{ "(position-if (lambda (x) (eq x 'red)) '(blue green s red s))", "3" },
@@ -185,6 +187,46 @@ BOOST_AUTO_TEST_CASE(test_eval_position_if)
         { "(position-if #'zerop)", "Eval error: position-if: invalid number of arguments" },
         { "(position-if)", "Eval error: position-if: invalid number of arguments" },
         { "(position-if #'zerop 'no)", "Eval error: length: needs sequence argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_count_if)
+{
+    vector<TestEval> tests = {
+        { "(count-if #'atom '(1 2 (3) 4))", "3" },
+        { "(count-if #'oddp '(1 2 3 4 5))", "3" },
+        { "(count-if #'evenp '(1 2 3 4 5))", "2" },
+        { "(count-if #'evenp nil)", "0" },
+
+        { "(count-if-not #'atom '(1 2 (3) 4))", "1" },
+        { "(count-if-not #'oddp '(1 2 3 4 5))", "2" },
+        { "(count-if-not #'evenp '(1 2 3 4 5))", "3" },
+        { "(count-if-not #'evenp nil)", "0" },
+
+        { "(count-if #'zerop)", "Eval error: count-if: invalid number of arguments" },
+        { "(count-if-not)", "Eval error: count-if-not: invalid number of arguments" },
+        { "(count-if #'zerop 'no)", "Eval error: length: needs sequence argument" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_remove_if)
+{
+    vector<TestEval> tests = {
+        { "(remove-if #'atom '(1 2 (3) 4))", "((3))" },
+        { "(remove-if #'oddp '(1 2 3 4 5))", "(2 4)" },
+        { "(remove-if #'evenp '(1 2 3 4 5))", "(1 3 5)" },
+        { "(remove-if #'evenp nil)", "nil" },
+
+        { "(remove-if-not #'atom '(1 2 (3) 4))", "(1 2 4)" },
+        { "(remove-if-not #'oddp '(1 2 3 4 5))", "(1 3 5)" },
+        { "(remove-if-not #'evenp '(1 2 3 4 5))", "(2 4)" },
+        { "(remove-if-not #'evenp nil)", "nil" },
+
+        { "(remove-if #'zerop)", "Eval error: remove-if: invalid number of arguments" },
+        { "(remove-if-not)", "Eval error: remove-if-not: invalid number of arguments" },
+        { "(remove-if #'zerop 'no)", "Eval error: length: needs sequence argument" },
     };
     test_Evaluator(tests);
 }
