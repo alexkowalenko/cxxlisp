@@ -129,7 +129,7 @@ Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable
         prev->cdr = nullptr;
         ex->cdr = new_res;
     } else {
-        ex->cdr = res;
+        ex->cdr = mk_list(res);
     }
     return l.eval(ex, a);
 }

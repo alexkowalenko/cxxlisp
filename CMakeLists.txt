@@ -125,4 +125,6 @@ foreach(benSrc ${bench_src})
 
 endforeach(benSrc)
 
-
+# install
+set(CMAKE_INSTALL_PREFIX /Users/alex/Development/lisp-proj/cxxlisp)
+install(TARGETS cxxlisp DESTINATION bin)

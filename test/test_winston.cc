@@ -714,6 +714,48 @@ BOOST_AUTO_TEST_CASE(test_chapter_6)
         { "(find-if #'fictionp books)",
             "((title (moby dick)) (author (herman melville)) (classification (fiction)))" },
 
+        // pg. 107
+        { "(funcall #'first '(e1 e2 e3))", "e1" },
+        { "(first '(e1 e2 e3))", "e1" },
+        { "(funcall #'append '(a b) '(x y))", "(a b x y)" },
+        { "(append '(a b) '(x y))", "(a b x y)" },
+        { R"( (defun toss (argument procedure)
+                (funcall procedure argument)) )",
+            "toss" },
+        { "(toss '(victim of attack) #'first)", "victim" },
+        { "(toss '(victim of attack) #'rest)", "(of attack)" },
+        { R"( (defun toss (argument procedure)
+                (procedure argument)) )",
+            "toss" },
+        { "(toss '(victim of attack) #'first)", "Eval error: A non function in function location #'first" },
+        { "(apply #'first '((e1 e2 e3)))", "e1" },
+        { "(first '(e1 e2 e3))", "e1" },
+        { "(apply #'append '((a b) (x y)))", "(a b x y)" },
+        { "(append '(a b) '(x y))", "(a b x y)" },
+        { "(apply #'+ '(1 2 3 4 5 6))", "21" },
+        // { "(apply #'+ 1 2 3 '(4 5 6))", "21" }, not supported
+        { R"( (defun toss (argument procedure)
+                (apply procedure (list argument))) )",
+            "toss" },
+        { "(toss '(victim of attack) #'first)", "victim" },
+        { "(toss '(victim of attack) #'rest)", "(of attack)" },
+
+        { R"( (defun book-last-name (book)
+                (first (last (book-author book)))) )",
+            "book-last-name" },
+        { "(mapcar #'book-last-name books)",
+            "(winston steele melville twain stout)" },
+        // { "(mapcar #'(lambda (book) (first (last (book-author book)))) books)", "" },
+        { "(mapcar (lambda (book) (first (last (book-author book)))) books)",
+            "(winston steele melville twain stout)" },
+        // { "(remove-if-not #'(lambda (book) (member 'fiction (book-classification book))) books)",
+        //     "(((title (moby dick)) (author (herman melville)) (classification (fiction))) ((title (tom sayer)) (author (mark twain)) (classification (fiction))) ((title (the black orchid)) (author (rex stout)) (classification (fiction mystery))))" },
+        { "(remove-if-not (lambda (book) (member 'fiction (book-classification book))) books)",
+            "(((title (moby dick)) (author (herman melville)) (classification (fiction))) ((title (tom sayer)) (author (mark twain)) (classification (fiction))) ((title (the black orchid)) (author (rex stout)) (classification (fiction mystery))))" },
+        // { "(funcall #'(lambda (parameter) (first parameter)) '(e1 e2 e3))", "e1" },
+        { "(funcall (lambda (parameter) (first parameter)) '(e1 e2 e3))", "e1" },
+        // { "(apply #'(lambda (parameter1 parameter2) (append parameter1 parameter2)) '((a b) (x y)))", "(a b x y)" },
+        { "(apply (lambda (parameter1 parameter2) (append parameter1 parameter2)) '((a b) (x y)))", "(a b x y)" },
     };
     test_Evaluator(tests);
 }

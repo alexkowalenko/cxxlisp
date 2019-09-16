@@ -105,7 +105,7 @@ Token Lexer::get_token()
             wstring str;
             uint32_t r;
             auto prev = c;
-            for (lineReader >> r; !(r == '\"' && prev != '\\'); lineReader >> r) {
+            for (lineReader >> r; !(r == '\"' && prev != '\\') && r != '\n'; lineReader >> r) {
                 if (prev == '\\' && r == '\"') {
                     str.pop_back();
                 }

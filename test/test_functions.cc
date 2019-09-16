@@ -670,6 +670,8 @@ BOOST_AUTO_TEST_CASE(test_eval_apply)
         { "(apply #'f '(0))", "t" },
         { "(apply #'f '(-1))", "nil" },
 
+        // { "(apply #'+ 1 2 3 '(4 5 6))", "21" }, // not supported
+
         { "(apply)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply f)", "Eval error: apply expecting at least 2 arguments" },
         { "(apply 1 1)", "Eval error: apply: Not function ref or lambda expression: 1" },
