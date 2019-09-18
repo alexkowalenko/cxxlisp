@@ -201,7 +201,6 @@ Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
         if (!is_a<Type::atom>(result)) {
             throw EvalException(name + ": result is not a symbol" + to_string(result));
         }
-        context->put(result->atom, sF);
     }
     // Eval limit
     auto res_limit = l.eval(limit, a);

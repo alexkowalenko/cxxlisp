@@ -789,6 +789,15 @@ BOOST_AUTO_TEST_CASE(test_eval_dotimes)
         { "(dotimes (n 6) (setq xxx (* n n)))", "nil" },
         { "xxx", "25" },
 
+        { R"( (defun dotimes-expt (m n)
+                (let ((result 1))
+                    (dotimes (count n result)
+                        (setf result (* m result))))) )",
+            "dotimes-expt" },
+        { "(dotimes-expt 3 2)", "9" },
+        { "(dotimes-expt 2 3)", "8" },
+        { "(dotimes-expt 2 32)", "4294967296" },
+
         { "(dotimes)", "Eval error: dotimes expecting at least 2 arguments" },
         { "(dotimes ())", "Eval error: dotimes expecting at least 2 arguments" },
         { "(dotimes (n))", "Eval error: dotimes expecting at least 2 arguments" },

@@ -30,7 +30,7 @@ namespace {
 
 LineReaderReplxx::LineReaderReplxx()
 {
-    BOOST_LOG_TRIVIAL(info) << "Using Replxx!";
+    //BOOST_LOG_TRIVIAL(info) << "Using Replxx!";
     struct passwd* pw = getpwuid(getuid());
     my_history_file = string(pw->pw_dir);
     my_history_file += "/" + history_file;
