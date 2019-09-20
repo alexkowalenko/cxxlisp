@@ -141,7 +141,8 @@ Expr* fboundp(const string&, Expr* args, shared_ptr<SymbolTable> a);
 Expr* apply(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* funcall(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 Expr* mapcar(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
-Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* do_times(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
+Expr* do_func(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a);
 
 // Strings
 

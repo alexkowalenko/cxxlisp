@@ -356,6 +356,8 @@ The list of arguments to function, lambda, macro definitions can be a sequence o
 
 `(dolist (var list [result]) expr expr ...)` - Performs the sequence of expressions, with `var` bound to the successive elements of `list`, returning the value of `result` if present or `nil`. `result` needs to be assigned to in the evaluations.
 
+`(do ([var|(var init [update])]+) (stop [result]) expr expr ...)` - Initialises the variables in the parameter list. If the `init` value is present, binds `var` to that value. Tests the `stop` condition, if `t`, then exits, with the `result` value or `nil`. Then performs the expressions in order, then updates the values in the parameter list if present. Repeats again, with the `stop` condition.
+
 # I/O
 
 ## Constants

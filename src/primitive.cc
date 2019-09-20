@@ -550,8 +550,10 @@ void init_prims()
         { "funcall", &funcall, min_two },
         { "mapcar", &mapcar, min_two },
         { "maplist", &mapcar, min_two },
-        { "dotimes", &doFuncs, min_two },
-        { "dolist", &doFuncs, min_two },
+        { "dotimes", &do_times, min_two },
+        { "dolist", &do_times, min_two },
+        { "do", &do_func, min_two },
+        { "do*", &do_func, min_two },
 
         // // Number functions
 

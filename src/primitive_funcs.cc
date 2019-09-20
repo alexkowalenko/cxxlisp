@@ -183,7 +183,7 @@ end:
     return resulttop;
 }
 
-Expr* doFuncs(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+Expr* do_times(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
 {
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": has no parameter list " + to_string(args->car));
@@ -250,5 +250,59 @@ end:
         }
     }
     return sF;
+}
+
+// (do (params) ((test) return) x1 x2 ...)
+Expr* do_func(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    if (!is_a<Type::list>(args->car)) {
+        throw EvalException(name + ": has no parameter list " + to_string(args->car));
+    }
+    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    for (auto params = args->car; !is_false(params); params = params->cdr) {
+        if (!is_a<Type::list>(params->car)) {
+            throw EvalException(name + ": parameter is not a list " + to_string(params->car));
+        }
+        if (params->car->size() < 2) {
+            throw EvalException(name + ": not enough vars in parameter list");
+        }
+        auto variable = arg0(params->car);
+        if (!is_atom(variable)) {
+            throw EvalException(name + ": parameter is not a symbol " + to_string(variable));
+        }
+        Expr* value = nullptr;
+        if (name == "do") {
+            value = l.eval(arg1(params->car), a);
+        } else {
+            value = l.eval(arg1(params->car), context);
+        }
+        context->put(variable->atom, value);
+    }
+
+    auto ret = arg1(args);
+    if (!is_a<Type::list>(ret)) {
+        throw EvalException(name + ": expecting a test " + to_string(arg1(args)));
+    }
+    auto test = arg0(ret);
+    Expr* ret_val = sF;
+    if (ret->size() >= 2) {
+        ret_val = arg1(ret);
+    }
+    for (auto test_val = l.eval(test, context); is_false(test_val); test_val = l.eval(test, context)) {
+        l.perform_list(args->cdr->cdr, context);
+
+        // update parameters
+        for (auto params = args->car; !is_false(params); params = params->cdr) {
+            if (!is_a<Type::list>(params->car)) {
+                throw EvalException(name + ": parameter is not a list " + to_string(params->car));
+            }
+            if (params->car->size() == 3) {
+                auto variable = arg0(params->car);
+                auto value = l.eval(arg2(params->car), context);
+                context->put(variable->atom, value);
+            }
+        }
+    }
+    return l.eval(ret_val, context);
 }
 }

@@ -817,3 +817,63 @@ BOOST_AUTO_TEST_CASE(test_eval_keywordp)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_do)
+{
+    vector<TestEval> tests = {
+        { "(do ((x 1 (1+ x))) ((> x 10) r) (setf r (+ x x)))", "20" },
+        { "(do ((x 1 (1+ x)) (y 9 (1- y))) ((> x 10) r) (setf r (+ x y)))", "10" },
+        { R"( (do ((x 1)) ((> x 10) r) 
+                  (setf r (+ x x)) 
+                  (setf x (1+ x))) )",
+            "20" },
+        { R"( (defun do-expt (m n) 
+                (do ((result 1 (* m result))
+                    (exponent n (- exponent 1)))
+                    ((zerop exponent) result))) )",
+            "do-expt" },
+        { "(do-expt 2 4)", "16" },
+        { R"( (defun do-expt (m n)
+                (do ((result 1)
+                    (exponent n))
+                  ((zerop exponent) result)
+                    (setf result (* m result))
+                    (setf exponent (- exponent 1)))) )",
+            "do-expt" },
+        { "(do-expt 2 4)", "16" },
+
+        // error, value not set
+        { R"( (defun do-expt (m n) 
+                (do ((result m (* m result))
+                    (exponent n (- exponent 1))
+                    (counter (- exponent 1) (- exponent 1)))
+                  ((zerop exponent) result)))  )",
+            "do-expt" },
+        { "(do-expt 2 4)", "Eval error: unbound variable: exponent" },
+
+        // error, value not set
+        { R"( (defun do-expt (m n) 
+                (do* ((result m (* m result))
+                     (exponent n (- exponent 1))
+                    (counter (- exponent 1) (- exponent 1)))
+                  ((zerop exponent) result)))  )",
+            "do-expt" },
+        { "(do-expt 2 4)", "32" }, // incorrect calculation, but uses do*
+
+        // return nil
+        { R"( (defun do-expt (m n) 
+                (do ((result 1 (* m result))
+                    (exponent n (- exponent 1)))
+                    ((zerop exponent) ))) )",
+            "do-expt" },
+        { "(do-expt 2 4)", "nil" },
+
+        { "(do)", "Eval error: do expecting at least 2 arguments" },
+        { "(do())", "Eval error: do expecting at least 2 arguments" },
+        // { "(do () ())", "Eval error: do: expecting a test nil" },
+        { "(do(x)())", "Eval error: do: parameter is not a list x" },
+        { "(do(())((null x)))", "Eval error: do: not enough vars in parameter list" },
+        { "(do((x))((null x)))", "Eval error: do: not enough vars in parameter list" },
+    };
+    test_Evaluator(tests);
+}
