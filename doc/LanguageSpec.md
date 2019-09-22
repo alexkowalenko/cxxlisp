@@ -346,6 +346,8 @@ The list of arguments to function, lambda, macro definitions can be a sequence o
 
 `(cond [(test then)]*)` - Returns the value of then if `test` is `t` for the first pair with a `test` that evaluates to `t`. Returns `nil` otherwise.
 
+`(case test [(key val)]+ [(otherwise final)])` - Evaluates `test` and then matches `eql` it with the various `key`s, if matches return that `val`. `key` can be a list of values. If no match, the `otherwise`'s `final` is return, if present. `key` can also be a list, then the match is preformed against the elements of the list until a value matches.
+
 `(when test x ...) (unless test x ...)` - Returns the value of the last element, if `test` is `t` for `when`, or `test` is `nil` for `unless`.
 
 `(progn x ...)` - Evaluates the list of arguments, returns the value of the last one.

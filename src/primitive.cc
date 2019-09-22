@@ -21,6 +21,8 @@ namespace ax {
 map<string, Primitive> prim_table;
 map<Atom, Accessor> setf_accessors;
 
+const Atom otherwise_sym("otherwise");
+
 Expr* atom(Expr* const args)
 {
     return is_atomic(args->car) || is_false(args->car) ? sT : sF;
@@ -380,13 +382,7 @@ Expr* makunbound(const string&, Expr* args, shared_ptr<SymbolTable> a)
 
 Expr* ifFunc(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
 {
-    size_t size = 0;
-    if (args) {
-        size = args->size();
-    }
-    if (size < 2) {
-        throw EvalException("if requires 2 or 3 arguments");
-    }
+    size_t size = args->size();
     auto res = l.eval(args->car, a);
     if (is_false(res)) {
         if (size < 3) {
@@ -394,7 +390,6 @@ Expr* ifFunc(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
         }
         return l.eval(args->cdr->cdr->car, a);
     }
-    //
     if (size < 2) {
         return sF;
     }
@@ -416,6 +411,31 @@ Expr* cond(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
             return l.perform_list(args->car->cdr, a);
         }
         throw EvalException("cond: clause " + to_string(args->car) + "is not a list");
+    }
+    return sF;
+}
+
+Expr* case_fn(Evaluator& l, const string&, Expr* args, shared_ptr<SymbolTable> a)
+{
+    auto test = l.eval(args->car, a);
+    for (auto cur = args->cdr; !is_false(cur); cur = cur->cdr) {
+        if (!is_a<Type::list>(cur->car)) {
+            throw EvalException("case: expecting case clause " + to_string(cur->car));
+        }
+        if (!is_false(expr_eql(test, cur->car->car))) {
+            return l.perform_list(cur->car->cdr, a);
+        }
+        if (is_a<Type::list>(cur->car->car)) {
+            for (auto list = cur->car->car; !is_false(list); list = list->cdr) {
+                if (!is_false(expr_eql(test, list->car))) {
+                    return l.perform_list(cur->car->cdr, a);
+                }
+            }
+            continue;
+        }
+        if (is_a<Type::atom>(cur->car->car) && cur->car->car->atom == otherwise_sym) {
+            return l.perform_list(cur->car->cdr, a);
+        }
     }
     return sF;
 }
@@ -528,8 +548,9 @@ void init_prims()
 
         // // Program control
 
-        { "if", &ifFunc, no_check },
+        { "if", &ifFunc, min_two },
         { "cond", &cond, no_check },
+        { "case", &case_fn, min_two },
 
         { "progn", &progn, no_check },
         { "prog1", &prog1, no_check },

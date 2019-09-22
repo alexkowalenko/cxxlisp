@@ -362,22 +362,22 @@ BOOST_AUTO_TEST_CASE(test_chapter_4)
                 (t 'anorexic)))",
             "normal" },
         { "(setf thing 'point r 1)", "1" },
-        // { R"((case thing
-        //         (circle (* pi r r))
-        //         (sphere (* 4 pi r r))))",
-        //     "nil" },
+        { R"((case thing
+                 (circle (* pi r r))
+                 (sphere (* 4 pi r r))))",
+            "nil" },
         { "(setf thing 'point r 1)", "1" },
-        // { R"((case thing
-        //         (circle (* pi r r))
-        //         (sphere (* 4 pi r r))
-        //         (otherwise 0)))",
-        //     "nil" },
+        { R"((case thing
+                 (circle (* pi r r))
+                 (sphere (* 4 pi r r))
+                 (otherwise 0)))",
+            "0" },
         { "(setf thing 'ball r 1)", "1" },
-        // { R"((case thing
-        //         (circle (* pi r r))
-        //         (sphere (* 4 pi r r))
-        //         (otherwise 0)))",
-        //     "nil" },
+        { R"((case thing
+                 ((circle wheel) (* pi r r))
+                 ((sphere ball) (* 4 pi r r))
+                 (otherwise 0)))",
+            "12.5663706144" },
 
         // pg. 66
         { R"((defun express-probability (p)
@@ -389,15 +389,20 @@ BOOST_AUTO_TEST_CASE(test_chapter_4)
         { "(express-probability .8)", "very-likely" },
         { "(express-probability .4)", "unlikely" },
         { "(express-probability .2)", "very-unlikely" },
-        // { R"((defun both-ends (whole-list)
-        //     (case (length whole-list)
-        //         (0 nil)
-        //         (1 (cons (first whole-list)
-        //             whole-list))
-        //         (2 whole-list)
-        //         (t (cons (first whole-list)
-        //                 (last whole-list))))))",
-        //     "both-ends" },
+        { R"((defun both-ends (whole-list)
+             (case (length whole-list)
+                 (0 nil)
+                 (1 (cons (first whole-list)
+                     whole-list))
+                 (2 whole-list)
+                 (otherwise (cons (first whole-list)
+                         (last whole-list))))))",
+            "both-ends" },
+        { "(both-ends nil)", "nil" },
+        { "(both-ends '(a))", "(a a)" },
+        { "(both-ends '(a b))", "(a b)" },
+        { "(both-ends '(a b c))", "(a c)" },
+        { "(both-ends '(a b c d))", "(a d)" },
     };
     test_Evaluator(tests);
 }

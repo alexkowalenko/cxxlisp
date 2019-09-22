@@ -858,9 +858,9 @@ BOOST_AUTO_TEST_CASE(test_eval_if)
         { "(if '0 'a 'z)", "a" },
 
         // Incorrect, return nil
-        { "(if t)", "Eval error: if requires 2 or 3 arguments" },
-        { "(if nil)", "Eval error: if requires 2 or 3 arguments" },
-        { "(if)", "Eval error: if requires 2 or 3 arguments" },
+        { "(if t)", "Eval error: if expecting at least 2 arguments" },
+        { "(if nil)", "Eval error: if expecting at least 2 arguments" },
+        { "(if)", "Eval error: if expecting at least 2 arguments" },
     };
     test_Evaluator(tests);
 }
@@ -967,6 +967,67 @@ BOOST_AUTO_TEST_CASE(test_eval_cond)
     test_Evaluator(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_eval_case)
+{
+    vector<TestEval> tests = {
+        { "(case 0 (0 'zero) (1 'one) (2 'two) (otherwise 'unknown))",
+            "zero" },
+        { "(case 1 (0 'zero) (1 'one) (2 'two) (otherwise 'unknown))",
+            "one" },
+        { "(case 2 (0 'zero) (1 'one) (2 'two) (otherwise 'unknown))",
+            "two" },
+        { "(case 3 (0 'zero) (1 'one) (2 'two) (otherwise 'unknown))",
+            "unknown" },
+
+        { "(case 'α (α 'alpha) (β 'beta) (γ 'gamma) (otherwise 'greek))",
+            "alpha" },
+        { "(case 'β (α 'alpha) (β 'beta) (γ 'gamma) (otherwise 'greek))",
+            "beta" },
+        { "(case 'γ (α 'alpha) (β 'beta) (γ 'gamma) (otherwise 'greek))",
+            "gamma" },
+        { "(case 'δ (α 'alpha) (β 'beta) (γ 'gamma) (otherwise 'greek))",
+            "greek" },
+        { "(case 'δ (α 'alpha) (β 'beta) (γ 'gamma))",
+            "nil" },
+
+        { "(case )", "Eval error: case expecting at least 2 arguments" },
+        { "(case 2)", "Eval error: case expecting at least 2 arguments" },
+        { "(case 2 4)", "Eval error: case: expecting case clause 4" },
+    };
+    test_Evaluator(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_eval_case_2)
+{
+    vector<TestEval> tests = {
+        { R"( (case 1 
+			((2 4 6 8 10) 'even)
+			((1 3 5 7 9) 'odd)
+			(otherwise 'zero)) )",
+            "odd" },
+        { R"((case 2 
+				((2 4 6 8 10) 'even)
+				((1 3 5 7 9) 'odd)
+				(otherwise 'zero)))",
+            "even" },
+        { R"((case 0 
+				((2 4 6 8 10) 'even)
+				((1 3 5 7 9) 'odd)
+				(otherwise 'zero)))",
+            "zero" },
+        { R"((case (* 2 3)
+			((2 3 5 7) 'prime)
+			((1 4 6 8 9) 'composite)))",
+            "composite" },
+        { R"((case (car '(a d))
+			((a e i o u) 'vowel)
+			((w y) 'semivowel)
+			(otherwise 'consonant)))",
+            "vowel" },
+    };
+    test_Evaluator(tests);
+}
+
 BOOST_AUTO_TEST_CASE(test_eval_progn)
 {
     vector<TestEval> tests = {
@@ -1064,7 +1125,6 @@ BOOST_AUTO_TEST_CASE(test_eval_setfcar)
         { "(defvar x 'a)", "x" },
         { "(setf (car x) 'a)", "Eval error: setf car: first argument not a list" },
         { "(setf (car) 'a)", "Eval error: setf car expecting an argument" },
-
     };
     test_Evaluator(tests);
 }
