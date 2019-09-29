@@ -327,4 +327,20 @@ Expr* untrace(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTab
     }
     return sT;
 }
+
+Expr* load(Evaluator& l, const string& name, Expr* args, shared_ptr<SymbolTable> a)
+{
+    ifstream file;
+    auto filename = ws2s(args->car->string);
+    file.open(filename);
+    if (!file.is_open()) {
+        throw EvalException("load: can't open " + filename);
+    }
+    auto output = get_reference(name, std_out, a)->stream;
+    l.opt.push_options();
+    l.opt.readline = false;
+    l.repl(file, *get<ostream*>(output->str));
+    l.opt.pop_options();
+    return sT;
+}
 }

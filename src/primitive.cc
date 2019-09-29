@@ -703,6 +703,8 @@ void init_prims()
         { "read-char", read_char, max_one, preEvaluate },
         { "format", format, min_two, preEvaluate },
 
+        { "load", load, one_str, preEvaluate },
+
         // debug
         { "trace", trace, no_check },
         { "untrace", untrace, no_check },

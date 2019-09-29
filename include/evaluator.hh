@@ -24,6 +24,8 @@ public:
         , trace_functions(tf)
         , opt(o){};
 
+    void repl(istream& in, ostream& os);
+
     Expr* eval(Expr* const e, shared_ptr<SymbolTable> a);
     Expr* perform_list(const Expr* e, shared_ptr<SymbolTable> a);
     Expr* eval_list(const Expr* e, shared_ptr<SymbolTable> a);
@@ -32,13 +34,12 @@ public:
 
     shared_ptr<SymbolTable> globalTable;
     set<Atom>& trace_functions;
+    Options opt;
 
 private:
     shared_ptr<SymbolTable> create_context(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
     Expr* perform_function(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
     Expr* backquote(Expr* s, shared_ptr<SymbolTable> a);
-
-    Options opt;
 };
 }
 

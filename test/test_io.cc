@@ -187,3 +187,16 @@ BOOST_AUTO_TEST_CASE(test_eval_trace)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_load)
+{
+    vector<TestEval> tests = {
+        // source
+        { "(load \"../demo/a.lisp\")", "t" },
+
+        { "(g 3)", "5" }, // we really loaded it
+        { "(load \"x.scm\")", "Eval error: load: can't open x.scm" },
+        { "(load)", "Eval error: load expecting an argument" },
+    };
+    test_Evaluator(tests);
+}

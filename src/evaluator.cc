@@ -10,6 +10,9 @@
 
 #include "exceptions.hh"
 #include "function.hh"
+#include "linereaderRL.hh"
+#include "linereaderReplxx.hh"
+#include "linereaderStream.hh"
 #include "parser.hh"
 #include "primitive.hh"
 #include "tracer.hh"
@@ -354,5 +357,61 @@ bool Evaluator::has_function(const Atom& name)
         return true;
     }
     return false;
+}
+
+void Evaluator::repl(istream& istr, ostream& ostr)
+{
+    unique_ptr<LineReader> rl;
+    if (opt.readline) {
+        // rl = make_unique<LineReaderReadLine>();
+        rl = make_unique<LineReaderReplxx>();
+    } else {
+        rl = make_unique<LineReaderStream>(istr);
+    }
+    Lexer lex(*rl);
+    Parser parser(lex);
+    while (true) {
+        ParserResult res;
+        try {
+            res = parser.parse();
+            if (res.eof) {
+                break;
+            }
+            if (opt.parse_only) {
+                ostr << to_string(res.val) << endl;
+                continue;
+            }
+
+            auto ex = eval(res.val, globalTable);
+            ostr << to_string(ex) << endl;
+
+        } catch (UnknownToken& e) {
+            ostr << "Unknown token: " << e.tok << endl;
+            continue;
+        } catch (ParseException& e) {
+            ostr << "Parse error: " << e.what() << endl;
+            continue;
+        } catch (EndBracketException& e) {
+            ostr << "Parse error: Extra bracket found" << endl;
+            continue;
+        } catch (EvalException& e) {
+            ostr << "Eval error: " << e.what() << endl;
+        } catch (NumericException& e) {
+            ostr << "Numeric exception: " << e.what() << endl;
+        } catch (RuntimeException& e) {
+            ostr << "Runtime exception: " << e.what() << endl;
+        } catch (ExceptionQuit& e) {
+            break;
+        } catch (exception& e) {
+            ostr << "Exception: " << e.what() << endl;
+            continue;
+        } catch (...) {
+            ostr << "Unknown exception!" << endl;
+            continue;
+        }
+        if (res.eof) {
+            break;
+        }
+    }
 }
 }
