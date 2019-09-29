@@ -386,11 +386,13 @@ The list of arguments to function, lambda, macro definitions can be a sequence o
 
 ## Ouput functions
 
-`(prin1 x [stream])` - output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument.
+`(prin1 x [stream])` - output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument. Returns `x`.
 
-`(print x [stream])` - print a newline and then output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument.
+`(print x [stream])` - print a newline and then output the object `x`. Default is `*standard-output*`, but can be optional `stream` argument. Returns `x`.
 
-`(princ x [stream])` - output the object `x` in a human acceptable version (strings, and characters print without lisp delimiters)  Default is `*standard-output*`, but can be optional `stream` argument.
+`(princ x [stream])` - output the object `x` in a human acceptable version (strings, and characters print without lisp delimiters)  Default is `*standard-output*`, but can be optional `stream` argument. Returns `x`.
+
+`(write-char x [stream])` - output the character `x`. Default is `*standard-output*`, but can be optional `stream` argument. Returns `x`.
 
 `(terpri [stream])` - output a newline.
 
@@ -413,6 +415,10 @@ The format string can contain:
 * `~%`, `~&` - generates a new line.
 * `~S` - replaces this with value of the corresponding argument.
 * `~A` - replaces this a non-escape version of the corresponding argument. With strings the enclosing `"` is not written. With characters the `#\` is not written.
+
+## Source files
+
+`(load file)` - evaluate the source file `file` in the current environment.
 
 # Execution functions
 

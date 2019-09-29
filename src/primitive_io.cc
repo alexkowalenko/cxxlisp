@@ -140,7 +140,7 @@ Expr* print(const string& name, Expr* args, shared_ptr<SymbolTable> a)
               [&out_str](fstream* arg) { (*arg) << out_str; },
           },
         output->str);
-    return sT;
+    return args->car;
 }
 
 Expr* terpri(const string& name, Expr* args, shared_ptr<SymbolTable> a)
