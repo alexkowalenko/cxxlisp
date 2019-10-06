@@ -399,3 +399,25 @@ BOOST_AUTO_TEST_CASE(test_eval_make_sequence)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_concatenate)
+{
+    vector<TestEval> tests = {
+        { "(concatenate 'string \"hello\")", "\"hello\"" },
+        { "(concatenate 'string \"hello\" \" \")", "\"hello \"" },
+        { "(concatenate 'string \"hello\" \" \" '(#\\w #\\o #\\r #\\l #\\d))", "\"hello world\"" },
+        { "(concatenate 'string)", "\"\"" },
+
+        { "(concatenate 'list \"hello\")", "(#\\h #\\e #\\l #\\l #\\o)" },
+        { "(concatenate 'list \"一二三四五六七\")", "(#\\一 #\\二 #\\三 #\\四 #\\五 #\\六 #\\七)" },
+
+        { "(concatenate 'string (concatenate 'list \"hello\"))", "\"hello\"" },
+
+        { "(concatenate 'list '(1 2 3) '(a b c))", "(1 2 3 a b c)" },
+        { "(concatenate 'cons '(1 2 3) '(a b c))", "(1 2 3 a b c)" },
+        { "(concatenate 'list)", "nil" },
+
+        { "(concatenate)", "Eval error: concatenate expecting at least 1 arguments" },
+    };
+    test_Evaluator(tests);
+}

@@ -203,4 +203,66 @@ Expr* make_sequence(Expr* args)
         return mk_list(arg1(args)->integer, init);
     }
 }
+
+Expr* concatenate_str(Expr* args)
+{
+    String result;
+    for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
+        if (is_a<Type::string>(ptr->car)) {
+            result += ptr->car->string;
+        } else if (is_a<Type::list>(ptr->car)) {
+            for (auto x = ptr->car; !is_false(x); x = x->cdr) {
+                if (is_a<Type::character>(x->car)) {
+                    result += x->car->chr;
+                } else {
+                    throw EvalException("concatenate: strings concatenate only lists of chars");
+                }
+            }
+        }
+    }
+    return mk_string(result);
+}
+
+Expr* concatenate_list(Expr* args)
+{
+    auto result = mk_list();
+    auto cur = result;
+    for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
+        if (is_a<Type::list>(ptr->car)) {
+            Expr* prev = nullptr;
+            for (auto x = ptr->car; !is_false(x); x = x->cdr) {
+                cur->car = x->car;
+                cur->cdr = mk_list();
+                prev = cur;
+                cur = cur->cdr;
+            }
+            if (!prev)
+                prev = nullptr;
+        } else if (is_a<Type::string>(ptr->car)) {
+            Expr* prev = nullptr;
+            for (auto x : ptr->car->string) {
+                cur->car = mk_char(x);
+                cur->cdr = mk_list();
+                prev = cur;
+                cur = cur->cdr;
+            }
+            if (!prev)
+                prev = nullptr;
+        }
+    }
+    return result;
+}
+
+Expr* concatenate(Expr* args)
+{
+    if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
+        throw EvalException("concatenate: first argument must be a sequence type name");
+    }
+    if (args->car->atom == type_string) {
+        return concatenate_str(args->cdr);
+    } else if (args->car->atom == type_list || args->car->atom == type_list2) {
+        return concatenate_list(args->cdr);
+    }
+    throw EvalException("concatenate: can't concatenate type " + args->car->atom);
+}
 }

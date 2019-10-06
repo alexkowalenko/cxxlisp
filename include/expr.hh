@@ -252,6 +252,7 @@ constexpr bool is_seq(const Expr* const s)
 
 const Atom type_atom{ "symbol" };
 const Atom type_list{ "cons" };
+const Atom type_list2{ "list" };
 const Atom type_int{ "integer" };
 const Atom type_float{ "float" };
 const Atom type_string{ "string" };
@@ -262,7 +263,7 @@ const Atom type_null{ "null" };
 
 inline bool is_seq_type(const Atom& s)
 {
-    return s == type_list || s == type_string;
+    return s == type_list || s == type_list2 || s == type_string;
 }
 
 inline Expr* mk_stream(Stream* s)
@@ -287,8 +288,7 @@ public:
         : stream_type(StreamType::output)
         , str(s){};
 
-Stream() {};
-
+    Stream(){};
 
     string to_string();
     bool is_input() { return stream_type == StreamType::input; };
@@ -312,6 +312,6 @@ inline Expr* mk_stream(ostream* s)
     return e;
 }
 
-Expr* mk_stream(fstream * const s, ios_base::openmode m);
+Expr* mk_stream(fstream* const s, ios_base::openmode m);
 }
 #endif

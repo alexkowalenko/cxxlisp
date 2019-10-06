@@ -683,6 +683,7 @@ void init_prims()
         { "set-elt", &setelt, three_arg, preEvaluate },
         { "subseq", &subseq, min_two, preEvaluate },
         { "make-sequence", &make_sequence, min_two, preEvaluate },
+        { "concatenate", &concatenate, min_one, preEvaluate },
 
         // I/O
         { "error", &throw_error, one_arg, preEvaluate },

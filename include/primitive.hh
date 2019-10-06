@@ -177,6 +177,7 @@ Expr* subseq(Expr* args);
 
 Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a);
 Expr* make_sequence(Expr* args);
+Expr* concatenate(Expr* args);
 
 // I/O
 
