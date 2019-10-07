@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Change compiler here
-set(AX_BASE_CLANG /usr/local/opt/llvm/bin)
-set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/clang++)
+set(AX_BASE_CLANG /usr/local/opt/llvm)
+set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/bin/clang++)
 
 project (cxxlisp LANGUAGES CXX)
 
@@ -37,13 +37,16 @@ set(BOEHM_LIBRARIES gc gccpp)
 include_directories(${BOEHM_INCLUDE_DIRS})
 link_directories(${BOEHM_LIBRARY_DIRS})
 
+#replxx
+set(REPLXX_INCLUDE_DIRS /usr/local/include)
+set(REPLXX_LIBRARY_DIRS /usr/local/lib)
+set(REPLXX_LIBRARIES replxx)
+include_directories(${REPLXX_INCLUDE_DIRS})
+link_directories(${REPLXX_LIBRARY_DIRS})
 
 include_directories(include)
 
 # Third party libraries local to this project
-
-add_subdirectory(third_party/replxx)
-include_directories("${PROJECT_SOURCE_DIR}/third_party/replxx/include")
 
 # add_subdirectory(third_party/utfcpp)
 include_directories("${PROJECT_SOURCE_DIR}/third_party/utfcpp/source")

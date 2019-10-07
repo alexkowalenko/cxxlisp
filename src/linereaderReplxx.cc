@@ -34,11 +34,7 @@ LineReaderReplxx::LineReaderReplxx()
     struct passwd* pw = getpwuid(getuid());
     my_history_file = string(pw->pw_dir);
     my_history_file += "/" + history_file;
-    auto res = replxx.history_load(my_history_file);
-    if (res != 0) {
-        cerr << "Can't read the history file: " << my_history_file
-             << ' ' << strerror(res) << endl;
-    }
+    replxx.history_load(my_history_file);
     replxx.set_max_history_size(max_history);
 
     ptr = buf.end();
@@ -46,11 +42,7 @@ LineReaderReplxx::LineReaderReplxx()
 
 LineReaderReplxx::~LineReaderReplxx()
 {
-    auto res = replxx.history_save(my_history_file);
-    if (res != 0) {
-        cerr << "Can't write the history file: " << my_history_file
-             << ' ' << strerror(res) << endl;
-    }
+    replxx.history_save(my_history_file);
 }
 
 uint32_t LineReaderReplxx::get_char()
