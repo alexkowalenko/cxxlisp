@@ -6,6 +6,8 @@
 
 #include "parser.hh"
 
+#include <charconv>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/log/trivial.hpp>
 #include <utf8.h>
@@ -80,7 +82,8 @@ Expr* Parser::parse_comma()
 
 Expr* Parser::parse_hash(const Token& tok)
 {
-    if (get<string>(tok.val) == "\\") {
+    auto token_val = boost::algorithm::to_upper_copy(get<string>(tok.val));
+    if (token_val == "\\") {
         // character
         auto t = lexer.peek();
         if (!iswspace(t)) {
@@ -105,7 +108,7 @@ Expr* Parser::parse_hash(const Token& tok)
             }
         }
         throw ParseException("#\\ expecting a character");
-    } else if (get<string>(tok.val) == "'") {
+    } else if (token_val == "'") {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
@@ -122,6 +125,27 @@ Expr* Parser::parse_hash(const Token& tok)
             throw ParseException("#' expecting lambda expression "s + to_string(funct));
         } else {
             throw ParseException("#' function ref unknown token "s + string(t));
+        }
+    } else if (token_val == "B" || token_val == "O" || token_val == "X") {
+        Token newTok = lexer.get_token();
+        if (newTok.type != TokenType::atom) {
+            throw ParseException("#"s + token_val + " expecting number "s + string(newTok));
+        }
+        int base = 10;
+        if (token_val == "B") {
+            base = 2;
+        } else if (token_val == "O") {
+            base = 8;
+        } else if (token_val == "X") {
+            base = 16;
+        }
+        Int value = 0;
+        auto str_val = get<string>(newTok.val);
+        if (auto [p, ec] = from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
+            ec == errc()) {
+            return mk_int(value);
+        } else {
+            throw ParseException("#"s + token_val + " badly formed number "s + str_val);
         }
     }
     throw ParseException("# unknown "s + string(tok));

@@ -26,6 +26,7 @@ Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `,@`, `#`
   * `#\c` is used for character type.
   * `#'function` is used for the function type.
   * `#'(lambda ...)` used for lambda equivalent of function type.
+  * `#B #O #X` used for introduce integers with different radix.
 
 ## Basic data types
 
@@ -43,7 +44,7 @@ Symbol `t` is defined as the standard true value, and `nil` is defined as the nu
 
 * Cons pair - i.e., `(a . b)`. Not all functions take cons pairs.
 
-* Integers - i.e., `1`, `-2`, `0`. All integers are 64-bit integers.
+* Integers - i.e., `1`, `-2`, `0`. All integers are 64-bit integers. Integers can be specified with different radix. For binary `#B`n, i.e `#B10101`, for octal `#O`n, i.e `#O777`, for hexadecimal `#X`n, i.e `#Xad10`.
 
 * Floats - i.e. 1.2, 1.2345e-08. All floats are 64-bit floating-points.
 

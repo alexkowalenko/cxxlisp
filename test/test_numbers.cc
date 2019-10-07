@@ -773,3 +773,14 @@ BOOST_AUTO_TEST_CASE(test_eval_float)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_radix)
+{
+    vector<TestEval> tests = {
+        { "(+ #B1 #B10)", "3" },
+        { "(+ #O1 #B10 #B100)", "7" },
+        { "(+ #O1 #B10 #B100 #X10)", "23" },
+        { "(+ #xcafe #B0)", "51966" },
+    };
+    test_Evaluator(tests);
+}
