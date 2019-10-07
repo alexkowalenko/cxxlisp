@@ -12,10 +12,13 @@
 
 #include "exceptions.hh"
 #include "function.hh"
+#include "primitive.hh"
 
 namespace ax {
 
 static const NotInt not_int;
+
+const Atom lambda_atom = "lambda";
 
 Int atoi(const string& str)
 {
@@ -107,6 +110,16 @@ Expr* Parser::parse_hash(const Token& tok)
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
             return mk_function_ref(get<string>(t.val));
+        } else if (t.type == TokenType::open) {
+            auto funct = parse_list().val;
+            if (!is_false(funct)
+                && is_atom(funct->car)
+                && funct->car->atom == lambda_atom
+                && !is_false(funct->cdr)) {
+                auto f = lambda("lambda"s, funct->cdr);
+                return f;
+            }
+            throw ParseException("#' expecting lambda expression "s + to_string(funct));
         } else {
             throw ParseException("#' function ref unknown token "s + string(t));
         }

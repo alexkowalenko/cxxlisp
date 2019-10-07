@@ -877,3 +877,20 @@ BOOST_AUTO_TEST_CASE(test_eval_do)
     };
     test_Evaluator(tests);
 }
+
+BOOST_AUTO_TEST_CASE(test_eval_hash_function)
+{
+    vector<TestEval> tests = {
+        { "#'(lambda (x) x)", "λ:lambda : (x)" },
+        { "#'(lambda (x))", "λ:lambda : nil" },
+
+        { "(mapcar #'(lambda (x) x) '(1 2 3) )", "(1 2 3)" },
+        { "(mapcar #'(lambda (x) (1+ x)) '(1 2 3) )", "(2 3 4)" },
+        { "(mapcar #'(lambda (n) (^ n n)) '(1 2 3 4) )", "(1 4 27 256)" },
+
+        { "#'()", "Parse error: #' expecting lambda expression nil" },
+        { "#'(lambda )", "Parse error: #' expecting lambda expression (lambda)" },
+        { "#'(atom x)", "Parse error: #' expecting lambda expression (atom x)" },
+    };
+    test_Evaluator(tests);
+}

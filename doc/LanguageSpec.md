@@ -25,6 +25,7 @@ Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `,@`, `#`
 * `#` is used to introduce various types and syntax features.
   * `#\c` is used for character type.
   * `#'function` is used for the function type.
+  * `#'(lambda ...)` used for lambda equivalent of function type.
 
 ## Basic data types
 
@@ -446,18 +447,18 @@ These are the options in running the executable:
 * `-D string` Debug options, `string` contains the characters:
   * `e` print compilation and execution.
 
-# Diferences to Common Lisp
+# Differences to Common Lisp
 
 Apart from what is not implemented.
 
-* Don't support `#'(lambda ....)`. Use `(lambda ...)` directly. Common Lisp says that this should be the case, and not this implementation.
+* Supports `#'(lambda ....)` and `(lambda ...)`. Common Lisp says the second is illegal.
 
 ```lisp
 (mapcar #'(lambda (x) (micro-eval x environment))
 		     (rest form))
 ```
 
-Should have the function reference removed, i.e.:
+The follow also works:
 
 ```lisp
 (mapcar (lambda (x) (micro-eval x environment))
