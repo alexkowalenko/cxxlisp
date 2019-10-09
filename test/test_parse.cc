@@ -334,6 +334,34 @@ BOOST_AUTO_TEST_CASE(test_parser_keyword)
     test_Parser(tests);
 }
 
+BOOST_AUTO_TEST_CASE(test_parser_vector)
+{
+    vector<TestParser> tests = {
+        { "#()", "#()" },
+        { "#(a )", "#(a)" },
+
+        { "#(a 1 \"2\" (3 s f) #\\4 nil)",
+            "#(a 1 \"2\" (3 s f) #\\4 nil)" },
+        { "#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))",
+            "#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))" },
+        { "#(#(#(1)))", "#(#(#(1)))" },
+    };
+    test_Parser(tests);
+}
+
+BOOST_AUTO_TEST_CASE(test_parser_complex)
+{
+    vector<TestParser> tests = {
+        { "#C(1 2)", "#c(1 2)" },
+        { "#C(-1 2)", "#c(-1 2)" },
+        { "#C(0 0)", "#c(0 0)" },
+        { "#C(0.5 0.25)", "#c(0.5 0.25)" },
+
+        { "(defvar z #C(1 3))", "(defvar z #c(1 3))" },
+    };
+    test_Parser(tests);
+}
+
 void test_Parser(const vector<TestParser>& tests)
 {
     for (auto test : tests) {

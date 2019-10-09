@@ -8,10 +8,12 @@
 #define EXPR_HH
 
 #include <codecvt>
+#include <complex>
 #include <iostream>
 #include <locale>
 #include <string>
 #include <variant>
+#include <vector>
 
 #include <gc_cpp.h>
 
@@ -25,14 +27,18 @@ enum class Type {
     boolean,
     integer,
     floating,
+    complex,
     list,
     character,
     string,
     function,
     keyword,
     function_ref,
-    stream
+    stream,
+    vector
 };
+
+class Expr;
 
 // defintions of basic types
 using Atom = string;
@@ -42,6 +48,8 @@ using Float = double;
 using Keyword = string;
 using Char = wchar_t;
 using String = wstring;
+using Vector = vector<Expr*>;
+using Complex = complex<Float>;
 
 class Function;
 class Stream;
@@ -62,6 +70,7 @@ public:
         Bool boolean;
         Int integer;
         Float floating;
+        Complex complex;
         struct {
             // THis makes easier access as unamed structure,
             // but is not standard C++.
@@ -74,6 +83,7 @@ public:
         Keyword keyword;
         Atom function_ref;
         Stream* stream;
+        Vector vector;
     };
 
     // Return the size of the list, 0 if not list.
@@ -113,6 +123,13 @@ inline Expr* mk_float(const Float f)
 {
     auto e = new (GC) Expr(Type::floating);
     e->floating = f;
+    return e;
+}
+
+inline Expr* mk_complex(const Complex c)
+{
+    auto e = new (GC) Expr(Type::complex);
+    e->complex = c;
     return e;
 }
 
@@ -255,11 +272,13 @@ const Atom type_list{ "cons" };
 const Atom type_list2{ "list" };
 const Atom type_int{ "integer" };
 const Atom type_float{ "float" };
+const Atom type_complex{ "complex" };
 const Atom type_string{ "string" };
 const Atom type_char{ "char" };
 const Atom type_funct{ "function" };
 const Atom type_bool{ "boolean" };
 const Atom type_null{ "null" };
+const Atom type_vector{ "vector" };
 
 inline bool is_seq_type(const Atom& s)
 {
@@ -313,5 +332,15 @@ inline Expr* mk_stream(ostream* s)
 }
 
 Expr* mk_stream(fstream* const s, ios_base::openmode m);
+
+// Vectors
+inline Expr* mk_vector()
+{
+    auto v = new (GC) Expr(Type::vector);
+    v->vector = Vector();
+    return v;
+}
+
+Expr* to_vector(Expr*);
 }
 #endif

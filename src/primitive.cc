@@ -65,6 +65,9 @@ Expr* type_of(Expr* args)
     case Type::floating:
         ret = type_float;
         break;
+    case Type::complex:
+        ret = type_complex;
+        break;
     case Type::string:
         ret = type_string;
         break;
@@ -76,6 +79,9 @@ Expr* type_of(Expr* args)
         break;
     case Type::boolean:
         ret = type_bool;
+        break;
+    case Type::vector:
+        ret = type_vector;
         break;
     default:
         throw EvalException("Uknown type: " + to_string(args->car));

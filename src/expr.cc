@@ -54,6 +54,13 @@ Expr* mk_list(size_t size, Expr* const init)
     return top;
 }
 
+inline string to_string(Float f)
+{
+    array<char, 30> buf;
+    sprintf(buf.data(), "%.12lg", f);
+    return string(buf.data());
+}
+
 string to_dstring(const Expr* const s)
 {
     if (!s) {
@@ -80,7 +87,9 @@ string to_dstring(const Expr* const s)
     case Type::function:
     case Type::keyword:
     case Type::floating:
+    case Type::complex:
     case Type::stream:
+    case Type::vector:
         return to_string(s);
     default:
         return "<Unknown>";
@@ -101,9 +110,15 @@ string to_string(const Expr* const s)
     case Type::integer:
         return std::to_string(s->integer);
     case Type::floating:
-        array<char, 30> buf;
-        sprintf(buf.data(), "%.12lg", s->floating);
-        return string(buf.data());
+        return to_string(s->floating);
+    case Type::complex: {
+        string str{ "#c(" };
+        str += to_string(s->complex.real());
+        str += ' ';
+        str += to_string(s->complex.imag());
+        str += ')';
+        return str;
+    }
     case Type::list: {
         if (s->car == nullptr && s->cdr == nullptr) {
             return "nil";
@@ -133,7 +148,7 @@ string to_string(const Expr* const s)
     case Type::string:
         return "\"" + ws2s(s->string) + "\"";
     case Type::character: {
-        string str("#\\");
+        string str{ "#\\" };
         switch (s->chr) {
         case ' ':
             str += "space";
@@ -154,6 +169,17 @@ string to_string(const Expr* const s)
         return s->keyword;
     case Type::stream:
         return s->stream->to_string();
+    case Type::vector: {
+        string str{ "#(" };
+        for (auto x = s->vector.begin(); x != s->vector.end(); x++) {
+            str += to_string(*x);
+            if (!(x == s->vector.end() - 1)) {
+                str += ' ';
+            }
+        }
+        str += ')';
+        return str;
+    }
     default:
         return "*Unprintable type*";
     }
@@ -304,5 +330,14 @@ string Stream::to_string()
         res += "output>";
     }
     return res;
+}
+
+Expr* to_vector(Expr* l)
+{
+    auto v = mk_vector();
+    for (; !is_false(l); l = l->cdr) {
+        v->vector.push_back(l->car);
+    }
+    return v;
 }
 }

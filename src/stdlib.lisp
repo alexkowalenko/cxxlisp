@@ -4,7 +4,7 @@
 ;; Copyright © Alex Kowalenko 2019.
 ;;
 
-;; Defined functions common imported into the environment
+;; Defined common functions imported into the environment
 
 (defun cadr (x)
 	(car (cdr x)))

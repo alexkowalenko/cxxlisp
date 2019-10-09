@@ -26,7 +26,9 @@ Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `,@`, `#`
   * `#\c` is used for character type.
   * `#'function` is used for the function type.
   * `#'(lambda ...)` used for lambda equivalent of function type.
+  * `#(...)` used for vector types.
   * `#B #O #X` used for introduce integers with different radix.
+  * `#C(n n)` used for numeric complex types.
 
 ## Basic data types
 
@@ -48,11 +50,15 @@ Symbol `t` is defined as the standard true value, and `nil` is defined as the nu
 
 * Floats - i.e. 1.2, 1.2345e-08. All floats are 64-bit floating-points.
 
+* Complex - i.e `#c(1 2) #c(0 1)`. Complex use Float numeric representation.
+
 * Strings - i.e., `"this string"`. Strings handle unicode text. 
 
 * Characters - i.e., `#\a`, `#\newline`, `#\space`. Characters handle unicode characters.
 
 * Function references, i.e., `#'atom`.
+
+* Vectors, i.e., `#(1 2 3)` - one dimensional arrays.
 
 All types apart from Lists are atomic.
 
@@ -80,7 +86,7 @@ All types apart from Lists are atomic.
 
 `(keywordp x)` - is `x` a keyword, returns `t` if so, `nil` if `x` is not an symbol.
 
-`(type-of x)` - returns a symbol representing the type of `x`. [Not implemented].
+`(type-of x)` - returns a symbol representing the type of `x`.
 
 ### Functions
 

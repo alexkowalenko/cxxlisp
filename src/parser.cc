@@ -147,6 +147,24 @@ Expr* Parser::parse_hash(const Token& tok)
         } else {
             throw ParseException("#"s + token_val + " badly formed number "s + str_val);
         }
+    } else if (token_val == "(") {
+        // Vector
+        auto list = parse_list();
+        return to_vector(list.val);
+    } else if (token_val == "C") {
+        // Complex
+        Token t = lexer.get_token();
+        if (t.type != TokenType::open) {
+            throw ParseException("malformed complex literal "s + string(t));
+        }
+        auto list = parse_list();
+        if (list.val->size() != 2) {
+            throw ParseException("malformed complex literal"s + to_string(list.val));
+        }
+        if (!is_number(list.val->car) || !is_number(list.val->cdr->car)) {
+            throw ParseException("malformed complex literal"s + to_string(list.val));
+        }
+        return mk_complex(Complex(as_float(list.val->car), (as_float(list.val->cdr->car))));
     }
     throw ParseException("# unknown "s + string(tok));
 }

@@ -15,9 +15,6 @@
 
 using namespace std;
 
-struct TestEval;
-void test_Evaluator(const vector<TestEval>& tests);
-
 BOOST_AUTO_TEST_CASE(test_eval)
 {
     vector<TestEval> tests = {
@@ -45,6 +42,12 @@ BOOST_AUTO_TEST_CASE(test_eval)
         { "1.2345e-8", "1.2345e-08" },
         { "-1.0", "-1" },
         { "+1.0", "1" },
+
+        // complex
+        { "#C(1 2)", "#c(1 2)" },
+        { "#C(-1 2)", "#c(-1 2)" },
+        { "#C(0 0)", "#c(0 0)" },
+        { "#C(0.5 -0.25)", "#c(0.5 -0.25)" },
     };
     test_Evaluator(tests);
 }

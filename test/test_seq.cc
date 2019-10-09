@@ -7,14 +7,9 @@
 
 #include "test.hh"
 
-#include <limits>
-
 #include <boost/test/unit_test.hpp>
 
 using namespace std;
-
-struct TestEval;
-void test_Evaluator(const vector<TestEval>& tests);
 
 BOOST_AUTO_TEST_CASE(test_eval_length)
 {
