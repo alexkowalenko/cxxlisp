@@ -76,8 +76,20 @@ if (CLANG_TIDY_PROGRAM)
         set(RUN_CLANG_TIDY "${CLANG_TIDY_PROGRAM}" "${CLANG_TIDY_OPTIONS}")
 endif()
 
+function(make_includable input_file output_file)
+    file(READ ${input_file} content)
+    set(delim "stdlib")
+    set(content "R\"${delim}(\n${content})${delim}\"")
+    file(WRITE ${output_file} "${content}")
+endfunction(make_includable)
+
+if (NOT EXISTS src/stdlib.lisp.hh)
+        make_includable(src/stdlib.lisp src/stdlib.lisp.hh)
+endif()
+#set_property(DIRECTORY PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stdlib.lisp.hh)
+
 file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
-add_library(libcxxlisp STATIC ${source_files})
+add_library(libcxxlisp STATIC ${source_files} src/stdlib.lisp.hh)
 
 add_executable(cxxlisp cmd/cxxlisp.cc)
 target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
