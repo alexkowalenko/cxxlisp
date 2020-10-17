@@ -49,6 +49,7 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" ON)
+option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" ON)
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
 if(ENABLE_TESTING)
@@ -62,11 +63,14 @@ if(ENABLE_FUZZING)
   add_subdirectory(fuzz_test)
 endif()
 
+if(ENABLE_BENCHMARKS)
+  message("Building Benchmarks")
+  add_subdirectory(benchmarks)
+endif()
+
 add_subdirectory(third_party/replxx)
 
 # Local Code
-
-include_directories(include)
 
 add_subdirectory(src)
 add_subdirectory(cmd)

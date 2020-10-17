@@ -44,7 +44,7 @@ link_libraries(${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_
 add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
 
 # GNU Readline 
-find_package(readline REQUIRED)
+find_package(Readline REQUIRED)
 include_directories(${Readline_INCLUDE_DIR})
 link_libraries(${Readline_LIBRARY})
 
