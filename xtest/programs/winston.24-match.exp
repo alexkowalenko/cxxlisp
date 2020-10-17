@@ -1,0 +1,35 @@
+add-binding
+extract-variable
+make-binding
+find-binding
+extract-key
+extract-value
+match-atoms
+match-variable
+match-pieces
+elements-p
+variable-p
+recursive-p
+match
+unify
+unify-atoms
+unify-pieces
+unify-variable
+insidep
+inside-or-equal-p
+((x apple))t
+((y red))t
+((y red) (x apple))t
+nilt
+nilt
+nilt
+failt
+failt
+((h blond) (p patrick))t
+((y red) (x apple))t
+((m red) (l apple))t
+((y (? m)) (x (? l)))t
+((y (? y)) (x (? x)))t
+((x (patrick is-a person)))t
+((x (patrick is-a (? y))))t
+failt

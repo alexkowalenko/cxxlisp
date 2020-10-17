@@ -1,0 +1,21 @@
+13
+0
+Eval error: length expecting an argument
+#\o
+#\e
+Eval error: elt: index out of range
+Eval error: char: invalid number of arguments
+Eval error: char: invalid number of arguments
+nil
+Eval error: string= arguments needs to be a string
+Eval error: string= arguments needs to be a string
+t
+"one and"
+"and"
+"one"
+""
+""
+""
+""
+""
+""

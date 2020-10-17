@@ -1,0 +1,5 @@
+(cons (quote a) (quote (x y z)))
+(cons (quote a) nil)
+(cons (quote (a b)) (quote (x y z)))
+(cons (quote (a b)) nil)
+(cons 'z (cdr '(a b c)))

@@ -1,0 +1,8 @@
+((lambda (x) (cons x '(b))) 'a)
+((lambda (x y) (cons x (cdr y))) 'z '(a b c))
+((lambda (x) (atom x)) 's)
+((lambda nil 'hello))
+((lambda (a b)
+    (list a b)) 'd 'g)
+((lambda (a b)
+    (cons a b)) 's 'y)

@@ -1,0 +1,11 @@
+10
+10
+get-m
+alive?
+count-m
+next
+print-m
+run
+run
+Eval error: Can't evaluate (make-array (list width height) :initial-contents '((_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ _ _ _ _ _ _ _ _ _) (_ % % % _ _ _ _ _ _) (_ _ _ % _ _ _ _ _ _) (_ _ % _ _ _ _ _ _ _)))
+Eval error: unbound variable: matrix

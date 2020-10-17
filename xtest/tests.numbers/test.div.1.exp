@@ -1,0 +1,18 @@
+0
+10
+-10
+Numeric exception: divide by zero
+0
+-3
+0
+1915388
+Eval error: / arguments needs to be a number
+Eval error: mod expecting 2 arguments
+2
+2
+Numeric exception: divide by zero
+0
+0
+Eval error: rem expecting 2 arguments
+28142
+Eval error: mod arguments needs to be a number

@@ -1,0 +1,5 @@
+(when t 'pass)
+(when nil 'pass)
+(when () 'pass)
+(when t)
+(when)

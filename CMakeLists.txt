@@ -56,6 +56,7 @@ if(ENABLE_TESTING)
   message("Enabling testing")
   enable_testing()
   add_subdirectory(test)
+  add_subdirectory(xtest)
 endif()
 
 if(ENABLE_FUZZING)

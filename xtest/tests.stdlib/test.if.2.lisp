@@ -1,0 +1,8 @@
+(if t 'true 'false)
+(if nil 'true 'false)
+(if nil 'true)
+(if nil)
+(if t 'true) ; this is the same as (when t 'true)
+(if t)
+(if)
+(if () 'true 'false)

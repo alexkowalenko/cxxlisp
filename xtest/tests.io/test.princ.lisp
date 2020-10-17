@@ -1,0 +1,8 @@
+(print 'x)
+(print 1)
+(print nil)
+(print ())
+(princ 'x)
+(princ 1)
+(princ nil)
+(princ ())

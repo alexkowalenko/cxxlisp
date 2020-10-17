@@ -1,0 +1,8 @@
+(list 'a)
+(list '(a b))
+(list 'a 'b)
+(list 'a '(c d))
+(list 'a 'b 'c 'd 'e 'f)
+(list 'a (list 'b 'c) 'd)
+(list 'α 'β 'γ 'δ 'ε 'ζ 'η 'θ 'ι 'κ 'λ 'μ 'ν 'ξ 'ο 'π 'ρ 'σ 'τ 'υ 'φ 'χ 'ψ 'ω)
+(list)

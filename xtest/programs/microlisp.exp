@@ -1,0 +1,19 @@
+micro-eval
+micro-apply
+bind-variables
+1t
+tt
+nilt
+(a b c)t
+1t
+2t
+at
+(b c)t
+(m-lambda (l) (m-first (m-rest l)))t
+bt
+bt
+m-appendt
+(a b)t
+(a b)t
+(a b)t
+t

@@ -1,0 +1,7 @@
+(progn 1 2 3)
+(progn (atom 1) (numberp 1) (zerop 1))
+(progn "hello" "olá")
+(progn 1 2 3)
+(progn 1 2)
+(progn 1)
+(progn)

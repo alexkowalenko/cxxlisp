@@ -1,0 +1,5 @@
+(a x y z)
+(a)
+((a b) x y z)
+((a b))
+(z b c)

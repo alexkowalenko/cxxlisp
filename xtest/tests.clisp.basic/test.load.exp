@@ -1,0 +1,5 @@
+(a b c)
+(a b c)(a b c)
+t
+Eval error: load: can't open x.lisp
+Eval error: load expecting an argument

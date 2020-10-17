@@ -1,0 +1,32 @@
+micro-eval
+micro-apply
+bind-variables
+
+11
+
+tt
+
+nilnil
+
+(a b c)(a b c)
+
+11
+
+22
+
+nilnil
+
+nilnil
+Eval error: setf accessor not found: get
+
+nilnil
+
+nilnil
+Eval error: setf accessor not found: get
+
+nilnil
+Eval error: mapcar: expecting list arguments nil
+
+nilnil
+
+t

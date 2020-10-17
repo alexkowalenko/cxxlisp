@@ -1,0 +1,6 @@
+(a b)
+(z b c)
+t
+Eval error: lambda needs a list of parameters
+(d g)
+(s . y)

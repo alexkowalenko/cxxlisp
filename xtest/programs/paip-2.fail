@@ -1,0 +1,15 @@
+mappend
+sentence
+noun-phrase
+verb-phrase
+Article
+Noun
+Verb
+one-of
+random-elt
+Adj*
+PP*
+PP
+Adj
+Prep
+*simple-grammar*

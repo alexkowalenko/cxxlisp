@@ -1,0 +1,7 @@
+(numberp 1)
+(numberp (+ 2 3))
+(numberp 0)
+(numberp 'a)
+(numberp '(a b c))
+(numberp t)
+(numberp nil)

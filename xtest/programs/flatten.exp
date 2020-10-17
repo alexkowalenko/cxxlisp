@@ -1,0 +1,8 @@
+flatten
+(a b)
+(a c1 v2 b)
+(a c1 c1 v2 v2 b)
+(a c1 v2 b c1 c1 c1 c1 c1 c1 v2 v2 v2)
+Error: Unbound function: f
+nil
+3.14159
