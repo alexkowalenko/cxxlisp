@@ -5,7 +5,14 @@
 
 #include "primitive.hh"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wcast-align"
 #include <utf8.h>
+#pragma clang diagnostic pop
 
 #include "exceptions.hh"
 #include "function.hh"
@@ -16,16 +23,13 @@ namespace ax {
 // Sequence functions
 //
 
-Expr* const keyword_initial_element = mk_keyword(":initial-element");
+Expr *const keyword_initial_element = mk_keyword(":initial-element");
 
-template <typename T>
-Expr* seq_length(const T& s)
-{
-    return mk_int(s.size());
+template <typename T> Expr *seq_length(const T &s) {
+    return mk_int(Int(s.size()));
 }
 
-Expr* length(Expr* args)
-{
+Expr *length(Expr *args) {
     if (is_false(args->car)) {
         return mk_int(0);
     }
@@ -39,15 +43,14 @@ Expr* length(Expr* args)
     throw EvalException("length: needs sequence argument");
 }
 
-Expr* elt(Expr* args)
-{
+Expr *elt(Expr *args) {
     if (!is_a<Type::integer>(args->cdr->car)) {
         throw EvalException("elt: index is not a integer");
     }
     if (is_false(args->car)) {
         throw EvalException("elt: index out of range");
     }
-    size_t index = args->cdr->car->integer;
+    size_t index = size_t(args->cdr->car->integer);
     if (is_seq(args->car)) {
         if (is_a<Type::string>(args->car)) {
             auto seq = args->car->string;
@@ -66,21 +69,20 @@ Expr* elt(Expr* args)
     throw EvalException("length: needs sequence argument");
 }
 
-Expr* subseq(Expr* args)
-{
+Expr *subseq(Expr *args) {
     if (is_false(args->car)) {
         return sF;
     }
     if (!is_a<Type::integer>(args->cdr->car)) {
         throw EvalException("elt: index is not a integer");
     }
-    size_t index = args->cdr->car->integer;
+    size_t index = size_t(args->cdr->car->integer);
     size_t length = 0;
     if (args->size() > 2) {
         if (!is_a<Type::integer>(args->cdr->cdr->car)) {
             throw EvalException("elt: length is not a integer");
         }
-        length = args->cdr->cdr->car->integer;
+        length = size_t(args->cdr->cdr->car->integer);
         if (length <= 0) {
             throw EvalException("elt: length must be greater than zero");
         }
@@ -88,11 +90,11 @@ Expr* subseq(Expr* args)
     if (is_seq(args->car)) {
         if (is_a<Type::string>(args->car)) {
             String sub;
-            auto seq = args->car->string;
+            auto   seq = args->car->string;
             if (length == 0) {
                 length = seq.size() - index;
             }
-            copy_n(seq.begin() + index, length, back_inserter(sub));
+            copy_n(seq.begin() + int(index), length, back_inserter(sub));
             return mk_string(sub);
         } else {
             auto top = mk_list();
@@ -101,7 +103,7 @@ Expr* subseq(Expr* args)
             if (length == 0) {
                 length = seq->size() - index;
             }
-            Expr* prev = nullptr;
+            Expr *prev = nullptr;
             for (unsigned int i = 0; i < args->car->size(); i++, seq = seq->cdr) {
                 if (i >= index && i < index + length) {
                     s->car = seq->car;
@@ -119,8 +121,7 @@ Expr* subseq(Expr* args)
 };
 
 template <typename T, typename S>
-T seq_setelt(const string& name, T& s, size_t index, const S& r)
-{
+T seq_setelt(const string &name, T &s, size_t index, const S &r) {
     if (index >= s->size()) {
         throw EvalException(name + ": index out of bounds");
     }
@@ -128,8 +129,7 @@ T seq_setelt(const string& name, T& s, size_t index, const S& r)
     return s;
 }
 
-void set_str_elt(const string& name, Expr* seq, Expr* c, size_t index)
-{
+void set_str_elt(const string &name, Expr *seq, Expr *c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -142,8 +142,7 @@ void set_str_elt(const string& name, Expr* seq, Expr* c, size_t index)
     seq->string[index] = c->chr;
 }
 
-void set_list_elt(const string& name, Expr* seq, Expr* c, size_t index)
-{
+void set_list_elt(const string &name, Expr *seq, Expr *c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -153,14 +152,13 @@ void set_list_elt(const string& name, Expr* seq, Expr* c, size_t index)
     seq->set(index, c);
 }
 
-Expr* setelt(const string& name, Expr* args)
-{
+Expr *setelt(const string &name, Expr *args) {
     auto seq = args->car;
     auto rindex = arg1(args);
     if (!is_a<Type::integer>(rindex)) {
         throw EvalException(name + ": needs integer index");
     }
-    size_t index = rindex->integer;
+    size_t index = size_t(rindex->integer);
     if (is_a<Type::string>(seq)) {
         set_str_elt(name, seq, arg2(args), index);
     } else {
@@ -171,15 +169,13 @@ Expr* setelt(const string& name, Expr* args)
 
 // setf version
 // (var index) result
-Expr* setf_elt(Evaluator& l, Expr* args, Expr* r, shared_ptr<SymbolTable> a)
-{
-    auto newargs = mk_list({ args->car, arg1(args), r });
+Expr *setf_elt(Evaluator &, Expr *args, Expr *r, shared_ptr<SymbolTable>) {
+    auto newargs = mk_list({args->car, arg1(args), r});
     setelt("setf elt", newargs);
     return r;
 }
 
-Expr* make_sequence(Expr* args)
-{
+Expr *make_sequence(Expr *args) {
     if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
         throw EvalException("make-sequence: first argument must be a sequence type name");
     }
@@ -198,14 +194,13 @@ Expr* make_sequence(Expr* args)
         if (!is_a<Type::character>(init)) {
             throw EvalException("make-sequence: :initial-element must be char");
         }
-        return mk_string(String(arg1(args)->integer, Char(init->chr)));
+        return mk_string(String(size_t(arg1(args)->integer), Char(init->chr)));
     } else {
-        return mk_list(arg1(args)->integer, init);
+        return mk_list(size_t(arg1(args)->integer), init);
     }
 }
 
-Expr* concatenate_str(Expr* args)
-{
+Expr *concatenate_str(Expr *args) {
     String result;
     for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
         if (is_a<Type::string>(ptr->car)) {
@@ -223,13 +218,12 @@ Expr* concatenate_str(Expr* args)
     return mk_string(result);
 }
 
-Expr* concatenate_list(Expr* args)
-{
+Expr *concatenate_list(Expr *args) {
     auto result = mk_list();
     auto cur = result;
     for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
         if (is_a<Type::list>(ptr->car)) {
-            Expr* prev = nullptr;
+            Expr *prev = nullptr;
             for (auto x = ptr->car; !is_false(x); x = x->cdr) {
                 cur->car = x->car;
                 cur->cdr = mk_list();
@@ -239,7 +233,7 @@ Expr* concatenate_list(Expr* args)
             if (!prev)
                 prev = nullptr;
         } else if (is_a<Type::string>(ptr->car)) {
-            Expr* prev = nullptr;
+            Expr *prev = nullptr;
             for (auto x : ptr->car->string) {
                 cur->car = mk_char(x);
                 cur->cdr = mk_list();
@@ -253,8 +247,7 @@ Expr* concatenate_list(Expr* args)
     return result;
 }
 
-Expr* concatenate(Expr* args)
-{
+Expr *concatenate(Expr *args) {
     if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
         throw EvalException("concatenate: first argument must be a sequence type name");
     }
@@ -265,4 +258,4 @@ Expr* concatenate(Expr* args)
     }
     throw EvalException("concatenate: can't concatenate type " + args->car->atom);
 }
-}
+} // namespace ax

@@ -10,7 +10,15 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/log/trivial.hpp>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wcast-align"
 #include <utf8.h>
+#pragma clang diagnostic pop
 
 #include "exceptions.hh"
 #include "function.hh"
@@ -22,10 +30,9 @@ static const NotInt not_int;
 
 const Atom lambda_atom = "lambda";
 
-Int atoi(const string& str)
-{
-    Int value = 0;
-    Int sign = 1;
+Int atoi(const string &str) {
+    Int  value = 0;
+    Int  sign = 1;
     bool digits = false;
 
     auto iter = str.begin();
@@ -36,7 +43,7 @@ Int atoi(const string& str)
     }
     for (; isdigit(*iter); iter++) {
         value *= 10;
-        value += (int)(*iter - '0');
+        value += int(*iter - '0');
         digits = true;
     }
     if (iter != str.end() || !digits) {
@@ -45,8 +52,7 @@ Int atoi(const string& str)
     return value * sign;
 }
 
-Expr* mk_symbolInt(const string& atom)
-{
+Expr *mk_symbolInt(const string &atom) {
     if (atom == "nil") {
         return sF;
     } else if (atom == "t") {
@@ -66,13 +72,12 @@ Expr* mk_symbolInt(const string& atom)
     }
     try {
         return mk_int(ax::atoi(atom));
-    } catch (NotInt) { //fallthrough to be an atom
+    } catch (NotInt) { // fallthrough to be an atom
     };
     return mk_atom(atom);
 }
 
-Expr* Parser::parse_comma()
-{
+Expr *Parser::parse_comma() {
     if (lexer.peek() == '@') {
         lexer.get_token();
         return splice_unquote_at;
@@ -80,20 +85,19 @@ Expr* Parser::parse_comma()
     return unquote_at;
 }
 
-Expr* Parser::parse_hash(const Token& tok)
-{
+Expr *Parser::parse_hash(const Token &tok) {
     auto token_val = boost::algorithm::to_upper_copy(get<string>(tok.val));
     if (token_val == "\\") {
         // character
         auto t = lexer.peek();
-        if (!iswspace(t)) {
+        if (!iswspace(wint_t(t))) {
             switch (t) {
             case 's':
             case 'S':
             case 'n':
             case 'N': {
                 Token newTok = lexer.get_token();
-                auto val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
+                auto  val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
                 if (val == "newline") {
                     return mk_char('\n');
                 } else if (val == "space") {
@@ -115,10 +119,8 @@ Expr* Parser::parse_hash(const Token& tok)
             return mk_function_ref(get<string>(t.val));
         } else if (t.type == TokenType::open) {
             auto funct = parse_list().val;
-            if (!is_false(funct)
-                && is_atom(funct->car)
-                && funct->car->atom == lambda_atom
-                && !is_false(funct->cdr)) {
+            if (!is_false(funct) && is_atom(funct->car) && funct->car->atom == lambda_atom &&
+                !is_false(funct->cdr)) {
                 auto f = lambda("lambda"s, funct->cdr);
                 return f;
             }
@@ -139,9 +141,10 @@ Expr* Parser::parse_hash(const Token& tok)
         } else if (token_val == "X") {
             base = 16;
         }
-        Int value = 0;
+        Int  value = 0;
         auto str_val = get<string>(newTok.val);
-        if (auto [p, ec] = from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
+        if (auto [p, ec] =
+                from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
             ec == errc()) {
             return mk_int(value);
         } else {
@@ -169,8 +172,7 @@ Expr* Parser::parse_hash(const Token& tok)
     throw ParseException("# unknown "s + string(tok));
 }
 
-ParserResult Parser::parse_quote(const Token& tok)
-{
+ParserResult Parser::parse_quote(const Token &tok) {
     auto x = mk_list();
     if (tok.type == TokenType::quote) {
         x->car = quote_at;
@@ -183,8 +185,7 @@ ParserResult Parser::parse_quote(const Token& tok)
     return res;
 }
 
-ParserResult Parser::parse_list()
-{
+ParserResult Parser::parse_list() {
     auto top = mk_list();
     auto l = top;
     while (true) {
@@ -205,13 +206,12 @@ ParserResult Parser::parse_list()
                 }
             }
         } catch (EndBracketException) {
-            return { top, eof };
+            return {top, eof};
         }
     }
 }
 
-ParserResult Parser::parse()
-{
+ParserResult Parser::parse() {
     Token tok;
     lexer >> tok;
     // BOOST_LOG_TRIVIAL(trace) << "parse: " << tok;
@@ -225,10 +225,10 @@ ParserResult Parser::parse()
         throw EndBracketException();
 
     case TokenType::atom:
-        return { mk_symbolInt(get<string>(tok.val)), false };
+        return {mk_symbolInt(get<string>(tok.val)), false};
 
     case TokenType::string:
-        return { mk_string(get<wstring>(tok.val)), false };
+        return {mk_string(get<wstring>(tok.val)), false};
 
     case TokenType::quote:
     case TokenType::backquote:
@@ -241,17 +241,17 @@ ParserResult Parser::parse()
     }
 
     case TokenType::comma:
-        return { parse_comma(), false };
+        return {parse_comma(), false};
 
     case TokenType::hash: {
-        return { parse_hash(tok), false };
+        return {parse_hash(tok), false};
     }
 
     case TokenType::eof:
-        return { sF, true };
+        return {sF, true};
 
     default:
         throw ParseException("Unknown token "s + string(tok));
     }
 }
-}
+} // namespace ax

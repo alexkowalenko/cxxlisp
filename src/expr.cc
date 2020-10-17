@@ -11,7 +11,14 @@
 
 #include <stdio.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wcast-align"
 #include <utf8.h>
+#pragma clang diagnostic pop
 
 #include "exceptions.hh"
 #include "function.hh"
@@ -19,13 +26,12 @@
 
 namespace ax {
 
-Expr* mk_list(initializer_list<Expr*> p)
-{
+Expr *mk_list(initializer_list<Expr *> p) {
     if (p.size() == 0) {
         return sF;
     }
-    Expr* start = mk_list();
-    Expr* l = start;
+    Expr *start = mk_list();
+    Expr *l = start;
     for (auto iter = p.begin(); iter != p.end(); iter++) {
         l->car = *iter;
         if (iter != p.end() - 1) {
@@ -36,11 +42,10 @@ Expr* mk_list(initializer_list<Expr*> p)
     return start;
 }
 
-Expr* mk_list(size_t size, Expr* const init)
-{
-    Expr* prev = nullptr;
-    auto top = mk_list();
-    auto s = top;
+Expr *mk_list(size_t size, Expr *const init) {
+    Expr *prev = nullptr;
+    auto  top = mk_list();
+    auto  s = top;
     while (size > 0) {
         s->car = init;
         s->cdr = mk_list();
@@ -54,15 +59,13 @@ Expr* mk_list(size_t size, Expr* const init)
     return top;
 }
 
-inline string to_string(Float f)
-{
+inline string to_string(Float f) {
     array<char, 30> buf;
     sprintf(buf.data(), "%.12lg", f);
     return string(buf.data());
 }
 
-string to_dstring(const Expr* const s)
-{
+string to_dstring(const Expr *const s) {
     if (!s) {
         return "NULL";
     }
@@ -96,8 +99,7 @@ string to_dstring(const Expr* const s)
     }
 }
 
-string to_string(const Expr* const s)
-{
+string to_string(const Expr *const s) {
     if (s == nullptr) {
         return "";
     }
@@ -112,7 +114,7 @@ string to_string(const Expr* const s)
     case Type::floating:
         return to_string(s->floating);
     case Type::complex: {
-        string str { "#c(" };
+        string str{"#c("};
         str += to_string(s->complex.real());
         str += ' ';
         str += to_string(s->complex.imag());
@@ -126,7 +128,7 @@ string to_string(const Expr* const s)
         if (s->car == quote_at) {
             return "'" + to_string(s->cdr->car);
         }
-        string str { '(' };
+        string str{'('};
         str += to_string(s->car);
         auto x = s;
         while (x->cdr != nullptr) {
@@ -148,7 +150,7 @@ string to_string(const Expr* const s)
     case Type::string:
         return "\"" + ws2s(s->string) + "\"";
     case Type::character: {
-        string str { "#\\" };
+        string str{"#\\"};
         switch (s->chr) {
         case ' ':
             str += "space";
@@ -157,7 +159,7 @@ string to_string(const Expr* const s)
             str += "newline";
             break;
         default:
-            utf8::append(s->chr, str);
+            utf8::append(char32_t(s->chr), str);
         }
         return str;
     }
@@ -170,7 +172,7 @@ string to_string(const Expr* const s)
     case Type::stream:
         return s->stream->to_string();
     case Type::vector: {
-        string str { "#(" };
+        string str{"#("};
         for (auto x = s->vector.begin(); x != s->vector.end(); x++) {
             str += to_string(*x);
             if (!(x == s->vector.end() - 1)) {
@@ -185,8 +187,7 @@ string to_string(const Expr* const s)
     }
 }
 
-string to_pstring(const Expr* const s)
-{
+string to_pstring(const Expr *const s) {
     if (!s) {
         return "NULL";
     }
@@ -194,22 +195,20 @@ string to_pstring(const Expr* const s)
     case Type::string:
         return ws2s(s->string);
     case Type::character:
-        return string(1, s->chr);
+        return string(1, char(s->chr));
     default:
         return to_string(s);
     }
 }
 
-unsigned int Expr::size() const noexcept
-{
+unsigned int Expr::size() const noexcept {
     unsigned int res = 0;
     for (auto s = this; s && is_list(s); res++, s = s->cdr) {
     }
     return res;
 }
 
-Expr* Expr::at(size_t pos) const noexcept
-{
+Expr *Expr::at(size_t pos) const noexcept {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             return s->car;
@@ -218,8 +217,7 @@ Expr* Expr::at(size_t pos) const noexcept
     return sF;
 }
 
-Expr* Expr::from(size_t pos) noexcept
-{
+Expr *Expr::from(size_t pos) noexcept {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             return s;
@@ -228,8 +226,7 @@ Expr* Expr::from(size_t pos) noexcept
     return sF;
 }
 
-void Expr::set(size_t pos, Expr* r) noexcept
-{
+void Expr::set(size_t pos, Expr *r) noexcept {
     for (auto s = this; !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             s->car = r;
@@ -238,8 +235,7 @@ void Expr::set(size_t pos, Expr* r) noexcept
     }
 }
 
-Expr* Expr::find(Expr* r) noexcept
-{
+Expr *Expr::find(Expr *r) noexcept {
     for (auto s = this; !is_false(s); s = s->cdr) {
         if (expr_eq(s->car, r)) {
             return s;
@@ -248,13 +244,11 @@ Expr* Expr::find(Expr* r) noexcept
     return nullptr;
 }
 
-constexpr bool same_type(Type t, const Expr* x, const Expr* y)
-{
+constexpr bool same_type(Type t, const Expr *x, const Expr *y) {
     return t == x->type && x->type == y->type;
 }
 
-Expr* expr_eq(const Expr* const x, const Expr* const y)
-{
+Expr *expr_eq(const Expr *const x, const Expr *const y) {
     if (is_false(x) && is_false(y)) {
         return sT;
     }
@@ -277,13 +271,11 @@ Expr* expr_eq(const Expr* const x, const Expr* const y)
     return sF;
 }
 
-Expr* expr_eql(const Expr* const x, const Expr* const y)
-{
+Expr *expr_eql(const Expr *const x, const Expr *const y) {
     return expr_eq(x, y);
 }
 
-Expr* expr_equal(const Expr* const x, const Expr* const y)
-{
+Expr *expr_equal(const Expr *const x, const Expr *const y) {
     if (expr_eql(x, y) == sT) {
         return sT;
     }
@@ -311,8 +303,7 @@ Expr* expr_equal(const Expr* const x, const Expr* const y)
     return sF;
 }
 
-Float as_float(const Expr* const s)
-{
+Float as_float(const Expr *const s) {
     if (is_a<Type::floating>(s)) {
         return s->floating;
     } else if (is_a<Type::integer>(s)) {
@@ -321,8 +312,7 @@ Float as_float(const Expr* const s)
         throw EvalException("Not number");
 }
 
-string Stream::to_string()
-{
+string Stream::to_string() {
     string res = "<stream:";
     if (stream_type == StreamType::input) {
         res += "input>";
@@ -332,12 +322,11 @@ string Stream::to_string()
     return res;
 }
 
-Expr* to_vector(Expr* l)
-{
+Expr *to_vector(Expr *l) {
     auto v = mk_vector();
     for (; !is_false(l); l = l->cdr) {
         v->vector.push_back(l->car);
     }
     return v;
 }
-}
+} // namespace ax

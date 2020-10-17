@@ -21,65 +21,60 @@
 namespace ax {
 
 namespace {
-    char const* prompt = "++> ";
+char const *prompt = "++> ";
 
-    const string history_file = ".cxxlisp";
-    const int max_history = 1000;
-};
+const string history_file = ".cxxlisp";
+const int    max_history = 1000;
+}; // namespace
 
-LineReaderReadLine::LineReaderReadLine()
-{
+LineReaderReadLine::LineReaderReadLine() {
     using_history();
 
-    struct passwd* pw = getpwuid(getuid());
+    struct passwd *pw = getpwuid(getuid());
     my_history_file = string(pw->pw_dir);
     my_history_file += "/" + history_file;
     auto res = read_history(my_history_file.c_str());
     if (res != 0) {
-        cerr << "Can't read the history file: " << my_history_file
-             << ' ' << strerror(res) << endl;
+        cerr << "Can't read the history file: " << my_history_file << ' ' << strerror(res) << endl;
     }
     ptr = buf.end();
 }
 
-LineReaderReadLine::~LineReaderReadLine()
-{
+LineReaderReadLine::~LineReaderReadLine() {
     auto res = write_history(my_history_file.c_str());
     if (res != 0) {
-        cerr << "Can't write the history file: " << my_history_file
-             << ' ' << strerror(res) << endl;
+        cerr << "Can't write the history file: " << my_history_file << ' ' << strerror(res)
+             << endl;
     }
     res = history_truncate_file(my_history_file.c_str(), max_history);
     if (res != 0) {
-        cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res) << endl;
+        cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res)
+             << endl;
     }
 }
 
-uint32_t LineReaderReadLine::get_char()
-{
-    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") % buf % ptr;
+uint32_t LineReaderReadLine::get_char() {
+    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") %
+    // buf % ptr;
     if (ptr == buf.end()) {
         get_line();
     }
     // BOOST_LOG_TRIVIAL(trace) << "buf: " << buf;
-    return *ptr++;
+    return uint32_t(*ptr++);
 }
 
-uint32_t LineReaderReadLine::peek_char()
-{
+uint32_t LineReaderReadLine::peek_char() {
     if (ptr == buf.end()) {
         get_line();
     }
-    return *ptr;
+    return uint32_t(*ptr);
 }
 
-void LineReaderReadLine::push_char(uint32_t)
-{
+void LineReaderReadLine::push_char(uint32_t) {
     return;
 }
 
-void LineReaderReadLine::get_line()
-{
+void LineReaderReadLine::get_line() {
     auto cbuf = readline(prompt);
     if (cbuf == nullptr) {
         throw EOFException();
@@ -91,4 +86,4 @@ void LineReaderReadLine::get_line()
     ptr = buf.begin();
     free(cbuf);
 }
-}
+} // namespace ax

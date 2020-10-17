@@ -20,12 +20,11 @@ using namespace std;
 namespace logging = boost::log;
 
 class NullBuffer : public std::streambuf {
-public:
-    int overflow(int c) { return 0; }
+  public:
+    int overflow(int) { return 0; }
 };
 
-static void BM_Atom(benchmark::State& state)
-{
+static void BM_Atom(benchmark::State &state) {
     // Perform setup here
 
     Options options;
@@ -37,11 +36,11 @@ static void BM_Atom(benchmark::State& state)
     Lisp lisp(options);
     lisp.init();
 
-    string input{ "(atom 's)" };
+    string input{"(atom 's)"};
 
     istringstream is(input);
-    NullBuffer null_buffer;
-    ostream null_stream(&null_buffer);
+    NullBuffer    null_buffer;
+    ostream       null_stream(&null_buffer);
 
     for (auto _ : state) {
         // This code gets timed

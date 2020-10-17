@@ -17,21 +17,27 @@
 #include <boost/format.hpp>
 #include <boost/log/trivial.hpp>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wcast-align"
 #include "utf8.h"
+#pragma clang diagnostic pop
 
 namespace ax {
 
 namespace {
-    char const* prompt = "++> ";
+char const *prompt = "++> ";
 
-    const string history_file = ".cxxlisp.replxx";
-    const int max_history = 1000;
-};
+const string history_file = ".cxxlisp.replxx";
+const int    max_history = 1000;
+}; // namespace
 
-LineReaderReplxx::LineReaderReplxx()
-{
-    //BOOST_LOG_TRIVIAL(info) << "Using Replxx!";
-    struct passwd* pw = getpwuid(getuid());
+LineReaderReplxx::LineReaderReplxx() {
+    // BOOST_LOG_TRIVIAL(info) << "Using Replxx!";
+    struct passwd *pw = getpwuid(getuid());
     my_history_file = string(pw->pw_dir);
     my_history_file += "/" + history_file;
     replxx.history_load(my_history_file);
@@ -40,37 +46,33 @@ LineReaderReplxx::LineReaderReplxx()
     ptr = buf.end();
 }
 
-LineReaderReplxx::~LineReaderReplxx()
-{
+LineReaderReplxx::~LineReaderReplxx() {
     replxx.history_save(my_history_file);
 }
 
-uint32_t LineReaderReplxx::get_char()
-{
-    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") % buf % ptr;
+uint32_t LineReaderReplxx::get_char() {
+    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") %
+    // buf % ptr;
     if (ptr == buf.end()) {
         get_line();
     }
     uint32_t c = utf8::next(ptr, buf.end());
-    //BOOST_LOG_TRIVIAL(trace) << " : char " << c;
+    // BOOST_LOG_TRIVIAL(trace) << " : char " << c;
     return c;
 }
 
-uint32_t LineReaderReplxx::peek_char()
-{
+uint32_t LineReaderReplxx::peek_char() {
     if (ptr == buf.end()) {
         get_line();
     }
     return utf8::peek_next(ptr, buf.end());
 }
 
-void LineReaderReplxx::push_char(uint32_t)
-{
+void LineReaderReplxx::push_char(uint32_t) {
     return;
 }
 
-void LineReaderReplxx::get_line()
-{
+void LineReaderReplxx::get_line() {
     auto cbuf = replxx.input(prompt);
     if (cbuf == nullptr) {
         throw EOFException();
@@ -87,4 +89,4 @@ void LineReaderReplxx::get_line()
     buf.append(1, '\n');
     ptr = buf.begin();
 }
-}
+} // namespace ax
