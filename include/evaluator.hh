@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#ifndef EVALUATOR_HH
-#define EVALUATOR_HH
+#pragma once
 
 #include "expr.hh"
 
@@ -18,29 +17,27 @@
 namespace ax {
 
 class Evaluator {
-public:
-    Evaluator(Options& o, shared_ptr<SymbolTable> g, set<Atom>& tf)
-        : globalTable(g)
-        , trace_functions(tf)
-        , opt(o){};
+  public:
+    Evaluator(Options &o, std::shared_ptr<SymbolTable> g, std::set<Atom> &tf)
+        : globalTable(g), trace_functions(tf), opt(o){};
 
-    void repl(istream& in, ostream& os);
+    void repl(std::istream &in, std::ostream &os);
 
-    Expr* eval(Expr* const e, shared_ptr<SymbolTable> a);
-    Expr* perform_list(const Expr* e, shared_ptr<SymbolTable> a);
-    Expr* eval_list(const Expr* e, shared_ptr<SymbolTable> a);
+    Expr *eval(Expr *const e, std::shared_ptr<SymbolTable> a);
+    Expr *perform_list(const Expr *e, std::shared_ptr<SymbolTable> a);
+    Expr *eval_list(const Expr *e, std::shared_ptr<SymbolTable> a);
 
-    bool has_function(const Atom& f);
+    bool has_function(const Atom &f);
 
-    shared_ptr<SymbolTable> globalTable;
-    set<Atom>& trace_functions;
-    Options opt;
+    std::shared_ptr<SymbolTable> globalTable;
+    std::set<Atom> &             trace_functions;
+    Options                      opt;
 
-private:
-    shared_ptr<SymbolTable> create_context(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
-    Expr* perform_function(Function* f, Expr* const args, shared_ptr<SymbolTable> a);
-    Expr* backquote(Expr* s, shared_ptr<SymbolTable> a);
+  private:
+    std::shared_ptr<SymbolTable> create_context(Function *f, Expr *const args,
+                                                std::shared_ptr<SymbolTable> a);
+    Expr *perform_function(Function *f, Expr *const args, std::shared_ptr<SymbolTable> a);
+    Expr *backquote(Expr *s, std::shared_ptr<SymbolTable> a);
 };
-}
 
-#endif
+} // namespace ax

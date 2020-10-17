@@ -16,42 +16,40 @@
 
 namespace ax {
 
-using namespace std;
-
 void init_prims();
 
-using PrimBasicFunct = function<Expr *(Expr *const args)>;
-using PrimSimpleFunct = function<Expr *(const string &name, Expr *const args)>;
-using PrimFunct =
-    function<Expr *(const string &name, Expr *const args, shared_ptr<SymbolTable> a)>;
-using PrimFullFunct = function<Expr *(Evaluator &l, const string &name, Expr *const args,
-                                      shared_ptr<SymbolTable> a)>;
+using PrimBasicFunct = std::function<Expr *(Expr *const args)>;
+using PrimSimpleFunct = std::function<Expr *(const std::string &name, Expr *const args)>;
+using PrimFunct = std::function<Expr *(const std::string &name, Expr *const args,
+                                       std::shared_ptr<SymbolTable> a)>;
+using PrimFullFunct = std::function<Expr *(Evaluator &l, const std::string &name, Expr *const args,
+                                           std::shared_ptr<SymbolTable> a)>;
 
 struct Primitive {
-    string                                                             name;
-    variant<PrimBasicFunct, PrimSimpleFunct, PrimFunct, PrimFullFunct> pf;
-    ArgConstraint                                                      cons;
-    bool                                                               preEval = false;
+    std::string                                                             name;
+    std::variant<PrimBasicFunct, PrimSimpleFunct, PrimFunct, PrimFullFunct> pf;
+    ArgConstraint                                                           cons;
+    bool                                                                    preEval = false;
 };
 
 inline const bool preEvaluate = true;
 
-extern map<string, Primitive> prim_table;
+extern std::map<std::string, Primitive> prim_table;
 
 // Accessor functions for setf
 using AccessorFunct =
-    function<Expr *(Evaluator &l, Expr *args, Expr *val, shared_ptr<SymbolTable> a)>;
+    std::function<Expr *(Evaluator &l, Expr *args, Expr *val, std::shared_ptr<SymbolTable> a)>;
 
 struct Accessor {
-    string        name;
+    std::string   name;
     AccessorFunct af;
     ArgConstraint cons;
     bool          preEval = false;
 };
-extern map<Atom, Accessor> setf_accessors;
+extern std::map<Atom, Accessor> setf_accessors;
 
 // get a reference, in order to modify it.
-Expr *get_reference(const string &name, Expr *ref, shared_ptr<SymbolTable> a);
+Expr *get_reference(const std::string &name, Expr *ref, std::shared_ptr<SymbolTable> a);
 
 // Numbers
 
@@ -69,7 +67,7 @@ Expr *nump(Expr *args)
 }
 
 template <typename T>
-PrimBasicFunct predicate_str(const function<bool(T, T)> &f)
+PrimBasicFunct predicate_str(const std::function<bool(T, T)> &f)
 // Returns a function with compare the first element to zero.
 {
     return [&](Expr *args) -> Expr * {
@@ -78,7 +76,7 @@ PrimBasicFunct predicate_str(const function<bool(T, T)> &f)
 }
 
 template <typename T>
-PrimBasicFunct predicate_chr(const function<bool(T, T)> &f)
+PrimBasicFunct predicate_chr(const std::function<bool(T, T)> &f)
 // Returns a function with compare the first element to zero.
 {
     return [&](Expr *args) -> Expr * { return f(args->car->chr, args->cdr->car->chr) ? sT : sF; };
@@ -122,25 +120,25 @@ extern PrimBasicFunct num_acos;
 extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
 
-Expr *incf(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
+Expr *incf(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
 Expr *float_f(Expr *);
 
-template <Int d> Expr *inc(const string &, Expr *args) {
+template <Int d> Expr *inc(const std::string &, Expr *args) {
     return mk_float(as_float(args->car) + d);
 }
 
 // Functions
 
-Expr *defun(const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *lambda(const string &name, Expr *args);
-Expr *funct(const string &name, Expr *args);
-Expr *functionp(const string &, Expr *args, shared_ptr<SymbolTable> a);
-Expr *fboundp(const string &, Expr *args, shared_ptr<SymbolTable> a);
-Expr *apply(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *funcall(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *mapcar(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *do_times(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *do_func(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
+Expr *defun(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *lambda(const std::string &name, Expr *args);
+Expr *funct(const std::string &name, Expr *args);
+Expr *functionp(const std::string &, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *fboundp(const std::string &, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *apply(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *funcall(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *mapcar(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *do_times(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *do_func(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
 
 // Strings
 
@@ -151,8 +149,8 @@ extern PrimBasicFunct str_ge;
 extern PrimBasicFunct str_lt;
 extern PrimBasicFunct str_le;
 
-PrimBasicFunct funct_ci(PrimBasicFunct f, function<Expr *(const Expr *)> trans);
-Expr *         string_fnct(const string &name, Expr *args);
+PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr *(const Expr *)> trans);
+Expr *         string_fnct(const std::string &name, Expr *args);
 Expr *         to_lower_str(const Expr *s);
 
 // Characters
@@ -170,10 +168,10 @@ Expr *to_lower_char(const Expr *s);
 
 Expr *length(Expr *args);
 Expr *elt(Expr *args);
-Expr *setelt(const string &name, Expr *args);
+Expr *setelt(const std::string &name, Expr *args);
 Expr *subseq(Expr *args);
 
-Expr *setf_elt(Evaluator &l, Expr *args, Expr *r, shared_ptr<SymbolTable> a);
+Expr *setf_elt(Evaluator &l, Expr *args, Expr *r, std::shared_ptr<SymbolTable> a);
 Expr *make_sequence(Expr *args);
 Expr *concatenate(Expr *args);
 
@@ -193,14 +191,15 @@ template <StreamType N> Expr *stream_typep(Expr *args) {
 Expr *open(Expr *args);
 Expr *close(Expr *args);
 
-Expr *print(const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *terpri(const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *read(const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *read_char(const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *format(const string &name, Expr *args, shared_ptr<SymbolTable> a);
+Expr *print(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *terpri(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *read(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *read_char(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *format(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
 
-Expr *load(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
+Expr *load(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
 
-Expr *trace(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
-Expr *untrace(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a);
+Expr *trace(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+Expr *untrace(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a);
+
 } // namespace ax

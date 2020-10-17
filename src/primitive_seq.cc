@@ -121,7 +121,7 @@ Expr *subseq(Expr *args) {
 };
 
 template <typename T, typename S>
-T seq_setelt(const string &name, T &s, size_t index, const S &r) {
+T seq_setelt(const std::string &name, T &s, size_t index, const S &r) {
     if (index >= s->size()) {
         throw EvalException(name + ": index out of bounds");
     }
@@ -129,7 +129,7 @@ T seq_setelt(const string &name, T &s, size_t index, const S &r) {
     return s;
 }
 
-void set_str_elt(const string &name, Expr *seq, Expr *c, size_t index) {
+void set_str_elt(const std::string &name, Expr *seq, Expr *c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -142,7 +142,7 @@ void set_str_elt(const string &name, Expr *seq, Expr *c, size_t index) {
     seq->string[index] = c->chr;
 }
 
-void set_list_elt(const string &name, Expr *seq, Expr *c, size_t index) {
+void set_list_elt(const std::string &name, Expr *seq, Expr *c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -152,7 +152,7 @@ void set_list_elt(const string &name, Expr *seq, Expr *c, size_t index) {
     seq->set(index, c);
 }
 
-Expr *setelt(const string &name, Expr *args) {
+Expr *setelt(const std::string &name, Expr *args) {
     auto seq = args->car;
     auto rindex = arg1(args);
     if (!is_a<Type::integer>(rindex)) {
@@ -169,7 +169,7 @@ Expr *setelt(const string &name, Expr *args) {
 
 // setf version
 // (var index) result
-Expr *setf_elt(Evaluator &, Expr *args, Expr *r, shared_ptr<SymbolTable>) {
+Expr *setf_elt(Evaluator &, Expr *args, Expr *r, std::shared_ptr<SymbolTable>) {
     auto newargs = mk_list({args->car, arg1(args), r});
     setelt("setf elt", newargs);
     return r;

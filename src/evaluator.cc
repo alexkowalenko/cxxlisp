@@ -21,20 +21,16 @@
 
 namespace ax {
 
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
+template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-template <class... Ts>
-overloaded(Ts...)->overloaded<Ts...>;
+template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-const string optional_atom = string("&optional");
-const string rest_atom = string("&rest");
-const string key_atom = string("&key");
+const std::string optional_atom{"&optional"};
+const std::string rest_atom{"&rest"};
+const std::string key_atom{"&key"};
 
-void process_keyword(const string& name, Expr* params, Expr* args, shared_ptr<SymbolTable> a)
-{
+void process_keyword(const std::string &name, Expr *params, Expr *args,
+                     std::shared_ptr<SymbolTable> a) {
     for (auto cur = params; !is_false(cur); cur = cur->cdr) {
         if (is_a<Type::atom>(cur->car)) {
             Atom param = cur->car->atom;
@@ -45,10 +41,12 @@ void process_keyword(const string& name, Expr* params, Expr* args, shared_ptr<Sy
             }
         } else if (is_a<Type::list>(cur->car)) {
             if (cur->car->size() != 2) {
-                throw EvalException(name + ": default argument not 2 member list " + to_string(cur->car));
+                throw EvalException(name + ": default argument not 2 member list " +
+                                    to_string(cur->car));
             }
             if (!is_a<Type::atom>(cur->car->car)) {
-                throw EvalException(name + ": default argument name not an atom " + to_string(cur->car->car));
+                throw EvalException(name + ": default argument name not an atom " +
+                                    to_string(cur->car->car));
             }
             Atom param = cur->car->car->atom;
             if (auto res = get_keyword_value(args, mk_keyword(":" + param))) {
@@ -60,18 +58,18 @@ void process_keyword(const string& name, Expr* params, Expr* args, shared_ptr<Sy
     }
 }
 
-shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, shared_ptr<SymbolTable> a)
-{
+std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr *evalArgs,
+                                                       std::shared_ptr<SymbolTable> a) {
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
     size_t evalArgs_size = 0;
     if (evalArgs) {
         evalArgs_size = evalArgs->size();
     };
-    size_t arg_count = 0;
-    bool optional = false;
-    bool rest = false;
-    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    size_t                       arg_count = 0;
+    bool                         optional = false;
+    bool                         rest = false;
+    std::shared_ptr<SymbolTable> context = std::make_shared<SymbolTable>(a.get());
     auto f_param_size = is_false(f->parameters) ? 0 : f->parameters->size();
 
     for (auto param = f->parameters; !is_false(param); param = param->cdr) {
@@ -91,11 +89,13 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, s
             if (optional) {
                 // get symbol
                 if (param->car->size() != 2) {
-                    throw EvalException(f->name + ": default argument not 2 member list " + to_string(param->car));
+                    throw EvalException(f->name + ": default argument not 2 member list " +
+                                        to_string(param->car));
                 }
                 auto atom = param->car->car;
                 if (!is_a<Type::atom>(atom)) {
-                    throw EvalException(f->name + ": optional default argument is not an atom " + to_string(atom));
+                    throw EvalException(f->name + ": optional default argument is not an atom " +
+                                        to_string(atom));
                 }
                 if (evalArgs_size < f_param_size - 1) {
                     context->put(atom->atom, param->car->cdr->car);
@@ -130,19 +130,18 @@ shared_ptr<SymbolTable> Evaluator::create_context(Function* f, Expr* evalArgs, s
     } else if (optional) {
         f_param_size -= 1;
         if (!(f_param_size == evalArgs_size || f_param_size - 1 == evalArgs_size)) {
-            throw EvalException(f->name + ": invalid number of arguments"s);
+            throw EvalException(f->name + ": invalid number of arguments");
         }
     } else {
         if (f_param_size != evalArgs_size) {
-            throw EvalException(f->name + ": invalid number of arguments"s);
+            throw EvalException(f->name + ": invalid number of arguments");
         }
     }
     return context;
 }
 
-Expr* Evaluator::perform_function(Function* f, Expr* args, shared_ptr<SymbolTable> a)
-{
-    Expr* evalArgs;
+Expr *Evaluator::perform_function(Function *f, Expr *args, std::shared_ptr<SymbolTable> a) {
+    Expr *evalArgs;
     if (f->macro) {
         // Macro args are evaluated later
         evalArgs = args;
@@ -161,24 +160,23 @@ Expr* Evaluator::perform_function(Function* f, Expr* args, shared_ptr<SymbolTabl
     return result;
 }
 
-Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
-{
+Expr *Evaluator::backquote(Expr *s, std::shared_ptr<SymbolTable> a) {
     if (is_atomic(s)) {
         return s;
     }
     if (is_a<Type::list>(s)) {
-        auto top = mk_list();
-        Expr* p = nullptr;
+        auto  top = mk_list();
+        Expr *p = nullptr;
         for (auto cur = top; !is_false(s); s = s->cdr, cur = cur->cdr) {
-            if (is_a<Type::atom>(s->car)
-                && (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom)) {
+            if (is_a<Type::atom>(s->car) &&
+                (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom)) {
                 if (!is_false(s->cdr)) {
                     auto res = eval(s->cdr->car, a);
                     if (s->car->atom == unquote_at->atom) {
                         cur->car = res;
                     } else if (is_a<Type::list>(res)) {
                         // splice in list
-                        Expr* prev = nullptr;
+                        Expr *prev = nullptr;
                         for (; !is_false(res); cur = cur->cdr, res = res->cdr) {
                             cur->car = res->car;
                             cur->cdr = mk_list();
@@ -209,13 +207,12 @@ Expr* Evaluator::backquote(Expr* s, shared_ptr<SymbolTable> a)
 }
 
 // eval_list makes a copy of the list.
-Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
-{
+Expr *Evaluator::eval_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
     if (is_false(e)) {
         return sF;
     }
-    Expr* result = mk_list();
-    Expr* rl = result;
+    Expr *result = mk_list();
+    Expr *rl = result;
     for (; e; e = e->cdr) {
         if (!rl->car) {
             rl->car = eval(e->car, a);
@@ -228,8 +225,7 @@ Expr* Evaluator::eval_list(const Expr* e, shared_ptr<SymbolTable> a)
     return result;
 }
 
-Expr* Evaluator::perform_list(const Expr* e, shared_ptr<SymbolTable> a)
-{
+Expr *Evaluator::perform_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
     auto result = sF;
     for (; e; e = e->cdr) {
         result = eval(e->car, a);
@@ -237,8 +233,7 @@ Expr* Evaluator::perform_list(const Expr* e, shared_ptr<SymbolTable> a)
     return result;
 }
 
-Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
-{
+Expr *Evaluator::eval(Expr *const e, std::shared_ptr<SymbolTable> a) {
     if (opt.debug_expr) {
         BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
     };
@@ -262,7 +257,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
         if (auto val = a->find(e->atom)) {
             return *val;
         }
-        throw EvalException("unbound variable: "s + to_string(e));
+        throw EvalException("unbound variable: " + to_string(e));
 
     case Type::function_ref:
     case Type::function:
@@ -273,7 +268,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
 
     // Test for list
     if (!is_list(e)) {
-        throw EvalException("Can't evaluate "s + to_string(e));
+        throw EvalException("Can't evaluate " + to_string(e));
     }
 
     auto e_car = e->car;
@@ -306,7 +301,7 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
         // Lookup symbol table for function
         if (auto f = a->find(name)) {
             if (!is_a<Type::function>(*f)) {
-                throw EvalException("A non function in function location "s + to_string(*f));
+                throw EvalException("A non function in function location " + to_string(*f));
             }
             auto fn = (*f)->function;
             return perform_function(fn, e->cdr, a);
@@ -322,12 +317,13 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
             if (check) {
                 throw EvalException(*check);
             }
-            return visit(overloaded{
-                             [&](PrimBasicFunct pf) -> Expr* { return pf(result); },
-                             [&](PrimSimpleFunct pf) -> Expr* { return pf(name, result); },
-                             [&](PrimFunct pf) -> Expr* { return pf(name, result, a); },
-                             [&](PrimFullFunct pf) -> Expr* { return pf(*this, name, result, a); },
-                         },
+            return visit(
+                overloaded{
+                    [&](PrimBasicFunct pf) -> Expr * { return pf(result); },
+                    [&](PrimSimpleFunct pf) -> Expr * { return pf(name, result); },
+                    [&](PrimFunct pf) -> Expr * { return pf(name, result, a); },
+                    [&](PrimFullFunct pf) -> Expr * { return pf(*this, name, result, a); },
+                },
                 prim->second.pf);
         }
     } else if (is_a<Type::function>(e_car)) {
@@ -344,11 +340,10 @@ Expr* Evaluator::eval(Expr* const e, shared_ptr<SymbolTable> a)
         }
     }
 
-    throw EvalException("Can't evaluate "s + to_string(e));
+    throw EvalException("Can't evaluate " + to_string(e));
 }
 
-bool Evaluator::has_function(const Atom& name)
-{
+bool Evaluator::has_function(const Atom &name) {
     if (auto f = globalTable->find(name)) {
         if (is_a<Type::function>(*f)) {
             return true;
@@ -361,16 +356,15 @@ bool Evaluator::has_function(const Atom& name)
     return false;
 }
 
-void Evaluator::repl(istream& istr, ostream& ostr)
-{
-    unique_ptr<LineReader> rl;
+void Evaluator::repl(std::istream &istr, std::ostream &ostr) {
+    std::unique_ptr<LineReader> rl;
     if (opt.readline) {
         // rl = make_unique<LineReaderReadLine>();
-        rl = make_unique<LineReaderReplxx>();
+        rl = std::make_unique<LineReaderReplxx>();
     } else {
-        rl = make_unique<LineReaderStream>(istr);
+        rl = std::make_unique<LineReaderStream>(istr);
     }
-    Lexer lex(*rl);
+    Lexer  lex(*rl);
     Parser parser(lex);
     while (true) {
         ParserResult res;
@@ -380,35 +374,35 @@ void Evaluator::repl(istream& istr, ostream& ostr)
                 break;
             }
             if (opt.parse_only) {
-                ostr << to_string(res.val) << endl;
+                ostr << to_string(res.val) << std::endl;
                 continue;
             }
 
             auto ex = eval(res.val, globalTable);
-            ostr << to_string(ex) << endl;
+            ostr << to_string(ex) << std::endl;
 
-        } catch (UnknownToken& e) {
-            ostr << "Unknown token: " << e.tok << endl;
+        } catch (UnknownToken &e) {
+            ostr << "Unknown token: " << e.tok << std::endl;
             continue;
-        } catch (ParseException& e) {
-            ostr << "Parse error: " << e.what() << endl;
+        } catch (ParseException &e) {
+            ostr << "Parse error: " << e.what() << std::endl;
             continue;
-        } catch (EndBracketException& e) {
-            ostr << "Parse error: Extra bracket found" << endl;
+        } catch (EndBracketException &e) {
+            ostr << "Parse error: Extra bracket found" << std::endl;
             continue;
-        } catch (EvalException& e) {
-            ostr << "Eval error: " << e.what() << endl;
-        } catch (NumericException& e) {
-            ostr << "Numeric exception: " << e.what() << endl;
-        } catch (RuntimeException& e) {
-            ostr << "Runtime exception: " << e.what() << endl;
-        } catch (ExceptionQuit& e) {
+        } catch (EvalException &e) {
+            ostr << "Eval error: " << e.what() << std::endl;
+        } catch (NumericException &e) {
+            ostr << "Numeric exception: " << e.what() << std::endl;
+        } catch (RuntimeException &e) {
+            ostr << "Runtime exception: " << e.what() << std::endl;
+        } catch (ExceptionQuit &e) {
             break;
-        } catch (exception& e) {
-            ostr << "Exception: " << e.what() << endl;
+        } catch (std::exception &e) {
+            ostr << "Exception: " << e.what() << std::endl;
             continue;
         } catch (...) {
-            ostr << "Unknown exception!" << endl;
+            ostr << "Unknown exception!" << std::endl;
             continue;
         }
         if (res.eof) {
@@ -416,4 +410,4 @@ void Evaluator::repl(istream& istr, ostream& ostr)
         }
     }
 }
-}
+} // namespace ax

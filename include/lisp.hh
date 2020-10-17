@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#ifndef LISP_HH
-#define LISP_HH
+#pragma once
 
 #include <iostream>
 #include <set>
@@ -15,21 +14,18 @@
 
 namespace ax {
 
-using namespace std;
-
 class Lisp {
-public:
-    Lisp(Options& opt);
+  public:
+    Lisp(Options &opt);
 
     void init();
-    void repl(istream& in, ostream& os);
+    void repl(std::istream &in, std::ostream &os);
     void terminate();
 
-private:
-    Options& opt;
-    shared_ptr<SymbolTable> symboltable;
-    set<Atom> trace_functions;
+  private:
+    Options &                    opt;
+    std::shared_ptr<SymbolTable> symboltable;
+    std::set<Atom>               trace_functions;
 };
-}
 
-#endif
+} // namespace ax

@@ -15,21 +15,19 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup.hpp>
 
-using namespace std;
 using namespace ax;
 
 namespace logging = boost::log;
 namespace expr = boost::log::expressions;
 
-void init_logging()
-{
+void init_logging() {
     // console sink
     auto sink = logging::add_console_log(std::cerr);
 
-    sink->set_formatter(
-        expr::stream << expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S.%f")
-                     << ": [" << logging::trivial::severity
-                     << "] " << expr::smessage);
+    sink->set_formatter(expr::stream
+                        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp",
+                                                                            "%Y-%m-%d %H:%M:%S.%f")
+                        << ": [" << logging::trivial::severity << "] " << expr::smessage);
     sink->imbue(sink->getloc());
 
     logging::add_common_attributes();
@@ -37,18 +35,16 @@ void init_logging()
     logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::trace);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     setlocale(LC_ALL, "en_US.utf8");
     init_logging();
 
     // Get options
     ax::Options options = getOptions(argc, argv);
 
-    Lisp lispInterp
-        = Lisp(options);
+    Lisp lispInterp = Lisp(options);
     lispInterp.init();
-    lispInterp.repl(cin, cout);
+    lispInterp.repl(std::cin, std::cout);
     lispInterp.terminate();
 
     return 0;

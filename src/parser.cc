@@ -30,7 +30,7 @@ static const NotInt not_int;
 
 const Atom lambda_atom = "lambda";
 
-Int atoi(const string &str) {
+Int atoi(const std::string &str) {
     Int  value = 0;
     Int  sign = 1;
     bool digits = false;
@@ -52,7 +52,7 @@ Int atoi(const string &str) {
     return value * sign;
 }
 
-Expr *mk_symbolInt(const string &atom) {
+Expr *mk_symbolInt(const std::string &atom) {
     if (atom == "nil") {
         return sF;
     } else if (atom == "t") {
@@ -61,11 +61,11 @@ Expr *mk_symbolInt(const string &atom) {
     if (atom[0] == '&' || atom[0] == ':') {
         return mk_keyword(atom);
     }
-    if (atom.find('.') != string::npos) {
+    if (atom.find('.') != std::string::npos) {
         try {
             return mk_float(stod(atom));
-        } catch (invalid_argument) {
-        } catch (out_of_range) {
+        } catch (std::invalid_argument) {
+        } catch (std::out_of_range) {
             throw NumericException("float out of range " + atom);
         };
         // fallthrough to Int.
@@ -86,7 +86,7 @@ Expr *Parser::parse_comma() {
 }
 
 Expr *Parser::parse_hash(const Token &tok) {
-    auto token_val = boost::algorithm::to_upper_copy(get<string>(tok.val));
+    auto token_val = boost::algorithm::to_upper_copy(get<std::string>(tok.val));
     if (token_val == "\\") {
         // character
         auto t = lexer.peek();
@@ -97,13 +97,13 @@ Expr *Parser::parse_hash(const Token &tok) {
             case 'n':
             case 'N': {
                 Token newTok = lexer.get_token();
-                auto  val = boost::algorithm::to_lower_copy(get<string>(newTok.val));
+                auto  val = boost::algorithm::to_lower_copy(get<std::string>(newTok.val));
                 if (val == "newline") {
                     return mk_char('\n');
                 } else if (val == "space") {
                     return mk_char(' ');
                 }
-                t = utf8::peek_next(string(newTok).begin(), string(newTok).end());
+                t = utf8::peek_next(std::string(newTok).begin(), std::string(newTok).end());
                 return mk_char(wchar_t(t));
             }
             default:
@@ -116,22 +116,22 @@ Expr *Parser::parse_hash(const Token &tok) {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
-            return mk_function_ref(get<string>(t.val));
+            return mk_function_ref(get<std::string>(t.val));
         } else if (t.type == TokenType::open) {
             auto funct = parse_list().val;
             if (!is_false(funct) && is_atom(funct->car) && funct->car->atom == lambda_atom &&
                 !is_false(funct->cdr)) {
-                auto f = lambda("lambda"s, funct->cdr);
+                auto f = lambda("lambda", funct->cdr);
                 return f;
             }
-            throw ParseException("#' expecting lambda expression "s + to_string(funct));
+            throw ParseException("#' expecting lambda expression " + to_string(funct));
         } else {
-            throw ParseException("#' function ref unknown token "s + string(t));
+            throw ParseException("#' function ref unknown token " + std::string(t));
         }
     } else if (token_val == "B" || token_val == "O" || token_val == "X") {
         Token newTok = lexer.get_token();
         if (newTok.type != TokenType::atom) {
-            throw ParseException("#"s + token_val + " expecting number "s + string(newTok));
+            throw ParseException("#" + token_val + " expecting number " + std::string(newTok));
         }
         int base = 10;
         if (token_val == "B") {
@@ -142,13 +142,13 @@ Expr *Parser::parse_hash(const Token &tok) {
             base = 16;
         }
         Int  value = 0;
-        auto str_val = get<string>(newTok.val);
+        auto str_val = get<std::string>(newTok.val);
         if (auto [p, ec] =
-                from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
-            ec == errc()) {
+                std::from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
+            ec == std::errc()) {
             return mk_int(value);
         } else {
-            throw ParseException("#"s + token_val + " badly formed number "s + str_val);
+            throw ParseException("#" + token_val + " badly formed number " + str_val);
         }
     } else if (token_val == "(") {
         // Vector
@@ -158,18 +158,18 @@ Expr *Parser::parse_hash(const Token &tok) {
         // Complex
         Token t = lexer.get_token();
         if (t.type != TokenType::open) {
-            throw ParseException("malformed complex literal "s + string(t));
+            throw ParseException("malformed complex literal " + std::string(t));
         }
         auto list = parse_list();
         if (list.val->size() != 2) {
-            throw ParseException("malformed complex literal"s + to_string(list.val));
+            throw ParseException("malformed complex literal" + to_string(list.val));
         }
         if (!is_number(list.val->car) || !is_number(list.val->cdr->car)) {
-            throw ParseException("malformed complex literal"s + to_string(list.val));
+            throw ParseException("malformed complex literal" + to_string(list.val));
         }
         return mk_complex(Complex(as_float(list.val->car), (as_float(list.val->cdr->car))));
     }
-    throw ParseException("# unknown "s + string(tok));
+    throw ParseException("# unknown " + std::string(tok));
 }
 
 ParserResult Parser::parse_quote(const Token &tok) {
@@ -225,10 +225,10 @@ ParserResult Parser::parse() {
         throw EndBracketException();
 
     case TokenType::atom:
-        return {mk_symbolInt(get<string>(tok.val)), false};
+        return {mk_symbolInt(get<std::string>(tok.val)), false};
 
     case TokenType::string:
-        return {mk_string(get<wstring>(tok.val)), false};
+        return {mk_string(get<std::wstring>(tok.val)), false};
 
     case TokenType::quote:
     case TokenType::backquote:
@@ -251,7 +251,7 @@ ParserResult Parser::parse() {
         return {sF, true};
 
     default:
-        throw ParseException("Unknown token "s + string(tok));
+        throw ParseException("Unknown token " + std::string(tok));
     }
 }
 } // namespace ax

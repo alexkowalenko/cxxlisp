@@ -10,32 +10,26 @@
 
 namespace ax {
 
-using namespace std;
-
-Tracer::Tracer(const string& f, const string& args)
-    : name(f)
-{
-    cerr << string(level * 2, ' ') << "ENTERING: " << name << ": " << args << endl;
+Tracer::Tracer(const std::string &f, const std::string &args) : name(f) {
+    std::cerr << std::string(level * 2, ' ') << "ENTERING: " << name << ": " << args << std::endl;
     level++;
 }
 
-Tracer::~Tracer()
-{
+Tracer::~Tracer() {
     level--;
-    cerr << string(level * 2, ' ') << "EXITING: " << name << endl;
+    std::cerr << std::string(level * 2, ' ') << "EXITING: " << name << std::endl;
 };
 
 unsigned int Tracer::level = 0;
 
-TracerGuard::~TracerGuard()
-{
+TracerGuard::~TracerGuard() {
     if (trace) {
         delete trace;
     }
 }
 
-void TracerGuard::add_trace(Tracer* t)
-{
+void TracerGuard::add_trace(Tracer *t) {
     trace = t;
 }
-}
+
+} // namespace ax

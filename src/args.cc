@@ -12,8 +12,8 @@
 namespace ax {
 
 template <Type t>
-optional<string> checkType(const string& name, const Expr* args, const string& tname)
-{
+std::optional<std::string> checkType(const std::string &name, const Expr *args,
+                                     const std::string &tname) {
     if (args->size() == 1) {
         if (!is_a<t>(args->car)) {
             return name + " argument needs to be a " + tname;
@@ -29,8 +29,8 @@ optional<string> checkType(const string& name, const Expr* args, const string& t
     return {};
 }
 
-optional<string> checkTypeNumeric(const string& name, const Expr* args, const string& tname)
-{
+std::optional<std::string> checkTypeNumeric(const std::string &name, const Expr *args,
+                                            const std::string &tname) {
     if (is_false(args)) {
         return {};
     } else if (args->size() == 1) {
@@ -48,8 +48,8 @@ optional<string> checkTypeNumeric(const string& name, const Expr* args, const st
     return {};
 }
 
-optional<string> checkArgs(const ArgConstraint& cons, const string& name, const Expr* args)
-{
+std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::string &name,
+                                     const Expr *args) {
     size_t size = 0;
     if (args) {
         size = args->size();
@@ -58,14 +58,14 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
     switch (cons.constraint) {
     case ArgConstraintType::none:
         if (size != 0) {
-            ostringstream os;
+            std::ostringstream os;
             os << boost::format("%1% expects no arguments") % name;
             return os.str();
         }
         break;
     case ArgConstraintType::eq:
         if (size != cons.num) {
-            ostringstream os;
+            std::ostringstream os;
             if (cons.num == 1) {
                 os << boost::format("%1% expecting an argument") % name;
             } else {
@@ -76,14 +76,14 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
         break;
     case ArgConstraintType::min:
         if (size < cons.num) {
-            ostringstream os;
+            std::ostringstream os;
             os << boost::format("%1% expecting at least %2% arguments") % name % cons.num;
             return os.str();
         }
         break;
     case ArgConstraintType::max:
         if (size > cons.num) {
-            ostringstream os;
+            std::ostringstream os;
             os << boost::format("%1% expecting at max %2% arguments") % name % cons.num;
             return os.str();
         }
@@ -101,4 +101,4 @@ optional<string> checkArgs(const ArgConstraint& cons, const string& name, const 
     }
     return {};
 }
-}
+} // namespace ax

@@ -18,8 +18,8 @@
 
 namespace ax {
 
-map<string, Primitive> prim_table;
-map<Atom, Accessor>    setf_accessors;
+std::map<std::string, Primitive> prim_table;
+std::map<Atom, Accessor>         setf_accessors;
 
 const Atom otherwise_sym("otherwise");
 
@@ -46,7 +46,7 @@ Expr *type_of(Expr *args) {
     if (is_false(args->car)) {
         return mk_atom(type_null);
     }
-    string ret;
+    std::string ret;
     switch (args->car->type) {
     case Type::atom:
         ret = type_atom;
@@ -102,7 +102,7 @@ Expr *endp(Expr *const args) {
     throw EvalException("end: must be a list " + to_string(args->car));
 }
 
-Expr *andor(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *andor(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (is_false(args)) {
         return name == "and" ? sT : sF;
     }
@@ -124,7 +124,7 @@ Expr *andor(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable
     return name == "and" ? last : sF;
 }
 
-Expr *carcdr(const string &name, Expr *args) {
+Expr *carcdr(const std::string &name, Expr *args) {
     auto res = args->car;
     if (is_list(res)) {
         if (name == "car" || name == "first") {
@@ -159,7 +159,7 @@ Expr *list(Expr *args) {
 }
 
 // (rplaca '(a b) 'x) -> (x b)
-Expr *rplaca(const string &name, Expr *args) {
+Expr *rplaca(const std::string &name, Expr *args) {
     if (is_list(args->car)) {
         args->car->car = args->cdr->car;
         return args->car;
@@ -167,14 +167,14 @@ Expr *rplaca(const string &name, Expr *args) {
     throw EvalException(name + ": first argument not a list");
 }
 
-Expr *setf_car(Evaluator &, Expr *args, Expr *r, shared_ptr<SymbolTable>) {
+Expr *setf_car(Evaluator &, Expr *args, Expr *r, std::shared_ptr<SymbolTable>) {
     auto res = mk_list({args->car, r});
     rplaca("setf car", res);
     return r;
 }
 
 // (rplacd '(a b) 'x) -> (a . x)
-Expr *rplacd(const string &name, Expr *args) {
+Expr *rplacd(const std::string &name, Expr *args) {
     if (is_list(args->car)) {
         args->car->cdr = args->cdr->car;
         return args->car;
@@ -182,7 +182,7 @@ Expr *rplacd(const string &name, Expr *args) {
     throw EvalException(name + ": first argument not a list");
 }
 
-Expr *setf_cdr(Evaluator &, Expr *args, Expr *r, shared_ptr<SymbolTable>) {
+Expr *setf_cdr(Evaluator &, Expr *args, Expr *r, std::shared_ptr<SymbolTable>) {
     auto res = mk_list({args->car, r});
     rplacd("setf cdr", res);
     return r;
@@ -223,7 +223,7 @@ Expr *append(Expr *args) {
     return cur;
 }
 
-Expr *push(Evaluator &l, const string &, Expr *const args, shared_ptr<SymbolTable> a) {
+Expr *push(Evaluator &l, const std::string &, Expr *const args, std::shared_ptr<SymbolTable> a) {
     auto x = l.eval(args->car, a);
     auto val = get_reference("push", arg1(args), a);
     if (is_a<Type::list>(val)) {
@@ -234,7 +234,7 @@ Expr *push(Evaluator &l, const string &, Expr *const args, shared_ptr<SymbolTabl
     throw EvalException("push: is not a list: " + to_string(arg1(args)));
 }
 
-Expr *pop(const string &, Expr *const args, shared_ptr<SymbolTable> a) {
+Expr *pop(const std::string &, Expr *const args, std::shared_ptr<SymbolTable> a) {
     auto val = get_reference("pop", args->car, a);
     if (is_a<Type::list>(val)) {
         auto ret = val->car;
@@ -268,7 +268,7 @@ Expr *equal_p(Expr *args) {
 // variable functions
 //
 
-Expr *defvar(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *defvar(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (is_false(args)) {
         throw EvalException(name + " needs a name");
     }
@@ -306,7 +306,7 @@ Expr *defvar(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTabl
     return n;
 }
 
-Expr *setq(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *setq(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (!args) {
         return sF;
     }
@@ -329,7 +329,7 @@ Expr *setq(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable>
                 auto accessor_def = setf->second;
                 auto result = n->cdr;
                 if (accessor_def.preEval) {
-                    cout << "setf preEval" << endl;
+                    std::cout << "setf preEval" << std::endl;
                     result = l.eval_list(result, a);
                 }
                 auto check = checkArgs(accessor_def.cons, "setf " + n->car->atom, result);
@@ -348,7 +348,7 @@ Expr *setq(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable>
     return val;
 }
 
-Expr *makunbound(const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *makunbound(const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (is_a<Type::atom>(args->car)) {
         a->remove(args->car->atom);
     }
@@ -359,7 +359,7 @@ Expr *makunbound(const string &, Expr *args, shared_ptr<SymbolTable> a) {
 // Program control
 //
 
-Expr *ifFunc(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *ifFunc(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     size_t size = args->size();
     auto   res = l.eval(args->car, a);
     if (is_false(res)) {
@@ -374,7 +374,7 @@ Expr *ifFunc(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a
     return l.eval(args->cdr->car, a);
 }
 
-Expr *cond(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *cond(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     while (args) {
         if (is_a<Type::list>(args->car)) {
             auto first = l.eval(args->car->car, a);
@@ -392,7 +392,7 @@ Expr *cond(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) 
     return sF;
 }
 
-Expr *case_fn(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *case_fn(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     auto test = l.eval(args->car, a);
     for (auto cur = args->cdr; !is_false(cur); cur = cur->cdr) {
         if (!is_a<Type::list>(cur->car)) {
@@ -416,11 +416,11 @@ Expr *case_fn(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> 
     return sF;
 }
 
-Expr *progn(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *progn(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     return l.perform_list(args, a);
 }
 
-Expr *prog1(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *prog1(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (is_false(args)) {
         return sF;
     }
@@ -429,11 +429,11 @@ Expr *prog1(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable> a)
     return result;
 }
 
-Expr *let(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *let(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": expecting a list of bindings");
     }
-    shared_ptr<SymbolTable> context = make_shared<SymbolTable>(a.get());
+    std::shared_ptr<SymbolTable> context = std::make_shared<SymbolTable>(a.get());
 
     auto b = args->car;
     while (!is_false(b)) {
@@ -458,7 +458,7 @@ Expr *let(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> 
 }
 
 // get a reference, in order to modify it.
-Expr *get_reference(const string &name, Expr *ref, shared_ptr<SymbolTable> a) {
+Expr *get_reference(const std::string &name, Expr *ref, std::shared_ptr<SymbolTable> a) {
     if (!is_a<Type::atom>(ref)) {
         throw EvalException(name + ": argument needs to a reference");
     }
@@ -470,7 +470,7 @@ Expr *get_reference(const string &name, Expr *ref, shared_ptr<SymbolTable> a) {
 }
 
 void init_prims() {
-    vector<Primitive> defs{
+    std::vector<Primitive> defs{
         {"atom", &atom, one_arg, preEvaluate},
         {"symbolp", &symbolp, one_arg, preEvaluate},
         {"keywordp", &typep<Type::keyword>, one_arg, preEvaluate},
@@ -687,9 +687,9 @@ void init_prims() {
         prim_table[p.name] = p;
     }
     // setup accessor functions
-    vector<Accessor> accessor_defs{{"elt", &setf_elt, two_args, preEvaluate},
-                                   {"car", &setf_car, one_arg, preEvaluate},
-                                   {"cdr", &setf_cdr, one_arg, preEvaluate}};
+    std::vector<Accessor> accessor_defs{{"elt", &setf_elt, two_args, preEvaluate},
+                                        {"car", &setf_car, one_arg, preEvaluate},
+                                        {"cdr", &setf_cdr, one_arg, preEvaluate}};
 
     for (auto p : accessor_defs) {
         setf_accessors[p.name] = p;

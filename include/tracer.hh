@@ -10,28 +10,26 @@
 
 namespace ax {
 
-using namespace std;
-
 class Tracer {
-public:
-    Tracer(const string& f, const string& args);
+  public:
+    Tracer(const std::string &f, const std::string &args);
     ~Tracer();
 
     static unsigned int level;
 
-private:
-    const string& name;
+  private:
+    const std::string &name;
 };
 
 class TracerGuard {
-public:
-    TracerGuard()
-        : trace(nullptr){};
+  public:
+    TracerGuard() : trace(nullptr){};
     ~TracerGuard();
 
-    void add_trace(Tracer* t);
+    void add_trace(Tracer *t);
 
-private:
-    Tracer* trace;
+  private:
+    Tracer *trace;
 };
-}
+
+} // namespace ax

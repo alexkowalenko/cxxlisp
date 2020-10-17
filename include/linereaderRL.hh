@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#ifndef LINEREADERRL_HH
-#define LINEREADERRL_HH
+#pragma once
 
 #include <string>
 
@@ -13,21 +12,19 @@
 
 namespace ax {
 
-using namespace std;
-
 class LineReaderReadLine : public LineReader {
-public:
+  public:
     LineReaderReadLine();
     ~LineReaderReadLine();
 
     uint32_t get_char() override;
     uint32_t peek_char() override;
-    void push_char(uint32_t c) override;
+    void     push_char(uint32_t c) override;
 
-private:
+  private:
     void get_line();
 
-    string my_history_file;
+    std::string my_history_file;
 };
-}
-#endif
+
+} // namespace ax

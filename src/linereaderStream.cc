@@ -23,7 +23,7 @@
 
 namespace ax {
 
-LineReaderStream::LineReaderStream(istream &s) : is(s) {
+LineReaderStream::LineReaderStream(std::istream &s) : is(s) {
     ptr = buf.end();
 }
 

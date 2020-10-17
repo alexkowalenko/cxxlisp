@@ -3,17 +3,15 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-file(GLOB bench_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} bench_*.cc)
-
-foreach(benSrc ${bench_src})
-        #Extract the filename without an extension (NAME_WE)
-        get_filename_component(benName ${benSrc} NAME_WE)
-
+macro(package_add_benchmark TESTNAME)
         #Add compile target
-        add_executable(${benName} ${benSrc})
+        add_executable(${TESTNAME} ${ARGN})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${benName} PRIVATE project_options project_warnings
-                                         cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} ${GBEN_LIBRARIES})
+        target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
+                                          cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} ${GBEN_LIBRARIES})
+endmacro() 
 
-endforeach(benSrc)
+package_add_benchmark(bench_1 bench_1.cc)
+package_add_benchmark(bench_2 bench_2.cc)
+package_add_benchmark(bench_test bench_test.cc)

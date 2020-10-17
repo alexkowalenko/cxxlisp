@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#ifndef SYMBOLTABLE_HH
-#define SYMBOLTABLE_HH
+#pragma once
 
 #include <iostream>
 #include <map>
@@ -15,30 +14,23 @@
 
 namespace ax {
 
-using namespace std;
-
 class SymbolTable {
-public:
-    SymbolTable(SymbolTable* const s)
-        : next(s){};
+  public:
+    SymbolTable(SymbolTable *const s) : next(s){};
 
-    SymbolTable(const SymbolTable&) = delete; // stop copying
+    SymbolTable(const SymbolTable &) = delete; // stop copying
 
-    inline void put(const string& name, Expr* const val)
-    {
-        table[name] = val;
-    };
+    inline void put(const std::string &name, Expr *const val) { table[name] = val; };
 
-    optional<Expr*> find(const string& name) const;
-    bool set(const string& name, Expr* const val);
-    void remove(const string& name);
+    std::optional<Expr *> find(const std::string &name) const;
+    bool                  set(const std::string &name, Expr *const val);
+    void                  remove(const std::string &name);
 
-    void dump(ostream& os) const;
+    void dump(std::ostream &os) const;
 
-private:
-    map<string, Expr*> table;
-    SymbolTable* const next;
+  private:
+    std::map<std::string, Expr *> table;
+    SymbolTable *const            next;
 };
-}
 
-#endif
+} // namespace ax

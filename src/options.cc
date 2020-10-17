@@ -14,20 +14,20 @@
 namespace ax {
 
 namespace po = boost::program_options;
-using namespace std;
 
-Options getOptions(int argc, char* argv[])
-{
-    Options options;
+Options getOptions(int argc, char *argv[]) {
+    Options                 options;
     po::options_description desc("Allowed options");
-    string debug;
+    std::string             debug;
 
-    desc.add_options()(
-        "help,h", "produce help message")(
-        "silent,s", po::value<bool>(&(options.silent))->implicit_value(true), "silent, don't print the prompt")(
-        "noreadline,r", po::value<bool>(&(options.readline))->implicit_value(false), "don't use readline for input")(
-        "parseonly,p", po::value<bool>(&(options.parse_only))->implicit_value(true), "only parse the input and print result")(
-        "debug,D", po::value<string>(&debug)->implicit_value(""), "debug options: e");
+    desc.add_options()("help,h", "produce help message")(
+        "silent,s", po::value<bool>(&(options.silent))->implicit_value(true),
+        "silent, don't print the prompt")(
+        "noreadline,r", po::value<bool>(&(options.readline))->implicit_value(false),
+        "don't use readline for input")(
+        "parseonly,p", po::value<bool>(&(options.parse_only))->implicit_value(true),
+        "only parse the input and print result")(
+        "debug,D", po::value<std::string>(&debug)->implicit_value(""), "debug options: e");
 
     try {
         po::variables_map vm;
@@ -35,7 +35,7 @@ Options getOptions(int argc, char* argv[])
         po::notify(vm);
 
         if (vm.count("help")) {
-            cout << desc << endl;
+            std::cout << desc << std::endl;
             exit(EXIT_SUCCESS);
         }
         if (!debug.empty()) {
@@ -44,23 +44,21 @@ Options getOptions(int argc, char* argv[])
                 BOOST_LOG_TRIVIAL(debug) << "debug: show evaluation ";
             }
         }
-    } catch (exception& e) {
-        cerr << "error: " << e.what() << "\n";
+    } catch (std::exception &e) {
+        std::cerr << "error: " << e.what() << "\n";
     }
 
     return options;
 }
 
-void Options::push_options()
-{
+void Options::push_options() {
     saved_options.push(silent);
     saved_options.push(readline);
     saved_options.push(parse_only);
     saved_options.push(debug_expr);
 };
 
-void Options::pop_options()
-{
+void Options::pop_options() {
     debug_expr = saved_options.top();
     saved_options.pop();
     parse_only = saved_options.top();

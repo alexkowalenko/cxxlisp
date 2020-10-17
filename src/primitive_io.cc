@@ -18,11 +18,11 @@ namespace ax {
 template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-inline Expr *mk_stream(fstream *const s, ios_base::openmode m) {
+inline Expr *mk_stream(std::fstream *const s, std::ios_base::openmode m) {
     auto e = new (GC) Expr(Type::stream);
     e->stream = new (GC) Stream();
     e->stream->str = s;
-    if (m == ios_base::out) {
+    if (m == std::ios_base::out) {
         e->stream->stream_type = StreamType::output;
     } else {
         e->stream->stream_type = StreamType::input;
@@ -53,19 +53,19 @@ Expr *quit(Expr *args) {
 }
 
 Expr *open(Expr *args) {
-    cout << "open args " << args << endl;
+    std::cout << "open args " << args << std::endl;
     if (is_a<Type::string>(args->car)) {
         auto filename = ws2s(args->car->string);
 
-        ios_base::openmode dir = ios_base::out;
+        std::ios_base::openmode dir = std::ios_base::out;
         if (auto opt = get_keyword_value(args, keyword_direction)) {
             if (is_a<Type::keyword>(*opt) && (*opt)->keyword == keyword_input->keyword) {
-                cout << "open input " << endl;
-                dir = ios_base::in;
+                std::cout << "open input " << std::endl;
+                dir = std::ios_base::in;
             }
         }
-        cout << "open mode = " << dir << endl;
-        fstream *fs = new (GC) fstream();
+        std::cout << "open mode = " << dir << std::endl;
+        std::fstream *fs = new (GC) std::fstream();
         fs->open(filename.c_str(), dir);
         if (fs->bad()) {
             EvalException("open: problem opening " + filename);
@@ -78,7 +78,7 @@ Expr *open(Expr *args) {
 
 Expr *close(Expr *args) {
     if (is_a<Type::stream>(args->car)) {
-        if (auto f = get_if<fstream *>(&args->car->stream->str)) {
+        if (auto f = get_if<std::fstream *>(&args->car->stream->str)) {
             if ((*f)->is_open()) {
                 (*f)->close();
                 return sT;
@@ -89,7 +89,7 @@ Expr *close(Expr *args) {
     throw EvalException("close: not a stream");
 }
 
-Stream *get_output(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Stream *get_output(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     Stream *output;
     if (args->size() == 1) {
         output = get_reference(name, std_out, a)->stream;
@@ -103,10 +103,10 @@ Stream *get_output(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
     return output;
 }
 
-Expr *print(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *print(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     Stream *output = get_output(name, args, a);
 
-    string out_str;
+    std::string out_str;
     if (name == "prin1" || name == "print") {
         if (name == "print") {
             out_str.push_back('\n');
@@ -121,17 +121,18 @@ Expr *print(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
             EvalException(name + ": argument is not a character");
         }
     }
-    visit(
-        overloaded{
-            [&name](istream *) { throw EvalException(name + ": can't write to a input stream"); },
-            [&out_str](ostream *arg) { (*arg) << out_str; },
-            [&out_str](fstream *arg) { (*arg) << out_str; },
-        },
-        output->str);
+    visit(overloaded{
+              [&name](std::istream *) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&out_str](std::ostream *arg) { (*arg) << out_str; },
+              [&out_str](std::fstream *arg) { (*arg) << out_str; },
+          },
+          output->str);
     return args->car;
 }
 
-Expr *terpri(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *terpri(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     Stream *output;
     if (args->size() == 0) {
         output = get_reference(name, std_out, a)->stream;
@@ -142,17 +143,18 @@ Expr *terpri(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
             throw EvalException(name + ": argument is not an output stream");
         }
     }
-    visit(
-        overloaded{
-            [&name](istream *) { throw EvalException(name + ": can't write to a input stream"); },
-            [](fstream *arg) { (*arg) << endl; },
-            [](ostream *arg) { (*arg) << endl; },
-        },
-        output->str);
+    visit(overloaded{
+              [&name](std::istream *) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [](std::fstream *arg) { (*arg) << std::endl; },
+              [](std::ostream *arg) { (*arg) << std::endl; },
+          },
+          output->str);
     return sT;
 }
 
-Stream *get_input(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Stream *get_input(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     Stream *input;
     if (args->size() == 0) {
         input = get_reference(name, std_in, a)->stream;
@@ -166,34 +168,36 @@ Stream *get_input(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
     return input;
 };
 
-Expr *read(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
-    Stream *         input = get_input(name, args, a);
-    array<char, 255> buf;
-    visit(
-        overloaded{
-            [&buf](istream *arg) { (*arg).getline(&buf[0], 255); },
-            [&name](ostream *) { throw EvalException(name + ": can't write to a input stream"); },
-            [&buf](fstream *arg) { (*arg).getline(&buf[0], 255); },
-        },
-        input->str);
-    return mk_string(s2ws(string(&buf[0], strlen(&buf[0]))));
+Expr *read(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
+    Stream *              input = get_input(name, args, a);
+    std::array<char, 255> buf;
+    visit(overloaded{
+              [&buf](std::istream *arg) { (*arg).getline(&buf[0], 255); },
+              [&name](std::ostream *) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&buf](std::fstream *arg) { (*arg).getline(&buf[0], 255); },
+          },
+          input->str);
+    return mk_string(s2ws(std::string(&buf[0], strlen(&buf[0]))));
 }
 
-Expr *read_char(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *read_char(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     Stream *input = get_input(name, args, a);
 
     char c;
-    visit(
-        overloaded{
-            [&c](istream *arg) { (*arg).get(c); },
-            [&name](ostream *) { throw EvalException(name + ": can't write to a input stream"); },
-            [&c](fstream *arg) { (*arg).get(c); },
-        },
-        input->str);
+    visit(overloaded{
+              [&c](std::istream *arg) { (*arg).get(c); },
+              [&name](std::ostream *) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&c](std::fstream *arg) { (*arg).get(c); },
+          },
+          input->str);
     return mk_char(Char(c));
 }
 
-Expr *format(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *format(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     if (!is_a<Type::string>(arg1(args))) {
         throw EvalException("format: format is not a string " + to_string(arg1(args)));
     }
@@ -203,7 +207,7 @@ Expr *format(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
 
     auto s_arg = args->cdr->cdr;
     for (size_t index = 1;; index++) {
-        if (auto p = format.find('~', index); p != string::npos) {
+        if (auto p = format.find('~', index); p != std::string::npos) {
             if (p + 1 < format.size()) {
                 String sub;
                 switch (format[p + 1]) {
@@ -248,17 +252,18 @@ Expr *format(const string &name, Expr *args, shared_ptr<SymbolTable> a) {
             throw EvalException(name + ": argument is not an output stream");
         }
     }
-    visit(
-        overloaded{
-            [&name](istream *) { throw EvalException(name + ": can't write to a input stream"); },
-            [&format](ostream *arg) { (*arg) << ws2s(format); },
-            [&format](fstream *arg) { (*arg) << ws2s(format); },
-        },
-        output->str);
+    visit(overloaded{
+              [&name](std::istream *) {
+                  throw EvalException(name + ": can't write to a input stream");
+              },
+              [&format](std::ostream *arg) { (*arg) << ws2s(format); },
+              [&format](std::fstream *arg) { (*arg) << ws2s(format); },
+          },
+          output->str);
     return sT;
 }
 
-Expr *trace(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable>) {
+Expr *trace(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable>) {
     if (args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
@@ -289,7 +294,7 @@ Expr *trace(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable>) {
     return top;
 }
 
-Expr *untrace(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable>) {
+Expr *untrace(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable>) {
     if (args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
@@ -306,9 +311,9 @@ Expr *untrace(Evaluator &l, const string &, Expr *args, shared_ptr<SymbolTable>)
     return sT;
 }
 
-Expr *load(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
-    ifstream file;
-    auto     filename = ws2s(args->car->string);
+Expr *load(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
+    std::ifstream file;
+    auto          filename = ws2s(args->car->string);
     file.open(filename);
     if (!file.is_open()) {
         throw EvalException("load: can't open " + filename);
@@ -316,7 +321,7 @@ Expr *load(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable>
     auto output = get_reference(name, std_out, a)->stream;
     l.opt.push_options();
     l.opt.readline = false;
-    l.repl(file, *get<ostream *>(output->str));
+    l.repl(file, *get<std::ostream *>(output->str));
     l.opt.pop_options();
     return sT;
 }

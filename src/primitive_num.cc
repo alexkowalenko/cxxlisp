@@ -18,32 +18,32 @@ Expr *numberp(Expr *args) {
     return is_a<Type::integer>(args->car) || is_a<Type::floating>(args->car) ? sT : sF;
 }
 
-PrimBasicFunct num_predicate0(const function<bool(Float, Float)> &f)
+PrimBasicFunct num_predicate0(const std::function<bool(Float, Float)> &f)
 // Returns a function with compare the first element to zero.
 {
     return [&](Expr *const args) { return f(as_float(args->car), 0.0) ? sT : sF; };
 }
 
 // these need to be static, as they are held by functions, when the functor here goes out of scope.
-static function<bool(Int, Int)> eq = equal_to<Int>();
-static function<bool(Int, Int)> neq = not_equal_to<Int>();
-static function<bool(Int, Int)> gt = greater<Int>();
-static function<bool(Int, Int)> ge = greater_equal<Int>();
-static function<bool(Int, Int)> lt = less<Int>();
-static function<bool(Int, Int)> le = less_equal<Int>();
+static std::function<bool(Int, Int)> eq = std::equal_to<Int>();
+static std::function<bool(Int, Int)> neq = std::not_equal_to<Int>();
+static std::function<bool(Int, Int)> gt = std::greater<Int>();
+static std::function<bool(Int, Int)> ge = std::greater_equal<Int>();
+static std::function<bool(Int, Int)> lt = std::less<Int>();
+static std::function<bool(Int, Int)> le = std::less_equal<Int>();
 
-static function<bool(Float, Float)> eqf = equal_to<Float>();
-static function<bool(Float, Float)> neqf = not_equal_to<Float>();
-static function<bool(Float, Float)> gtf = greater<Float>();
-static function<bool(Float, Float)> gef = greater_equal<Float>();
-static function<bool(Float, Float)> ltf = less<Float>();
-static function<bool(Float, Float)> lef = less_equal<Float>();
+static std::function<bool(Float, Float)> eqf = std::equal_to<Float>();
+static std::function<bool(Float, Float)> neqf = std::not_equal_to<Float>();
+static std::function<bool(Float, Float)> gtf = std::greater<Float>();
+static std::function<bool(Float, Float)> gef = std::greater_equal<Float>();
+static std::function<bool(Float, Float)> ltf = std::less<Float>();
+static std::function<bool(Float, Float)> lef = std::less_equal<Float>();
 
 PrimBasicFunct zerop = num_predicate0(eqf);
 PrimBasicFunct plusp = num_predicate0(gtf);
 PrimBasicFunct minusp = num_predicate0(ltf);
 
-PrimBasicFunct predicate_num(function<bool(Float, Float)> &f) {
+PrimBasicFunct predicate_num(std::function<bool(Float, Float)> &f) {
     return [&](Expr *args) -> Expr * {
         return f(as_float(args->car), as_float(args->cdr->car)) ? sT : sF;
     };
@@ -56,25 +56,25 @@ PrimBasicFunct num_ge = predicate_num(gef);
 PrimBasicFunct num_lt = predicate_num(ltf);
 PrimBasicFunct num_le = predicate_num(lef);
 
-static function<Int(Int, Int)> add = plus<Int>();
-static function<Int(Int, Int)> sub = minus<Int>();
-static function<Int(Int, Int)> mult = multiplies<Int>();
-static function<Int(Int, Int)> div = divides<Int>();
-static function<Int(Int, Int)> mod = modulus<Int>();
-static function<Int(Int, Int)> rem = modulus<Int>();
+static std::function<Int(Int, Int)> add = std::plus<Int>();
+static std::function<Int(Int, Int)> sub = std::minus<Int>();
+static std::function<Int(Int, Int)> mult = std::multiplies<Int>();
+static std::function<Int(Int, Int)> div = std::divides<Int>();
+static std::function<Int(Int, Int)> mod = std::modulus<Int>();
+static std::function<Int(Int, Int)> rem = std::modulus<Int>();
 
-static function<Float(Float, Float)> addf = plus<Float>();
-static function<Float(Float, Float)> subf = minus<Float>();
-static function<Float(Float, Float)> multf = multiplies<Float>();
-static function<Float(Float, Float)> divf = divides<Float>();
-static function<Float(Float, Float)> modf = [](Float a, Float b) -> Float {
+static std::function<Float(Float, Float)> addf = std::plus<Float>();
+static std::function<Float(Float, Float)> subf = std::minus<Float>();
+static std::function<Float(Float, Float)> multf = std::multiplies<Float>();
+static std::function<Float(Float, Float)> divf = std::divides<Float>();
+static std::function<Float(Float, Float)> modf = [](Float a, Float b) -> Float {
     return Float(fmod(a, b));
 };
-static function<Float(Float, Float)> remf = [](Float a, Float b) -> Float {
+static std::function<Float(Float, Float)> remf = [](Float a, Float b) -> Float {
     return Float(remainder(a, b));
 };
 
-PrimBasicFunct numeric_operation_int(const function<Int(Int, Int)> &f, Int s)
+PrimBasicFunct numeric_operation_int(const std::function<Int(Int, Int)> &f, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
     return [=](Expr *args) -> Expr * {
@@ -101,8 +101,8 @@ bool is_all_integer(Expr *args) {
     return true;
 }
 
-PrimBasicFunct numeric_operation_float(const function<Int(Int, Int)> &      f,
-                                       const function<Float(Float, Float)> &fr, Int s)
+PrimBasicFunct numeric_operation_float(const std::function<Int(Int, Int)> &      f,
+                                       const std::function<Float(Float, Float)> &fr, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
     return [=](Expr *args) -> Expr * {
@@ -128,8 +128,8 @@ PrimBasicFunct numeric_operation_float(const function<Int(Int, Int)> &      f,
     };
 }
 
-PrimBasicFunct numeric_operation2_float(const function<Int(Int, Int)> &f,
-                                        const function<Float(Float, Float)> &)
+PrimBasicFunct numeric_operation2_float(const std::function<Int(Int, Int)> &f,
+                                        const std::function<Float(Float, Float)> &)
 // Returns a function implementing the function f across 2 arguments.
 {
     return [=](Expr *args) -> Expr * {
@@ -171,7 +171,7 @@ PrimBasicFunct check_zeros(PrimBasicFunct f) {
     };
 }
 
-PrimBasicFunct numeric_operation(const function<Float(Float, Float)> &f, Float s)
+PrimBasicFunct numeric_operation(const std::function<Float(Float, Float)> &f, Float s)
 // Returns a function implementing the function f across the list of arguments.
 {
     return [=](Expr *args) -> Expr * {
@@ -192,12 +192,12 @@ PrimBasicFunct num_power =
     numeric_operation([](Float a, Float b) -> Float { return Float(pow(a, b)); }, 0);
 
 PrimBasicFunct num_max =
-    numeric_operation([](Float a, Float b) -> Float { return max<Float>(a, b); }, 0);
+    numeric_operation([](Float a, Float b) -> Float { return std::max<Float>(a, b); }, 0);
 
 PrimBasicFunct num_min =
-    numeric_operation([](Float a, Float b) -> Float { return min<Float>(a, b); }, 0);
+    numeric_operation([](Float a, Float b) -> Float { return std::min<Float>(a, b); }, 0);
 
-PrimBasicFunct numeric_single(const function<Float(Float)> &f)
+PrimBasicFunct numeric_single(const std::function<Float(Float)> &f)
 // Returns a function implementing the function f on one argument.
 {
     return [=](Expr *args) -> Expr * { return mk_float(f(as_float(args->car))); };
@@ -219,7 +219,7 @@ PrimBasicFunct num_acos = numeric_single([](Float x) -> Float { return Float(aco
 PrimBasicFunct num_atan = numeric_single([](Float x) -> Float { return Float(atan(x)); });
 PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqrt(x)); });
 
-Expr *incf(Evaluator &l, const string &name, Expr *args, shared_ptr<SymbolTable> a) {
+Expr *incf(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
     auto val = get_reference(name, args->car, a);
     auto incr = mk_int(1);
     if (args->size() > 1) {

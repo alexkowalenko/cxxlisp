@@ -11,40 +11,36 @@
 
 namespace ax {
 
-using namespace std;
-
-Token::operator string() const
-{
+Token::operator std::string() const {
     switch (type) {
     case TokenType::open:
-        return "("s;
+        return "(";
     case TokenType::close:
-        return ")"s;
+        return ")";
     case TokenType::dot:
-        return "."s;
+        return ".";
     case TokenType::quote:
-        return "\""s;
+        return "\"";
     case TokenType::backquote:
-        return "`"s;
+        return "`";
     case TokenType::comma:
-        return ","s;
+        return ",";
     case TokenType::at:
-        return "@"s;
+        return "@";
     case TokenType::hash:
-        return "#"s + get<string>(val);
+        return "#" + get<std::string>(val);
     case TokenType::atom:
-        return get<string>(val);
+        return get<std::string>(val);
     case TokenType::string:
-        return "\"" + get<string>(val) + "\"";
+        return "\"" + get<std::string>(val) + "\"";
     case TokenType::eof:
-        return "eof"s;
+        return "eof";
     default:
-        return ""s;
+        return std::string();
     }
 }
 
-ostream& operator<<(ostream& os, const Token& t)
-{
-    return os << string(t);
+std::ostream &operator<<(std::ostream &os, const Token &t) {
+    return os << std::string(t);
 }
-}
+} // namespace ax

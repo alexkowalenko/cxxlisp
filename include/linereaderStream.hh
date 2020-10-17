@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#ifndef LINEREADERSTREAM_HH
-#define LINEREADERSTREAM_HH
+#pragma once
 
 #include "linereader.hh"
 
@@ -13,20 +12,18 @@
 
 namespace ax {
 
-using namespace std;
-
 class LineReaderStream : public LineReader {
-public:
-    LineReaderStream(istream& is);
+  public:
+    LineReaderStream(std::istream &is);
 
     uint32_t get_char() override;
     uint32_t peek_char() override;
-    void push_char(uint32_t c) override;
+    void     push_char(uint32_t c) override;
 
-private:
+  private:
     void get_line();
 
-    istream& is;
+    std::istream &is;
 };
-}
-#endif
+
+} // namespace ax

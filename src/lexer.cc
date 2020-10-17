@@ -44,11 +44,12 @@ inline bool is_emoji(uint32_t c) {
            (0x20D0 <= c && c <= 0x20FF);
 }
 
-const string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
-const string hashChars = "\\('+-";
+const std::string lispIdentifiers = "-+*/<=>!?:$%_&~^@.\\{}";
+const std::string hashChars = "\\('+-";
 
 inline bool isID(uint32_t c) {
-    return u_isalnum(UChar32(c)) || lispIdentifiers.find(char(c)) != string::npos || is_emoji(c);
+    return u_isalnum(UChar32(c)) || lispIdentifiers.find(char(c)) != std::string::npos ||
+           is_emoji(c);
 }
 } // namespace
 
@@ -98,17 +99,17 @@ Token Lexer::get_token() {
                     prev = t;
                 }
                 goto top;
-            } else if (u_isalnum(UChar32(c)) || hashChars.find(char(c)) != string::npos) {
+            } else if (u_isalnum(UChar32(c)) || hashChars.find(char(c)) != std::string::npos) {
                 Token result = Token(TokenType::hash);
-                result.val = ""s + char(c);
+                result.val = std::string(1, char(c));
                 return result;
             }
             throw UnknownToken(char(c));
         case '"': {
             // build string
-            wstring  str;
-            uint32_t r;
-            auto     prev = c;
+            std::wstring str;
+            uint32_t     r;
+            auto         prev = c;
             for (lineReader >> r; !(r == '\"' && prev != '\\') && r != '\n'; lineReader >> r) {
                 if (prev == '\\' && r == '\"') {
                     str.pop_back();
@@ -120,14 +121,14 @@ Token Lexer::get_token() {
         }
         case '.':
             auto n = lineReader.peek_char();
-            if (isspace(char(n)) || int(n) == char_traits<char>::eof()) {
+            if (isspace(char(n)) || int(n) == std::char_traits<char>::eof()) {
                 return dot_token;
             }
             // fallthrough to get the atom
         };
         // BOOST_LOG_TRIVIAL(trace) << "lexer char " << c;
         if (isID(c)) {
-            string id;
+            std::string id;
             utf8::append(char32_t(c), id);
             for (auto r = lineReader.peek_char(); isID(r); r = lineReader.peek_char()) {
                 lineReader.get_char();

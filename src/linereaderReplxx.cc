@@ -29,16 +29,16 @@
 namespace ax {
 
 namespace {
-char const *prompt = "++> ";
+constexpr char const *prompt{"++> "};
 
-const string history_file = ".cxxlisp.replxx";
-const int    max_history = 1000;
+const std::string history_file = ".cxxlisp.replxx";
+constexpr int     max_history = 1000;
 }; // namespace
 
 LineReaderReplxx::LineReaderReplxx() {
     // BOOST_LOG_TRIVIAL(info) << "Using Replxx!";
     struct passwd *pw = getpwuid(getuid());
-    my_history_file = string(pw->pw_dir);
+    my_history_file = std::string(pw->pw_dir);
     my_history_file += "/" + history_file;
     replxx.history_load(my_history_file);
     replxx.set_max_history_size(max_history);
@@ -79,10 +79,10 @@ void LineReaderReplxx::get_line() {
     }
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
 
-    if (utf8::find_invalid(buf) != string::npos) {
+    if (utf8::find_invalid(buf) != std::string::npos) {
         BOOST_LOG_TRIVIAL(trace) << "invalid str " << cbuf;
     }
-    buf = string(cbuf);
+    buf = std::string(cbuf);
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << buf;
     replxx.history_add(cbuf);
 

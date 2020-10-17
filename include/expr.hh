@@ -25,8 +25,6 @@
 
 namespace ax {
 
-using namespace std;
-
 // basic types for objects
 enum class Type {
     atom,
@@ -47,15 +45,15 @@ enum class Type {
 class Expr;
 
 // defintions of basic types
-using Atom = string;
+using Atom = std::string;
 using Bool = bool;
 using Int = long;
 using Float = double;
-using Keyword = string;
+using Keyword = std::string;
 using Char = wchar_t;
-using String = wstring;
-using Vector = vector<Expr *>;
-using Complex = complex<Float>;
+using String = std::wstring;
+using Vector = std::vector<Expr *>;
+using Complex = std::complex<Float>;
 
 class Function;
 class Stream;
@@ -143,7 +141,7 @@ inline Expr *mk_list(Expr *car = nullptr, Expr *cdr = nullptr) {
     return e;
 }
 
-Expr *mk_list(initializer_list<Expr *>);
+Expr *mk_list(std::initializer_list<Expr *>);
 Expr *mk_list(size_t size, Expr *const init);
 
 // Test functions for s-expression types
@@ -186,11 +184,11 @@ constexpr Expr *arg2(const Expr *const args) {
 
 // Output
 
-string to_string(const Expr *const e);
-string to_dstring(const Expr *const e);
-string to_pstring(const Expr *const s);
+std::string to_string(const Expr *const e);
+std::string to_dstring(const Expr *const e);
+std::string to_pstring(const Expr *const s);
 
-inline ostream &operator<<(ostream &os, const Expr *const s) {
+inline std::ostream &operator<<(std::ostream &os, const Expr *const s) {
     return os << to_string(s);
 }
 
@@ -227,12 +225,12 @@ inline Expr *mk_string(const String &s) {
 
 // string <-> wstring conversion functions
 
-inline wstring s2ws(const std::string &str) {
+inline std::wstring s2ws(const std::string &str) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
     return converterX.from_bytes(str);
 }
 
-inline string ws2s(const std::wstring &wstr) {
+inline std::string ws2s(const std::wstring &wstr) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
     return converterX.to_bytes(wstr);
 }
@@ -278,33 +276,33 @@ enum class StreamType { input, output };
 
 class Stream {
   public:
-    Stream(istream *s) : stream_type(StreamType::input), str(s){};
+    Stream(std::istream *s) : stream_type(StreamType::input), str(s){};
 
-    Stream(ostream *s) : stream_type(StreamType::output), str(s){};
+    Stream(std::ostream *s) : stream_type(StreamType::output), str(s){};
 
     Stream(){};
 
-    string to_string();
-    bool   is_input() { return stream_type == StreamType::input; };
-    bool   is_output() { return stream_type == StreamType::output; };
+    std::string to_string();
+    bool        is_input() { return stream_type == StreamType::input; };
+    bool        is_output() { return stream_type == StreamType::output; };
 
-    StreamType                               stream_type;
-    variant<istream *, ostream *, fstream *> str;
+    StreamType                                                   stream_type;
+    std::variant<std::istream *, std::ostream *, std::fstream *> str;
 };
 
-inline Expr *mk_stream(istream *s) {
+inline Expr *mk_stream(std::istream *s) {
     auto e = new (GC) Expr(Type::stream);
     e->stream = new (GC) Stream(s);
     return e;
 }
 
-inline Expr *mk_stream(ostream *s) {
+inline Expr *mk_stream(std::ostream *s) {
     auto e = new (GC) Expr(Type::stream);
     e->stream = new (GC) Stream(s);
     return e;
 }
 
-Expr *mk_stream(fstream *const s, ios_base::openmode m);
+Expr *mk_stream(std::fstream *const s, std::ios_base::openmode m);
 
 // Vectors
 inline Expr *mk_vector() {

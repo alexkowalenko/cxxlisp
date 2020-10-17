@@ -3,22 +3,38 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test_*.cc)
-
 add_library(testlib utils.cc)
 target_link_libraries(testlib PRIVATE project_options project_warnings)
 
-foreach(testSrc ${test_src})
-        #Extract the filename without an extension (NAME_WE)
-        get_filename_component(testName ${testSrc} NAME_WE)
-
+macro(package_add_test TESTNAME)
         #Add compile target
-        add_executable(${testName} ${testSrc})
+        add_executable(${TESTNAME} ${ARGN})
 
         #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} PRIVATE project_options project_warnings
+        target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
                                           cxxlispl replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
 
-        add_test(NAME ${testName} 
-                 COMMAND ${testName} )
-endforeach(testSrc)
+        add_test(NAME ${TESTNAME} 
+                 COMMAND ${TESTNAME} )
+
+endmacro() 
+
+
+package_add_test(test_linereader test_linereader.cc)
+package_add_test(test_token test_token.cc)
+package_add_test(test_lexer test_lexer.cc)
+package_add_test(test_parse test_parse.cc)
+
+package_add_test(test_expr test_expr.cc)
+package_add_test(test_symtable test_symtable.cc)
+
+package_add_test(test_eval test_eval.cc)
+package_add_test(test_functions test_functions.cc)
+package_add_test(test_io test_io.cc)
+package_add_test(test_numbers test_numbers.cc)
+package_add_test(test_seq test_seq.cc)
+package_add_test(test_stdlib test_stdlib.cc)
+package_add_test(test_chars test_chars.cc)
+package_add_test(test_string test_string.cc)
+package_add_test(test_vector test_vector.cc)
+package_add_test(test_winston test_winston.cc)

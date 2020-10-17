@@ -26,7 +26,7 @@
 
 namespace ax {
 
-Expr *mk_list(initializer_list<Expr *> p) {
+Expr *mk_list(std::initializer_list<Expr *> p) {
     if (p.size() == 0) {
         return sF;
     }
@@ -59,13 +59,13 @@ Expr *mk_list(size_t size, Expr *const init) {
     return top;
 }
 
-inline string to_string(Float f) {
-    array<char, 30> buf;
+inline std::string to_string(Float f) {
+    std::array<char, 30> buf;
     sprintf(buf.data(), "%.12lg", f);
-    return string(buf.data());
+    return std::string(buf.data());
 }
 
-string to_dstring(const Expr *const s) {
+std::string to_dstring(const Expr *const s) {
     if (!s) {
         return "NULL";
     }
@@ -77,7 +77,7 @@ string to_dstring(const Expr *const s) {
     case Type::integer:
         return std::to_string(s->integer);
     case Type::list: {
-        string res("[");
+        std::string res("[");
         res += to_dstring(s->car);
         res += " . ";
         res += to_dstring(s->cdr);
@@ -99,7 +99,7 @@ string to_dstring(const Expr *const s) {
     }
 }
 
-string to_string(const Expr *const s) {
+std::string to_string(const Expr *const s) {
     if (s == nullptr) {
         return "";
     }
@@ -114,7 +114,7 @@ string to_string(const Expr *const s) {
     case Type::floating:
         return to_string(s->floating);
     case Type::complex: {
-        string str{"#c("};
+        std::string str{"#c("};
         str += to_string(s->complex.real());
         str += ' ';
         str += to_string(s->complex.imag());
@@ -128,7 +128,7 @@ string to_string(const Expr *const s) {
         if (s->car == quote_at) {
             return "'" + to_string(s->cdr->car);
         }
-        string str{'('};
+        std::string str{'('};
         str += to_string(s->car);
         auto x = s;
         while (x->cdr != nullptr) {
@@ -150,7 +150,7 @@ string to_string(const Expr *const s) {
     case Type::string:
         return "\"" + ws2s(s->string) + "\"";
     case Type::character: {
-        string str{"#\\"};
+        std::string str{"#\\"};
         switch (s->chr) {
         case ' ':
             str += "space";
@@ -164,7 +164,7 @@ string to_string(const Expr *const s) {
         return str;
     }
     case Type::function:
-        return string(*s->function);
+        return std::string(*s->function);
     case Type::function_ref:
         return "#'" + s->function_ref;
     case Type::keyword:
@@ -172,7 +172,7 @@ string to_string(const Expr *const s) {
     case Type::stream:
         return s->stream->to_string();
     case Type::vector: {
-        string str{"#("};
+        std::string str{"#("};
         for (auto x = s->vector.begin(); x != s->vector.end(); x++) {
             str += to_string(*x);
             if (!(x == s->vector.end() - 1)) {
@@ -187,7 +187,7 @@ string to_string(const Expr *const s) {
     }
 }
 
-string to_pstring(const Expr *const s) {
+std::string to_pstring(const Expr *const s) {
     if (!s) {
         return "NULL";
     }
@@ -195,7 +195,7 @@ string to_pstring(const Expr *const s) {
     case Type::string:
         return ws2s(s->string);
     case Type::character:
-        return string(1, char(s->chr));
+        return std::string(1, char(s->chr));
     default:
         return to_string(s);
     }
@@ -312,8 +312,8 @@ Float as_float(const Expr *const s) {
         throw EvalException("Not number");
 }
 
-string Stream::to_string() {
-    string res = "<stream:";
+std::string Stream::to_string() {
+    std::string res = "<stream:";
     if (stream_type == StreamType::input) {
         res += "input>";
     } else {

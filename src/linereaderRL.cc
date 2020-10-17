@@ -21,21 +21,22 @@
 namespace ax {
 
 namespace {
-char const *prompt = "++> ";
+constexpr char const *prompt{"++> "};
 
-const string history_file = ".cxxlisp";
-const int    max_history = 1000;
+const std::string history_file = ".cxxlisp";
+constexpr int     max_history = 1000;
 }; // namespace
 
 LineReaderReadLine::LineReaderReadLine() {
     using_history();
 
     struct passwd *pw = getpwuid(getuid());
-    my_history_file = string(pw->pw_dir);
+    my_history_file = std::string(pw->pw_dir);
     my_history_file += "/" + history_file;
     auto res = read_history(my_history_file.c_str());
     if (res != 0) {
-        cerr << "Can't read the history file: " << my_history_file << ' ' << strerror(res) << endl;
+        std::cerr << "Can't read the history file: " << my_history_file << ' ' << strerror(res)
+                  << std::endl;
     }
     ptr = buf.end();
 }
@@ -43,13 +44,13 @@ LineReaderReadLine::LineReaderReadLine() {
 LineReaderReadLine::~LineReaderReadLine() {
     auto res = write_history(my_history_file.c_str());
     if (res != 0) {
-        cerr << "Can't write the history file: " << my_history_file << ' ' << strerror(res)
-             << endl;
+        std::cerr << "Can't write the history file: " << my_history_file << ' ' << strerror(res)
+                  << std::endl;
     }
     res = history_truncate_file(my_history_file.c_str(), max_history);
     if (res != 0) {
-        cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res)
-             << endl;
+        std::cerr << "Can't truncate the history file: " << history_file << ' ' << strerror(res)
+                  << std::endl;
     }
 }
 
@@ -81,7 +82,7 @@ void LineReaderReadLine::get_line() {
     }
     add_history(cbuf);
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
-    buf = string(cbuf);
+    buf = std::string(cbuf);
     buf.append(1, '\n');
     ptr = buf.begin();
     free(cbuf);
