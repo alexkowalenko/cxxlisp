@@ -112,7 +112,7 @@ string to_string(const Expr* const s)
     case Type::floating:
         return to_string(s->floating);
     case Type::complex: {
-        string str{ "#c(" };
+        string str { "#c(" };
         str += to_string(s->complex.real());
         str += ' ';
         str += to_string(s->complex.imag());
@@ -126,7 +126,7 @@ string to_string(const Expr* const s)
         if (s->car == quote_at) {
             return "'" + to_string(s->cdr->car);
         }
-        string str{ '(' };
+        string str { '(' };
         str += to_string(s->car);
         auto x = s;
         while (x->cdr != nullptr) {
@@ -148,7 +148,7 @@ string to_string(const Expr* const s)
     case Type::string:
         return "\"" + ws2s(s->string) + "\"";
     case Type::character: {
-        string str{ "#\\" };
+        string str { "#\\" };
         switch (s->chr) {
         case ' ':
             str += "space";
@@ -170,7 +170,7 @@ string to_string(const Expr* const s)
     case Type::stream:
         return s->stream->to_string();
     case Type::vector: {
-        string str{ "#(" };
+        string str { "#(" };
         for (auto x = s->vector.begin(); x != s->vector.end(); x++) {
             str += to_string(*x);
             if (!(x == s->vector.end() - 1)) {

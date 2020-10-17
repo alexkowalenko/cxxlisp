@@ -3,143 +3,73 @@ cmake_minimum_required(VERSION 3.12)
 # Change compiler here
 set(AX_BASE_CLANG /usr/local/opt/llvm)
 set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/bin/clang++)
+message(STATUS "C++ compiler = ${CMAKE_CXX_COMPILER}")
 
 project (cxxlisp LANGUAGES CXX)
+include(cmake/StandardProjectSettings.cmake)
+include(cmake/PreventInSourceBuilds.cmake)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
 
-#add_compile_options(-Wall -Wextra -Wshadow -Wpedantic)
-add_compile_options(-Wall -Wshadow)
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+target_compile_features(project_options INTERFACE cxx_std_17)
 
-enable_testing()
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+  if(ENABLE_BUILD_WITH_TIME_TRACE)
+    add_compile_definitions(project_options INTERFACE -ftime-trace)
+  endif()
+endif()
 
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
 
-# Add custom Find cmake files
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+# enable cache system
+include(cmake/Cache.cmake)
 
-# Boost libraries
-find_package(Boost 1.70 REQUIRED 
-             COMPONENTS log program_options test_exec_monitor)
-include_directories(${Boost_INCLUDE_DIRS})
-link_libraries(${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_LIBRARIES})
-add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
+# standard compiler warnings
+#include(cmake/CompilerWarnings.cmake)
+#set_project_warnings(project_warnings)
 
-# GNU Readline 
-find_package(readline REQUIRED)
-include_directories(${Readline_INCLUDE_DIR})
-link_libraries(${Readline_LIBRARY})
+# sanitizer options if supported by compiler
+set(ENABLE_SANITIZER_ADDRESS OFF)
+set(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR OFF)
+include(cmake/Sanitizers.cmake)
+enable_sanitizers(project_options)
 
-#Boehm Garbage collector
-set(BOEHM_INCLUDE_DIRS /usr/local/opt/bdw-gc/include)
-set(BOEHM_LIBRARY_DIRS /usr/local/opt/bdw-gc/lib)
-set(BOEHM_LIBRARIES gc gccpp)
-include_directories(${BOEHM_INCLUDE_DIRS})
-link_directories(${BOEHM_LIBRARY_DIRS})
+# enable doxygen
+include(cmake/Doxygen.cmake)
+enable_doxygen()
 
-#replxx
-set(REPLXX_INCLUDE_DIRS /usr/local/include)
-set(REPLXX_LIBRARY_DIRS /usr/local/lib)
-set(REPLXX_LIBRARIES replxx)
-include_directories(${REPLXX_INCLUDE_DIRS})
-link_directories(${REPLXX_LIBRARY_DIRS})
+# allow for static analysis options
+set(ENABLE_CLANG_TIDY OFF)
+set(ENABLE_CPPCHECK OFF)
+include(cmake/StaticAnalyzers.cmake)
+
+option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
+option(ENABLE_TESTING "Enable Test Builds" ON)
+option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
+
+if(ENABLE_TESTING)
+  message("Enabling testing")
+  enable_testing()
+  add_subdirectory(test)
+endif()
+
+if(ENABLE_FUZZING)
+  message("Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
+  add_subdirectory(fuzz_test)
+endif()
+
+add_subdirectory(third_party/replxx)
+
+# Local Code
 
 include_directories(include)
 
-# Third party libraries local to this project
-
-# add_subdirectory(third_party/utfcpp)
-include_directories("${PROJECT_SOURCE_DIR}/third_party/utfcpp/source")
-
-set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
-set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
-set(ICU_LIBRARIES icuuc)
-include_directories(${ICU_INCLUDE_DIRS})
-link_directories(${ICU_LIBRARY_DIRS})
-
-set(GBEN_INCLUDE_DIRS /usr/local/opt/google-benchmark/include)
-set(GBEN_LIBRARY_DIRS /usr/local/opt/google-benchmark/lib)
-set(GBEN_LIBRARIES benchmark)
-include_directories(${GBEN_INCLUDE_DIRS})
-link_directories(${GBEN_LIBRARY_DIRS})
-
-# CXX Lisp build
-
-# options that work on macOs address, undefined
-#add_compile_options (-fsanitize=undefined)
-#set(CMAKE_EXE_LINKER_FLAGS -fsanitize=undefined)
-#set(CMAKE_LINKER ${AX_BASE_CLANG}/clang++)
-
-find_program(CLANG_TIDY_PROGRAM NAMES "clang-tidy" DOC ${AX_BASE_CLANG}/clang-tidy)
-if (CLANG_TIDY_PROGRAM)
-        set(CLANG_TIDY_OPTIONS "-warnings-as-errors=*")
-        set(RUN_CLANG_TIDY "${CLANG_TIDY_PROGRAM}" "${CLANG_TIDY_OPTIONS}")
-endif()
-
-function(make_includable input_file output_file)
-    file(READ ${input_file} content)
-    set(delim "stdlib")
-    set(content "R\"${delim}(\n${content})${delim}\"")
-    file(WRITE ${output_file} "${content}")
-endfunction(make_includable)
-
-if (NOT EXISTS src/stdlib.lisp.hh)
-        make_includable(src/stdlib.lisp src/stdlib.lisp.hh)
-endif()
-#set_property(DIRECTORY PROPERTY ADDITIONAL_CLEAN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stdlib.lisp.hh)
-
-file(GLOB source_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc)
-add_library(libcxxlisp STATIC ${source_files} src/stdlib.lisp.hh)
-
-add_executable(cxxlisp cmd/cxxlisp.cc)
-target_link_libraries(cxxlisp libcxxlisp replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
-
-if (CLANG_TIDY_PROGRAM)
-        set_target_properties(cxxlisp PROPERTIES CXX_CLANG_TIDY "${RUN_CLANG_TIDY}")
-endif()
-
-# Test programs build
-
-file(GLOB test_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/test_*.cc)
-
-add_library(testlib test/utils.cc)
-
-foreach(testSrc ${test_src})
-        #Extract the filename without an extension (NAME_WE)
-        get_filename_component(testName ${testSrc} NAME_WE)
-
-        #Add compile target
-        add_executable(${testName} ${testSrc})
-
-        #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${testName} libcxxlisp replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
-
-        #I like to move testing binaries into a testBin directory
-        #set_target_properties(${testName} PROPERTIES 
-        #    RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/testBin)
-
-        #Finally add it to test execution - 
-        #Notice the WORKING_DIRECTORY and COMMAND
-        add_test(NAME ${testName} 
-                 COMMAND ${testName} )
-endforeach(testSrc)
-
-# Benchmark programs
-
-file(GLOB bench_src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} benchmarks/bench_*.cc)
-
-foreach(benSrc ${bench_src})
-        #Extract the filename without an extension (NAME_WE)
-        get_filename_component(benName ${benSrc} NAME_WE)
-
-        #Add compile target
-        add_executable(${benName} ${benSrc})
-
-        #link to Boost libraries AND your targets and dependencies
-        target_link_libraries(${benName} libcxxlisp replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} ${GBEN_LIBRARIES})
-
-endforeach(benSrc)
+add_subdirectory(src)
+add_subdirectory(cmd)
 
 # install
-set(CMAKE_INSTALL_PREFIX /Users/alex/Development/lisp-proj/cxxlisp)
-install(TARGETS cxxlisp DESTINATION bin)
+set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
