@@ -1,6 +1,13 @@
 
 # Benchmark programs
 
+option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/third_party/googletest" "third_party/googletest")
+
+option(BENCHMARK_ENABLE_TESTING "Enable testing of the benchmark library." OFF)
+option(BENCHMARK_ENABLE_INSTALL "Enable installation of benchmark. (Projects embedding benchmark may want to turn this OFF.)" OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/third_party/benchmark" "third_party/benchmark")
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 macro(package_add_benchmark TESTNAME)
@@ -9,7 +16,7 @@ macro(package_add_benchmark TESTNAME)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
-                                          cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} ${GBEN_LIBRARIES})
+                                          cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} benchmark::benchmark)
 endmacro() 
 
 package_add_benchmark(bench_1 bench_1.cc)

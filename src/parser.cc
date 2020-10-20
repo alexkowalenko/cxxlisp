@@ -86,7 +86,7 @@ Expr *Parser::parse_comma() {
 }
 
 Expr *Parser::parse_hash(const Token &tok) {
-    auto token_val = boost::algorithm::to_upper_copy(get<std::string>(tok.val));
+    auto token_val = boost::algorithm::to_upper_copy(std::get<std::string>(tok.val));
     if (token_val == "\\") {
         // character
         auto t = lexer.peek();
@@ -97,7 +97,7 @@ Expr *Parser::parse_hash(const Token &tok) {
             case 'n':
             case 'N': {
                 Token newTok = lexer.get_token();
-                auto  val = boost::algorithm::to_lower_copy(get<std::string>(newTok.val));
+                auto  val = boost::algorithm::to_lower_copy(std::get<std::string>(newTok.val));
                 if (val == "newline") {
                     return mk_char('\n');
                 } else if (val == "space") {
@@ -116,7 +116,7 @@ Expr *Parser::parse_hash(const Token &tok) {
         // function ref
         Token t = lexer.get_token();
         if (t.type == TokenType::atom) {
-            return mk_function_ref(get<std::string>(t.val));
+            return mk_function_ref(std::get<std::string>(t.val));
         } else if (t.type == TokenType::open) {
             auto funct = parse_list().val;
             if (!is_false(funct) && is_atom(funct->car) && funct->car->atom == lambda_atom &&
@@ -142,7 +142,7 @@ Expr *Parser::parse_hash(const Token &tok) {
             base = 16;
         }
         Int  value = 0;
-        auto str_val = get<std::string>(newTok.val);
+        auto str_val = std::get<std::string>(newTok.val);
         if (auto [p, ec] =
                 std::from_chars(str_val.data(), str_val.data() + str_val.size(), value, base);
             ec == std::errc()) {
@@ -225,10 +225,10 @@ ParserResult Parser::parse() {
         throw EndBracketException();
 
     case TokenType::atom:
-        return {mk_symbolInt(get<std::string>(tok.val)), false};
+        return {mk_symbolInt(std::get<std::string>(tok.val)), false};
 
     case TokenType::string:
-        return {mk_string(get<std::wstring>(tok.val)), false};
+        return {mk_string(std::get<std::wstring>(tok.val)), false};
 
     case TokenType::quote:
     case TokenType::backquote:

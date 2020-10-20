@@ -1,6 +1,5 @@
 build/***
 bin/**
-third_party/**
 .vscode/***
 src/stdlib.lisp.hh
 .cache/*

@@ -28,11 +28,11 @@ Token::operator std::string() const {
     case TokenType::at:
         return "@";
     case TokenType::hash:
-        return "#" + get<std::string>(val);
+        return "#" + std::get<std::string>(val);
     case TokenType::atom:
-        return get<std::string>(val);
+        return std::get<std::string>(val);
     case TokenType::string:
-        return "\"" + get<std::string>(val) + "\"";
+        return "\"" + std::get<std::string>(val) + "\"";
     case TokenType::eof:
         return "eof";
     default:

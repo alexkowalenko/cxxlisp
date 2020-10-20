@@ -73,9 +73,3 @@ include_directories(${ICU_INCLUDE_DIRS})
 link_directories(${ICU_LIBRARY_DIRS})
 message(STATUS "Using International Components for Unicode: ${ICU_INCLUDE_DIRS}")
 
-set(GBEN_INCLUDE_DIRS /usr/local/opt/google-benchmark/include)
-set(GBEN_LIBRARY_DIRS /usr/local/opt/google-benchmark/lib)
-set(GBEN_LIBRARIES benchmark)
-include_directories(${GBEN_INCLUDE_DIRS})
-link_directories(${GBEN_LIBRARY_DIRS})
-

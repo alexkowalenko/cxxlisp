@@ -78,7 +78,7 @@ Expr *open(Expr *args) {
 
 Expr *close(Expr *args) {
     if (is_a<Type::stream>(args->car)) {
-        if (auto f = get_if<std::fstream *>(&args->car->stream->str)) {
+        if (auto f = std::get_if<std::fstream *>(&args->car->stream->str)) {
             if ((*f)->is_open()) {
                 (*f)->close();
                 return sT;
@@ -321,7 +321,7 @@ Expr *load(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<Sy
     auto output = get_reference(name, std_out, a)->stream;
     l.opt.push_options();
     l.opt.readline = false;
-    l.repl(file, *get<std::ostream *>(output->str));
+    l.repl(file, *std::get<std::ostream *>(output->str));
     l.opt.pop_options();
     return sT;
 }

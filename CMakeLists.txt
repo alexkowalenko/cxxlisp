@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 # Change compiler here
-set(AX_BASE_CLANG /usr/local/Cellar/llvm/11.0.0)
+set(AX_BASE_CLANG /usr/local/opt/llvm)
 set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/bin/clang++)
 message(STATUS "C++ compiler = ${CMAKE_CXX_COMPILER}")
 
@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_20)
+target_compile_features(project_options INTERFACE cxx_std_17)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
