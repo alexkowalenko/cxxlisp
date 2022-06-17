@@ -6,7 +6,8 @@
 
 #include "evaluator.hh"
 
-#include <boost/log/trivial.hpp>
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include <spdlog/spdlog.h>
 
 #include "exceptions.hh"
 #include "function.hh"
@@ -235,7 +236,7 @@ Expr *Evaluator::perform_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
 
 Expr *Evaluator::eval(Expr *const e, std::shared_ptr<SymbolTable> a) {
     if (opt.debug_expr) {
-        BOOST_LOG_TRIVIAL(debug) << "eval: " << to_string(e);
+        SPDLOG_DEBUG( "eval: {}",to_string(e));
     };
 
     if (is_false(e)) { // stops nullptrs

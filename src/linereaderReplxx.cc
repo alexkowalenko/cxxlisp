@@ -15,7 +15,9 @@
 #include <iostream>
 
 #include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
+
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include <spdlog/spdlog.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
@@ -80,7 +82,7 @@ void LineReaderReplxx::get_line() {
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << cbuf;
 
     if (utf8::find_invalid(buf) != std::string::npos) {
-        BOOST_LOG_TRIVIAL(trace) << "invalid str " << cbuf;
+        // SPDLOG_TRACE("invalid str {}", cbuf);
     }
     buf = std::string(cbuf);
     // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_line: " << buf;

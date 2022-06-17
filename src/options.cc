@@ -8,7 +8,9 @@
 
 #include <iostream>
 
-#include <boost/log/trivial.hpp>
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include <spdlog/spdlog.h>
+
 #include <boost/program_options.hpp>
 
 namespace ax {
@@ -41,7 +43,7 @@ Options getOptions(int argc, char *argv[]) {
         if (!debug.empty()) {
             if (debug.find('e')) {
                 options.debug_expr = true;
-                BOOST_LOG_TRIVIAL(debug) << "debug: show evaluation ";
+                SPDLOG_DEBUG("debug: show evaluation ");
             }
         }
     } catch (std::exception &e) {

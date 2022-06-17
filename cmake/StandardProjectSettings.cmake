@@ -73,3 +73,7 @@ include_directories(${ICU_INCLUDE_DIRS})
 link_directories(${ICU_LIBRARY_DIRS})
 message(STATUS "Using International Components for Unicode: ${ICU_INCLUDE_DIRS}")
 
+# spdlog
+set(SPDLOG_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/spdlog/include")
+include_directories(${SPDLOG_INCLUDE_DIRS})
+message(STATUS "Using spdlog: ${SPDLOG_INCLUDE_DIRS}")

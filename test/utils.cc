@@ -5,8 +5,10 @@
 //
 
 #include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup.hpp>
+
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include <spdlog/spdlog.h>
+
 #include <boost/test/unit_test.hpp>
 #include <sstream>
 
@@ -18,7 +20,6 @@
 
 using namespace ax;
 using namespace std;
-namespace logging = boost::log;
 
 void test_Evaluator(const vector<TestEval>& tests)
 {
@@ -27,7 +28,7 @@ void test_Evaluator(const vector<TestEval>& tests)
     options.readline = false;
     options.debug_expr = false;
 
-    logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
+    spdlog::set_level(spdlog::level::info); // Set global log level to info 
     Lisp lisp(options);
     lisp.init();
 

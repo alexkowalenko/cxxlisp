@@ -8,8 +8,6 @@
 
 #include <array>
 
-#include <boost/log/trivial.hpp>
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
 #pragma clang diagnostic ignored "-Wconversion"

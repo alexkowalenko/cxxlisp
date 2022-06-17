@@ -15,7 +15,6 @@
 #include <iostream>
 
 #include <boost/format.hpp>
-#include <boost/log/trivial.hpp>
 #include <readline/readline.h>
 
 namespace ax {

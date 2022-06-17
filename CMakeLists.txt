@@ -70,6 +70,7 @@ if(ENABLE_BENCHMARKS)
 endif()
 
 add_subdirectory(extern/replxx)
+add_subdirectory(extern/spdlog)
 
 # Local Code
 

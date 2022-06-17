@@ -8,8 +8,9 @@
 #include <string>
 
 #include <benchmark/benchmark.h>
-#include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup.hpp>
+
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include <spdlog/spdlog.h>
 
 #include "exceptions.hh"
 #include "linereaderStream.hh"
@@ -17,7 +18,6 @@
 
 using namespace ax;
 using namespace std;
-namespace logging = boost::log;
 
 class NullBuffer : public std::streambuf {
   public:
@@ -32,7 +32,7 @@ static void BM_Atom(benchmark::State &state) {
     options.readline = false;
     options.debug_expr = false;
 
-    logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::info);
+    spdlog::set_level(spdlog::level::info); // Set global log level to info 
     Lisp lisp(options);
     lisp.init();
 

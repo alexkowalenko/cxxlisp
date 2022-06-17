@@ -10,29 +10,14 @@
 #include "lisp.hh"
 #include "options.hh"
 
-#include <boost/log/expressions.hpp>
-#include <boost/log/support/date_time.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup.hpp>
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#include "spdlog/spdlog.h"
 
 using namespace ax;
 
-namespace logging = boost::log;
-namespace expr = boost::log::expressions;
-
 void init_logging() {
-    // console sink
-    auto sink = logging::add_console_log(std::cerr);
-
-    sink->set_formatter(expr::stream
-                        << expr::format_date_time<boost::posix_time::ptime>("TimeStamp",
-                                                                            "%Y-%m-%d %H:%M:%S.%f")
-                        << ": [" << logging::trivial::severity << "] " << expr::smessage);
-    sink->imbue(sink->getloc());
-
-    logging::add_common_attributes();
-
-    logging::core::get()->set_filter(logging::trivial::severity >= logging::trivial::trace);
+    spdlog::set_level(spdlog::level::debug); // Set global log level to debug 
+    // SPDLOG_DEBUG("Debug logging");  
 }
 
 int main(int argc, char *argv[]) {
