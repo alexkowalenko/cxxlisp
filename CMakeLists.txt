@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 # Change compiler here
-set(AX_BASE_CLANG /usr/local/opt/llvm)
+set(AX_BASE_CLANG /usr/local/Cellar/llvm/14.0.5)
 set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/bin/clang++)
 message(STATUS "C++ compiler = ${CMAKE_CXX_COMPILER}")
 
@@ -13,7 +13,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_17)
+target_compile_features(project_options INTERFACE cxx_std_23)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
@@ -33,8 +33,8 @@ include(cmake/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
 # sanitizer options if supported by compiler
-set(ENABLE_SANITIZER_ADDRESS ON)
-set(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR ON)
+set(ENABLE_SANITIZER_ADDRESS OFF)
+set(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR OFF)
 include(cmake/Sanitizers.cmake)
 enable_sanitizers(project_options)
 
@@ -69,7 +69,7 @@ if(ENABLE_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-add_subdirectory(third_party/replxx)
+add_subdirectory(extern/replxx)
 
 # Local Code
 

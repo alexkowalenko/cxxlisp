@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <numeric>
+#include <array>
 
 #include <boost/algorithm/string/replace.hpp>
 
@@ -264,7 +265,7 @@ Expr *format(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a
 }
 
 Expr *trace(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable>) {
-    if (args->size() > 0) {
+    if (args && args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
                 throw EvalException("trace: function is not an atom " + to_string(cur->car));
@@ -295,7 +296,7 @@ Expr *trace(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<Symbo
 }
 
 Expr *untrace(Evaluator &l, const std::string &, Expr *args, std::shared_ptr<SymbolTable>) {
-    if (args->size() > 0) {
+    if (args && args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
                 throw EvalException("trace: function is not an atom " + to_string(cur->car));

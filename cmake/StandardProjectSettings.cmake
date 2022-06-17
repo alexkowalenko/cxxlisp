@@ -57,14 +57,14 @@ link_directories(${BOEHM_LIBRARY_DIRS})
 
 #replxx
 message(STATUS "Using replxx")
-set(REPLXX_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/third_party/replxx/include")
-set(REPLXX_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/third_party/replxx/lib")
+set(REPLXX_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/replxx/include")
+set(REPLXX_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/extern/replxx/lib")
 set(REPLXX_LIBRARIES replxx)
 message(STATUS "Using replxx ${REPLXX_LIBRARY_DIRS}")
 
 set(REPLXX_BUILD_EXAMPLES OFF)
 
-include_directories("${PROJECT_SOURCE_DIR}/third_party/utfcpp/source")
+include_directories("${PROJECT_SOURCE_DIR}/extern/utfcpp/source")
 
 set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
 set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
