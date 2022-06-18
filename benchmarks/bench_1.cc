@@ -32,7 +32,7 @@ static void BM_Atom(benchmark::State &state) {
     options.readline = false;
     options.debug_expr = false;
 
-    spdlog::set_level(spdlog::level::info); // Set global log level to info 
+    spdlog::set_level(spdlog::level::info); // Set global log level to info
     Lisp lisp(options);
     lisp.init();
 

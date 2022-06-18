@@ -3,6 +3,20 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
+add_subdirectory("${PROJECT_SOURCE_DIR}/extern/googletest" "extern/googletest")
+
+mark_as_advanced(
+    # BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS
+    BUILD_GTEST BUILD_SHARED_LIBS
+    # gmock_build_tests gtest_build_samples gtest_build_tests
+    gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
+)
+
+set_target_properties(gtest PROPERTIES FOLDER extern)
+#set_target_properties(gtest_main PROPERTIES FOLDER extern)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 add_library(testlib utils.cc)
 target_link_libraries(testlib PRIVATE project_options project_warnings)
 
@@ -12,12 +26,18 @@ macro(package_add_test TESTNAME)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
-                                          cxxlispl replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES})
+                                          cxxlispl replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES}
+                                          gtest gtest_main)
 
         add_test(NAME ${TESTNAME} 
                  COMMAND ${TESTNAME} )
 
 endmacro() 
+
+include_directories(${PROJECT_SOURCE_DIR}/extern/googletest/googletest/include)
+
+set(INSTALL_GTEST OFF)
+set(BUILD_GMOCK OFF)
 
 
 package_add_test(test_linereader test_linereader.cc)

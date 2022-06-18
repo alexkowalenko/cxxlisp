@@ -4,60 +4,61 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#define BOOST_TEST_MODULE symboltable
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
 #include <iostream>
 
 #include "symboltable.hh"
 
 using namespace ax;
-using namespace std;
 
-BOOST_AUTO_TEST_CASE(symboltable_invoker)
-{
+TEST(symboltable, invoker) {
     SymbolTable tab(nullptr);
     tab.put("a", mk_atom("hello"));
     tab.put("b", mk_int(3));
     tab.put("c", sF);
 
     if (auto x = tab.find("a")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "hello");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "hello");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 
     if (auto x = tab.find("b")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "3");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "3");
     } else {
-        BOOST_FAIL("b not found");
+        std::cout << "b not found";
+        FAIL();
     }
 
     if (auto x = tab.find("c")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "nil");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "nil");
     } else {
-        BOOST_FAIL("c not found");
+        std::cout << "c not found";
+        FAIL();
     }
 
     if (auto x = tab.find("d")) {
-        BOOST_FAIL("d should not be found");
+        std::cout << "d should not be found";
     };
 
     auto aa = mk_atom("aa");
     auto aaa = mk_atom("aa");
     tab.put(aa->atom, aa);
     if (auto x = tab.find(aaa->atom)) {
-        cout << to_string(*x) << endl;
-        BOOST_REQUIRE_EQUAL(to_string(*x), "aa");
+        std::cout << to_string(*x) << std::endl;
+        EXPECT_EQ(to_string(*x), "aa");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 }
 
-BOOST_AUTO_TEST_CASE(symboltable_nested)
-{
+TEST(symboltable, nested) {
     SymbolTable tab(nullptr);
 
     tab.put("a", mk_atom("hello"));
@@ -68,36 +69,39 @@ BOOST_AUTO_TEST_CASE(symboltable_nested)
     tab2.put("d", mk_atom("Bonjour"));
 
     if (auto x = tab2.find("a")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "hello");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "hello");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 
     if (auto x = tab2.find("b")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "3");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "3");
     } else {
-        BOOST_FAIL("b not found");
+        std::cout << "b not found";
+        FAIL();
     }
 
     if (auto x = tab2.find("c")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "nil");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "nil");
     } else {
-        BOOST_FAIL("c not found");
+        std::cout << "c not found";
+        FAIL();
     }
 
     if (auto x = tab2.find("d")) {
-        cout << to_string(*x) << endl;
-        BOOST_REQUIRE_EQUAL(to_string(*x), "Bonjour");
+        std::cout << to_string(*x) << std::endl;
+        EXPECT_EQ(to_string(*x), "Bonjour");
     } else {
-        BOOST_FAIL("d should not be found");
+        std::cout << "d should not be found";
+        FAIL();
     };
 }
 
-BOOST_AUTO_TEST_CASE(symboltable_set)
-{
+TEST(symboltable, set) {
     SymbolTable tab(nullptr);
 
     tab.put("a", mk_atom("hello"));
@@ -108,27 +112,30 @@ BOOST_AUTO_TEST_CASE(symboltable_set)
     tab2.put("d", mk_atom("bonjour"));
 
     if (auto x = tab2.find("a")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "hello");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "hello");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 
     tab2.set("a", mk_atom("bonjour"));
 
     //  Find in second
     if (auto x = tab2.find("a")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "bonjour");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "bonjour");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 
     // Find in first
     if (auto x = tab.find("a")) {
-        cout << to_string(*x) << " ";
-        BOOST_REQUIRE_EQUAL(to_string(*x), "bonjour");
+        std::cout << to_string(*x) << " ";
+        EXPECT_EQ(to_string(*x), "bonjour");
     } else {
-        BOOST_FAIL("a not found");
+        std::cout << "a not found";
+        FAIL();
     }
 }

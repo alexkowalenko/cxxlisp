@@ -4,423 +4,406 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#define BOOST_TEST_MODULE test_parser
-#include <boost/format.hpp>
-#include <boost/test/unit_test.hpp>
 #include <sstream>
 #include <vector>
+
+#include <boost/format.hpp>
+#include <gtest/gtest.h>
 
 #include "exceptions.hh"
 #include "linereaderStream.hh"
 #include "parser.hh"
 
 using namespace ax;
-using namespace std;
 
 struct TestParser {
-    string input;
-    string output;
+    std::string input;
+    std::string output;
 };
 
-void test_Parser(const vector<TestParser>& tests);
+void test_Parser(const std::vector<TestParser> &tests);
 
-BOOST_AUTO_TEST_CASE(test_parser)
-{
-    vector<TestParser> tests = {
-        { "t", "t" },
-        { "nil", "nil" },
-        { "a", "a" },
-        { "(t)", "(t)" },
-        { "()", "nil" },
-        { "(a)", "(a)" },
-        { "", "" },
+TEST(parser, basic) {
+    std::vector<TestParser> tests = {
+        {"t", "t"},
+        {"nil", "nil"},
+        {"a", "a"},
+        {"(t)", "(t)"},
+        {"()", "nil"},
+        {"(a)", "(a)"},
+        {"", ""},
 
-        { "(a b c)", "(a b c)" },
-        { "((a) b)", "((a) b)" },
-        { "(a (b))", "(a (b))" },
-        { "(a (b) c)", "(a (b) c)" },
-        { "(a (b) (a (b) c))", "(a (b) (a (b) c))" },
-        { "(a (b) (a (b) (a (b) (a (b) c))))", "(a (b) (a (b) (a (b) (a (b) c))))" },
-        { "(a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) c))))))))",
-            "(a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) c))))))))" },
+        {"(a b c)", "(a b c)"},
+        {"((a) b)", "((a) b)"},
+        {"(a (b))", "(a (b))"},
+        {"(a (b) c)", "(a (b) c)"},
+        {"(a (b) (a (b) c))", "(a (b) (a (b) c))"},
+        {"(a (b) (a (b) (a (b) (a (b) c))))", "(a (b) (a (b) (a (b) (a (b) c))))"},
+        {"(a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) c))))))))",
+         "(a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) (a (b) c))))))))"},
 
-        { "(a (b))", "(a (b))" },
-        { "(a ((a (b))))", "(a ((a (b))))" },
-        { "(a ((a ((a ((a (b))))))))", "(a ((a ((a ((a (b))))))))" },
+        {"(a (b))", "(a (b))"},
+        {"(a ((a (b))))", "(a ((a (b))))"},
+        {"(a ((a ((a ((a (b))))))))", "(a ((a ((a ((a (b))))))))"},
 
-        { "1234567890", "1234567890" },
-        { "( s )", "(s)" },
-        { "( s s )", "(s s)" },
-        { "((a) b s)", "((a) b s)" },
-        { "(a b (c))", "(a b (c))" },
-        { "(atom a)", "(atom a)" },
+        {"1234567890", "1234567890"},
+        {"( s )", "(s)"},
+        {"( s s )", "(s s)"},
+        {"((a) b s)", "((a) b s)"},
+        {"(a b (c))", "(a b (c))"},
+        {"(atom a)", "(atom a)"},
 
-        { "(1+ a)", "(1+ a)" },
-        { "(1- a)", "(1- a)" },
+        {"(1+ a)", "(1+ a)"},
+        {"(1- a)", "(1- a)"},
 
-        { R"x((a 
+        {R"x((a 
 			(b) c))x",
-            "(a (b) c)" },
-        { R"x((a 
+         "(a (b) c)"},
+        {R"x((a 
 				(b) c))x",
-            "(a (b) c)" },
-        { R"x((a (b) 
+         "(a (b) c)"},
+        {R"x((a (b) 
 				c))x",
-            "(a (b) c)" },
-        { R"x((
+         "(a (b) c)"},
+        {R"x((
 				a (b) c))x",
-            "(a (b) c)" },
-        { R"x((a (b
+         "(a (b) c)"},
+        {R"x((a (b
 				) c))x",
-            "(a (b) c)" },
-        { R"x((a (b) c
+         "(a (b) c)"},
+        {R"x((a (b) c
 				))x",
-            "(a (b) c)" },
-        { R"x((   a   (b) c)
+         "(a (b) c)"},
+        {R"x((   a   (b) c)
 			)x",
-            "(a (b) c)" },
-        { R"x((
+         "(a (b) c)"},
+        {R"x((
 				a 
 				(b) 
 				c))x",
-            "(a (b) c)" },
-        { R"x((
+         "(a (b) c)"},
+        {R"x((
 				a 
 				(
 					b
 					) 
 						c
 							 ))x",
-            "(a (b) c)" },
-        { R"x((       a 
+         "(a (b) c)"},
+        {R"x((       a 
 			  (b      ) 
 			  c       ))x",
-            "(a (b) c)" },
-        { R"x((   a   (
+         "(a (b) c)"},
+        {R"x((   a   (
 				b   )   c
 				))x",
-            "(a (b) c)" },
+         "(a (b) c)"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_comments)
-{
-    vector<TestParser> tests = {
-        { "a ; Hello", "a" },
-        { "; In 1960, John McCarthy published a remarkable paper in which he did for programming something like what Euclid did for geometry.", "nil" },
+TEST(parser, comments) {
+    std::vector<TestParser> tests = {
+        {"a ; Hello", "a"},
+        {"; In 1960, John McCarthy published a remarkable paper in which he did for programming "
+         "something like what Euclid did for geometry.",
+         "nil"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_multiline_comments)
-{
-    vector<TestParser> tests = {
-        { "a #| Hello |#", "a" },
-        { "#| Hello |# a", "a" },
-        { R"(#|
+TEST(parser, multiline_comments) {
+    std::vector<TestParser> tests = {
+        {"a #| Hello |#", "a"},
+        {"#| Hello |# a", "a"},
+        {R"(#|
 			 
 			In 1960, John McCarthy published a remarkable paper in which he did 
 			for programming something like what Euclid did for geometry.
 
 		  |#)",
-            "" },
-        { "a #||#", "a" },
-        { "(a #| Hello |# b c)", "(a b c)" },
-        { R"(#|
+         ""},
+        {"a #||#", "a"},
+        {"(a #| Hello |# b c)", "(a b c)"},
+        {R"(#|
 
             |#a)",
-            "a" },
+         "a"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_TF)
-{
-    vector<TestParser> tests = {
-        { "t", "t" },
-        { "nil", "nil" },
-        { "(t)", "(t)" },
-        { "(nil)", "(nil)" },
+TEST(parser, TF) {
+    std::vector<TestParser> tests = {
+        {"t", "t"},
+        {"nil", "nil"},
+        {"(t)", "(t)"},
+        {"(nil)", "(nil)"},
 
-        { "(t t)", "(t t)" },
-        { "(nil t)", "(nil t)" },
-        { "(t nil)", "(t nil)" },
-        { "(nil nil)", "(nil nil)" },
+        {"(t t)", "(t t)"},
+        {"(nil t)", "(nil t)"},
+        {"(t nil)", "(t nil)"},
+        {"(nil nil)", "(nil nil)"},
 
-        { "(t t (t))", "(t t (t))" },
-        { "(nil t (t))", "(nil t (t))" },
-        { "(t nil (t))", "(t nil (t))" },
-        { "(nil nil (t))", "(nil nil (t))" },
+        {"(t t (t))", "(t t (t))"},
+        {"(nil t (t))", "(nil t (t))"},
+        {"(t nil (t))", "(t nil (t))"},
+        {"(nil nil (t))", "(nil nil (t))"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_quote)
-{
-    vector<TestParser> tests = {
-        { "'a", "'a" },
-        { "('a 'b 'c)", "('a 'b 'c)" },
-        { "('a '(b c))", "('a '(b c))" },
-        { "('(a b) 'c)", "('(a b) 'c)" },
+TEST(parser, quote) {
+    std::vector<TestParser> tests = {
+        {"'a", "'a"},
+        {"('a 'b 'c)", "('a 'b 'c)"},
+        {"('a '(b c))", "('a '(b c))"},
+        {"('(a b) 'c)", "('(a b) 'c)"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_backquote)
-{
-    vector<TestParser> tests = {
+TEST(parser, backquote) {
+    std::vector<TestParser> tests = {
         // // backquote
-        { "`a", "(backquote a)" },
-        { "(`a `b `c)", "((backquote a) (backquote b) (backquote c))" },
-        { "(`a `(b c))", "((backquote a) (backquote (b c)))" },
-        { "(`(a b) `c)", "((backquote (a b)) (backquote c))" },
+        {"`a", "(backquote a)"},
+        {"(`a `b `c)", "((backquote a) (backquote b) (backquote c))"},
+        {"(`a `(b c))", "((backquote a) (backquote (b c)))"},
+        {"(`(a b) `c)", "((backquote (a b)) (backquote c))"},
         // // unquote
-        { ",", "unquote" },
-        { "`(cons x ,a)", "(backquote (cons x unquote a))" },
+        {",", "unquote"},
+        {"`(cons x ,a)", "(backquote (cons x unquote a))"},
         // // splice-unquote
-        { ",@", "splice-unquote" },
-        { "`(cons x ,@ a)", "(backquote (cons x splice-unquote a))" },
+        {",@", "splice-unquote"},
+        {"`(cons x ,@ a)", "(backquote (cons x splice-unquote a))"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_dot)
-{
-    vector<TestParser> tests = {
+TEST(parser, dot) {
+    std::vector<TestParser> tests = {
         // Dot form
-        { "(1 . 2)", "(1 . 2)" },
-        { "((1 2) . 3)", "((1 2) . 3)" },
-        { "(1 2 . 3)", "(1 2 . 3)" },
-        { "(1 2 . (3 4))", "(1 2 3 4)" },
-        { "(1 . (2 . (3 . (4))))", "(1 2 3 4)" },
-        { "(1 . (2 . (3 . (4 . ()))))", "(1 2 3 4)" },
-        { "(1 . (2 . (3 . 4)))", "(1 2 3 . 4)" },
+        {"(1 . 2)", "(1 . 2)"},
+        {"((1 2) . 3)", "((1 2) . 3)"},
+        {"(1 2 . 3)", "(1 2 . 3)"},
+        {"(1 2 . (3 4))", "(1 2 3 4)"},
+        {"(1 . (2 . (3 . (4))))", "(1 2 3 4)"},
+        {"(1 . (2 . (3 . (4 . ()))))", "(1 2 3 4)"},
+        {"(1 . (2 . (3 . 4)))", "(1 2 3 . 4)"},
 
-        { "1 . 2", "1" }, // should be an error, but 2 is evaluated next
-        { "(1 . 2 3)", "(1 . 2)" }, // should be an error, but anything after 2 is ignored.
-        { "(1 . 2 3 4)", "(1 . 2)" },
-        { "(1 . 2 3 4 5)", "(1 . 2)" },
-        { ". 2 3 4 5", "2" }, // should be an error, but the dot is ignored
+        {"1 . 2", "1"},           // should be an error, but 2 is evaluated next
+        {"(1 . 2 3)", "(1 . 2)"}, // should be an error, but anything after 2 is ignored.
+        {"(1 . 2 3 4)", "(1 . 2)"},
+        {"(1 . 2 3 4 5)", "(1 . 2)"},
+        {". 2 3 4 5", "2"}, // should be an error, but the dot is ignored
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_unicode)
-{
-    vector<TestParser> tests = {
-        { "七", "七" },
-        { "(一 二 三)", "(一 二 三)" },
-        { "(liberté (égalité fraternité))",
-            "(liberté (égalité fraternité))" },
+TEST(parser, unicode) {
+    std::vector<TestParser> tests = {
+        {"七", "七"},
+        {"(一 二 三)", "(一 二 三)"},
+        {"(liberté (égalité fraternité))", "(liberté (égalité fraternité))"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_numbers)
-{
-    vector<TestParser> tests = {
-        { "1", "1" },
-        { "0", "0" },
-        { "46846368464", "46846368464" },
-        { "-1", "-1" },
-        { "+1", "1" },
-        { to_string(numeric_limits<long>::min()), "-9223372036854775808" },
-        { to_string(numeric_limits<long>::min() + 1), "-9223372036854775807" },
-        { to_string(numeric_limits<long>::max()), "9223372036854775807" },
-        { to_string(numeric_limits<long>::max() - 1), "9223372036854775806" },
+TEST(parser, numbers) {
+    std::vector<TestParser> tests = {
+        {"1", "1"},
+        {"0", "0"},
+        {"46846368464", "46846368464"},
+        {"-1", "-1"},
+        {"+1", "1"},
+        {std::to_string(std::numeric_limits<long>::min()), "-9223372036854775808"},
+        {std::to_string(std::numeric_limits<long>::min() + 1), "-9223372036854775807"},
+        {std::to_string(std::numeric_limits<long>::max()), "9223372036854775807"},
+        {std::to_string(std::numeric_limits<long>::max() - 1), "9223372036854775806"},
 
-        { "(42 7)", "(42 7)" },
+        {"(42 7)", "(42 7)"},
 
         // Different Radix
-        { "#B1", "1" },
-        { "#B101", "5" },
-        { "#B1111", "15" },
+        {"#B1", "1"},
+        {"#B101", "5"},
+        {"#B1111", "15"},
 
-        { "#O1", "1" },
-        { "#O101", "65" },
-        { "#O1111", "585" },
-        { "#O777", "511" },
+        {"#O1", "1"},
+        {"#O101", "65"},
+        {"#O1111", "585"},
+        {"#O777", "511"},
 
-        { "#X1", "1" },
-        { "#X101", "257" },
-        { "#X1111", "4369" },
-        { "#X777", "1911" },
-        { "#Xffff", "65535" },
+        {"#X1", "1"},
+        {"#X101", "257"},
+        {"#X1111", "4369"},
+        {"#X777", "1911"},
+        {"#Xffff", "65535"},
 
-        { "(#B1 #O1 #X1)", "(1 1 1)" },
+        {"(#B1 #O1 #X1)", "(1 1 1)"},
 
         // Floats
-        { "1.2", "1.2" },
-        { "0.6", "0.6" },
-        { "-46846368.464", "-46846368.464" },
-        { "3.145926536", "3.145926536" },
-        { "1.2345e-8", "1.2345e-08" },
-        { "-1.0", "-1" },
-        { "+1.0", "1" },
+        {"1.2", "1.2"},
+        {"0.6", "0.6"},
+        {"-46846368.464", "-46846368.464"},
+        {"3.145926536", "3.145926536"},
+        {"1.2345e-8", "1.2345e-08"},
+        {"-1.0", "-1"},
+        {"+1.0", "1"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_atoms)
-{
-    vector<TestParser> tests = {
+TEST(parser, atoms) {
+    std::vector<TestParser> tests = {
         // unicode and emoji
-        { "one", "one" },
-        { "κὀσμος", "κὀσμος" },
-        { "👾", "👾" },
-        { "🍊🍎🍌", "🍊🍎🍌" },
-        { "😀", "😀" },
+        {"one", "one"}, {"κὀσμος", "κὀσμος"}, {"👾", "👾"}, {"🍊🍎🍌", "🍊🍎🍌"}, {"😀", "😀"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_strings)
-{
-    vector<TestParser> tests = {
-        { R"("one")", R"("one")" },
-        { R"("κὀσμος")", R"("κὀσμος")" },
+TEST(parser, strings) {
+    std::vector<TestParser> tests = {
+        {R"("one")", R"("one")"},
+        {R"("κὀσμος")", R"("κὀσμος")"},
 
-        { R"("👾")", R"("👾")" },
-        { R"("🇵🇹")", R"("🇵🇹")" },
-        { R"("🏄🏻‍🏖")", R"("🏄🏻‍🏖")" },
-        { R"("")", R"("")" },
+        {R"("👾")", R"("👾")"},
+        {R"("🇵🇹")", R"("🇵🇹")"},
+        {R"("🏄🏻‍🏖")", R"("🏄🏻‍🏖")"},
+        {R"("")", R"("")"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_char)
-{
-    vector<TestParser> tests = {
-        { "#\\a", "#\\a" },
-        { "#\\1", "#\\1" },
-        { "#\\A", "#\\A" },
-        { "#\\.", "#\\." },
-        { "#\\;", "#\\;" },
-        { "#\\(", "#\\(" },
-        { "#\\)", "#\\)" },
-        { "#\\#", "#\\#" },
-        { "#\\\\", "#\\\\" },
-        { "#\\ἄ", "#\\ἄ" },
-        { "#\\七", "#\\七" },
-        { "#\\👾", "#\\👾" },
-        { "#\\space", "#\\space" },
-        { "#\\newline", "#\\newline" },
-        { "#\\SPACE", "#\\space" },
-        { "#\\NeWlInE", "#\\newline" },
+TEST(parser, char) {
+    std::vector<TestParser> tests = {
+        {"#\\a", "#\\a"},
+        {"#\\1", "#\\1"},
+        {"#\\A", "#\\A"},
+        {"#\\.", "#\\."},
+        {"#\\;", "#\\;"},
+        {"#\\(", "#\\("},
+        {"#\\)", "#\\)"},
+        {"#\\#", "#\\#"},
+        {"#\\\\", "#\\\\"},
+        {"#\\ἄ", "#\\ἄ"},
+        {"#\\七", "#\\七"},
+        {"#\\👾", "#\\👾"},
+        {"#\\space", "#\\space"},
+        {"#\\newline", "#\\newline"},
+        {"#\\SPACE", "#\\space"},
+        {"#\\NeWlInE", "#\\newline"},
 
-        { "(#\\A #\\ἄ #\\七)", "(#\\A #\\ἄ #\\七)" },
+        {"(#\\A #\\ἄ #\\七)", "(#\\A #\\ἄ #\\七)"},
 
-        { "#\\abc", "#\\a" }, // this is not really correct
+        {"#\\abc", "#\\a"}, // this is not really correct
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_functionrefs)
-{
-    vector<TestParser> tests = {
-        { "#'id", "#'id" },
-        { "#'+", "#'+" },
+TEST(parser, functionrefs) {
+    std::vector<TestParser> tests = {
+        {"#'id", "#'id"},
+        {"#'+", "#'+"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_keyword)
-{
-    vector<TestParser> tests = {
-        { ":keyword", ":keyword" },
-        { "&keyword", "&keyword" },
+TEST(parser, keyword) {
+    std::vector<TestParser> tests = {
+        {":keyword", ":keyword"},
+        {"&keyword", "&keyword"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_vector)
-{
-    vector<TestParser> tests = {
-        { "#()", "#()" },
-        { "#(a )", "#(a)" },
+TEST(parser, vector) {
+    std::vector<TestParser> tests = {
+        {"#()", "#()"},
+        {"#(a )", "#(a)"},
 
-        { "#(a 1 \"2\" (3 s f) #\\4 nil)",
-            "#(a 1 \"2\" (3 s f) #\\4 nil)" },
-        { "#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))",
-            "#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))" },
-        { "#(#(#(1)))", "#(#(#(1)))" },
+        {"#(a 1 \"2\" (3 s f) #\\4 nil)", "#(a 1 \"2\" (3 s f) #\\4 nil)"},
+        {"#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))", "#(a 1 \"2\" (3 s f) #\\4 nil #(1 2 3))"},
+        {"#(#(#(1)))", "#(#(#(1)))"},
     };
     test_Parser(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_parser_complex)
-{
-    vector<TestParser> tests = {
-        { "#C(1 2)", "#c(1 2)" },
-        { "#C(-1 2)", "#c(-1 2)" },
-        { "#C(0 0)", "#c(0 0)" },
-        { "#C(0.5 0.25)", "#c(0.5 0.25)" },
+TEST(parser, complex) {
+    std::vector<TestParser> tests = {
+        {"#C(1 2)", "#c(1 2)"},
+        {"#C(-1 2)", "#c(-1 2)"},
+        {"#C(0 0)", "#c(0 0)"},
+        {"#C(0.5 0.25)", "#c(0.5 0.25)"},
 
-        { "(defvar z #C(1 3))", "(defvar z #c(1 3))" },
+        {"(defvar z #C(1 3))", "(defvar z #c(1 3))"},
     };
     test_Parser(tests);
 }
 
-void test_Parser(const vector<TestParser>& tests)
-{
+void test_Parser(const std::vector<TestParser> &tests) {
     for (auto test : tests) {
-        istringstream is(test.input);
-        LineReaderStream r(is);
-        Lexer lex(r);
-        Parser parser(lex);
+        std::istringstream is(test.input);
+        LineReaderStream   r(is);
+        Lexer              lex(r);
+        Parser             parser(lex);
         try {
-            BOOST_TEST_CHECKPOINT(test.input);
+            // BOOST_TEST_CHECKPOINT(test.input);
             auto [val, eof, dot] = parser.parse();
             if (eof) {
                 continue;
             }
-            ostringstream outStr;
-            outStr << to_string(val);
-            cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << endl;
+            std::ostringstream outStr;
+            outStr << ax::to_string(val);
+            std::cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << std::endl;
             if (test.output != outStr.str()) {
-                BOOST_ERROR(boost::format("%1% should \nbe: %3%, \nnot %2%") % test.input % outStr.str() % test.output);
+                std::cout << boost::format("%1% should \nbe: %3%, \nnot %2%") % test.input %
+                                 outStr.str() % test.output;
+                FAIL();
             }
-        } catch (UnknownToken& e) {
-            BOOST_ERROR("Unknown token: " << e.tok);
-        } catch (ParseException& e) {
-            BOOST_ERROR("Parse error: " << e.what());
-        } catch (EOFException&) {
-            BOOST_ERROR("EOF: ");
-        } catch (exception& e) {
-            BOOST_ERROR(boost::format("Exception thrown %1%") % e.what());
+        } catch (UnknownToken &e) {
+            std::cout << "Unknown token: " << e.tok;
+            FAIL();
+        } catch (ParseException &e) {
+            std::cout << "Parse error: " << e.what();
+            FAIL();
+        } catch (EOFException &) {
+            std::cout << "EOF: ";
+            FAIL();
+        } catch (std::exception &e) {
+            std::cout << boost::format("Exception thrown %1%") % e.what();
+            FAIL();
         } catch (...) {
-            BOOST_ERROR("Unknown exception thrown on : " << test.input);
+            std::cout << "Unknown exception thrown on : " << test.input;
+            FAIL();
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_atoi)
-{
-    string a{ "1" };
-    BOOST_CHECK_EQUAL(ax::atoi(a), 1);
-    a = "12"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), 12);
-    a = "+12"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), 12);
-    a = "-12"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), -12);
-    a = "0"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
-    a = "-0"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
-    a = "+0"s;
-    BOOST_CHECK_EQUAL(ax::atoi(a), 0);
+TEST(test, atoi) {
+    std::string a{"1"};
+    EXPECT_EQ(ax::atoi(a), 1);
+    a = "12";
+    EXPECT_EQ(ax::atoi(a), 12);
+    a = "+12";
+    EXPECT_EQ(ax::atoi(a), 12);
+    a = "-12";
+    EXPECT_EQ(ax::atoi(a), -12);
+    a = "0";
+    EXPECT_EQ(ax::atoi(a), 0);
+    a = "-0";
+    EXPECT_EQ(ax::atoi(a), 0);
+    a = "+0";
+    EXPECT_EQ(ax::atoi(a), 0);
 
-    a = "1+"s;
+    a = "1+";
     try {
-        BOOST_CHECK_EQUAL(ax::atoi(a), -12);
+        EXPECT_EQ(ax::atoi(a), -12);
     } catch (NotInt) {
     };
 
-    a = "+"s;
+    a = "+";
     try {
-        BOOST_CHECK_EQUAL(ax::atoi(a), -12);
+        EXPECT_EQ(ax::atoi(a), -12);
     } catch (NotInt) {
     };
 }

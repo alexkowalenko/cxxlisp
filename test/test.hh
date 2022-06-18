@@ -10,13 +10,11 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 struct TestEval {
-    string input;
-    string output;
+    std::string input;
+    std::string output;
 };
 
-void test_Evaluator(const vector<TestEval>& tests);
+void test_Evaluator(const std::vector<TestEval> &tests);
 
 #endif

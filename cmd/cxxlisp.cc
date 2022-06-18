@@ -11,13 +11,13 @@
 #include "options.hh"
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 using namespace ax;
 
 void init_logging() {
-    spdlog::set_level(spdlog::level::debug); // Set global log level to debug 
-    // SPDLOG_DEBUG("Debug logging");  
+    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+    // SPDLOG_DEBUG("Debug logging");
 }
 
 int main(int argc, char *argv[]) {
@@ -25,9 +25,9 @@ int main(int argc, char *argv[]) {
     init_logging();
 
     // Get options
-    ax::Options options = getOptions(argc, argv);
+    ax::Options options = ax::getOptions(argc, argv);
 
-    Lisp lispInterp = Lisp(options);
+    ax::Lisp lispInterp = ax::Lisp(options);
     lispInterp.init();
     lispInterp.repl(std::cin, std::cout);
     lispInterp.terminate();

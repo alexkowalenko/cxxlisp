@@ -4,8 +4,8 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#define BOOST_TEST_MODULE test_lexer
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
 #include <sstream>
 #include <vector>
 
@@ -32,7 +32,7 @@ struct TestLexer_ws {
 void test_Lexer(const vector<TestLexer> &tests);
 void test_Lexer_wstr(const vector<TestLexer_ws> &tests);
 
-BOOST_AUTO_TEST_CASE(test_lexer_1) {
+TEST(lexer, 1) {
     vector<TestLexer> tests = {
         {"(", TokenType::open, ""},
         {")", TokenType::close, ""},
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_lexer_1) {
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_2) {
+TEST(lexer, 2) {
     vector<TestLexer> tests = {
         {"", TokenType::eof, ""},
         {";", TokenType::eof, ""},
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_lexer_2) {
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_comments) {
+TEST(lexer, comments) {
     vector<TestLexer> tests = {
         // Multiline comments
         {"#| Hello |#a", TokenType::atom, "a"},
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(test_lexer_comments) {
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_hash) {
+TEST(lexer, hash) {
     vector<TestLexer> tests = {
         // hash function ref
         {"#'", TokenType::hash, "'"},
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(test_lexer_hash) {
     test_Lexer(tests);
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_atoms) {
+TEST(lexer, atoms) {
     vector<TestLexer> tests = {
         // unicode identifiers
         {"estação", TokenType::atom, "estação"},
@@ -153,18 +153,19 @@ void test_Lexer(const vector<TestLexer> &tests) {
         try {
             auto tok = lex.get_token();
             cout << "type " << tok.type << " wanted " << test.tok << endl;
-            BOOST_CHECK_EQUAL(tok.type, test.tok);
+            EXPECT_EQ(tok.type, test.tok);
             if (tok.type == TokenType::atom) {
                 cout << "  got " << get<string>(tok.val) << " wanted " << test.atom << endl;
-                BOOST_CHECK_EQUAL(get<string>(tok.val), test.atom);
+                EXPECT_EQ(get<string>(tok.val), test.atom);
             }
         } catch (exception &e) {
-            BOOST_FAIL("Exception thrown!");
+            cout << "Exception thrown!\n";
+            FAIL();
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_lexer_strings) {
+TEST(lexer, strings) {
     vector<TestLexer_ws> tests = {
         {R"("abc")", TokenType::string, LR"(abc)"},
         {R"("a b c")"s, TokenType::string, LR"(a b c)"},
@@ -189,15 +190,15 @@ void test_Lexer_wstr(const vector<TestLexer_ws> &tests) {
         try {
             auto tok = lex.get_token();
             cout << "type[s] " << tok.type << " wanted " << test.tok << endl;
-            BOOST_CHECK_EQUAL(tok.type, test.tok);
+            EXPECT_EQ(tok.type, test.tok);
             if (tok.type == TokenType::string) {
                 cout << "  got " << ws2s(get<wstring>(tok.val)) << " wanted " << ws2s(test.atom)
                      << endl;
-                BOOST_CHECK_EQUAL(ws2s(get<wstring>(tok.val)), ws2s(test.atom));
+                EXPECT_EQ(ws2s(get<wstring>(tok.val)), ws2s(test.atom));
             }
         } catch (exception &e) {
             cout << "Exception : " << e.what() << endl;
-            BOOST_FAIL("Exception thrown!");
+            FAIL();
         }
     }
 }

@@ -4,109 +4,95 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#define BOOST_TEST_MODULE test_linereader
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
 #include <sstream>
 #include <vector>
 
 #include "exceptions.hh"
 #include "linereaderStream.hh"
 
-using namespace ax;
-using namespace std;
-
 struct TestLineReader {
     char want;
     bool eof;
 };
 
-void test_lineReader(const vector<TestLineReader>& tests, LineReaderStream& r)
-{
+void test_lineReader(const std::vector<TestLineReader> &tests, ax::LineReaderStream &r) {
     for (auto t : tests) {
         try {
             auto got = r.get_char();
-            cout << "got: " << char(got) << " want: " << t.want << endl;
-            BOOST_REQUIRE_EQUAL(got, t.want);
-        } catch (EOFException) {
+            std::cout << "got: " << char(got) << " want: " << t.want << std::endl;
+            EXPECT_EQ(got, t.want);
+        } catch (ax::EOFException) {
             if (!t.eof) {
-                BOOST_FAIL("No eof at end of file :"s + t.want);
+                std::cout << "No eof at end of file :" << t.want << std::endl;
+                FAIL();
             }
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_linereader_1)
-{
-    vector<TestLineReader> tests = {
-        { 'a', false },
-        { 'b', false },
-        { 'c', false },
-        { 10, false },
-        { 'd', false },
-        { 'e', false },
-        { 'f', false },
-        { 10, true },
+TEST(linereader, 1) {
+    std::vector<TestLineReader> tests = {
+        {'a', false}, {'b', false}, {'c', false}, {10, false},
+        {'d', false}, {'e', false}, {'f', false}, {10, true},
     };
 
-    istringstream is("abc\ndef"s);
-    LineReaderStream r = LineReaderStream(is);
+    std::istringstream   is("abc\ndef");
+    ax::LineReaderStream r(is);
     test_lineReader(tests, r);
 }
 
-BOOST_AUTO_TEST_CASE(test_linereader_2)
-{
-    vector<TestLineReader> tests = {
-        { 0, true },
+TEST(linereader, 2) {
+    std::vector<TestLineReader> tests = {
+        {0, true},
     };
 
-    istringstream is(""s);
-    LineReaderStream r = LineReaderStream(is);
+    std::istringstream   is("");
+    ax::LineReaderStream r(is);
     test_lineReader(tests, r);
 }
 
-BOOST_AUTO_TEST_CASE(test_linereader_3)
-{
-    vector<TestLineReader> tests = {
-        { 'b', false },
+TEST(linereader, 3) {
+    std::vector<TestLineReader> tests = {
+        {'b', false},
     };
 
-    istringstream is("abc\ndef"s);
-    LineReaderStream r = LineReaderStream(is);
+    std::istringstream   is("abc\ndef");
+    ax::LineReaderStream r(is);
 
     auto c = r.get_char();
-    BOOST_REQUIRE_EQUAL(c, 'a');
+    EXPECT_EQ(c, 'a');
     test_lineReader(tests, r);
 }
 
-BOOST_AUTO_TEST_CASE(test_linereader_push_char)
-{
-    vector<TestLineReader> tests = {
-        { 'a', false },
-        { 'b', false },
-        { 'c', false },
+TEST(linereader, push_char) {
+    std::vector<TestLineReader> tests = {
+        {'a', false},
+        {'b', false},
+        {'c', false},
     };
 
-    istringstream is("abc\ndef"s);
-    LineReaderStream r = LineReaderStream(is);
+    std::istringstream   is("abc\ndef");
+    ax::LineReaderStream r(is);
 
     auto c = r.get_char();
-    BOOST_REQUIRE_EQUAL(c, 'a');
+    EXPECT_EQ(c, 'a');
     r.push_char(c);
     test_lineReader(tests, r);
 }
 
-BOOST_AUTO_TEST_CASE(test_linereader_peek_char)
-{
-    vector<TestLineReader> tests = {
-        { 'a', false },
-        { 'b', false },
-        { 'c', false },
+TEST(linereader, peek_char) {
+    std::vector<TestLineReader> tests = {
+        {'a', false},
+        {'b', false},
+        {'c', false},
     };
 
-    istringstream is("abc\ndef"s);
-    LineReaderStream r = LineReaderStream(is);
+    std::istringstream   is("abc\ndef");
+    ax::LineReaderStream r(is);
 
     auto c = r.peek_char();
-    BOOST_REQUIRE_EQUAL(c, 'a');
+    EXPECT_EQ(c, 'a');
     test_lineReader(tests, r);
 }

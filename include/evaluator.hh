@@ -30,7 +30,7 @@ class Evaluator {
     bool has_function(const Atom &f);
 
     std::shared_ptr<SymbolTable> globalTable;
-    std::set<Atom> &             trace_functions;
+    std::set<Atom>              &trace_functions;
     Options                      opt;
 
   private:

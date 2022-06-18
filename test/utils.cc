@@ -9,7 +9,7 @@
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include <spdlog/spdlog.h>
 
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 #include <sstream>
 
 #include "exceptions.hh"
@@ -19,31 +19,31 @@
 #include "test.hh"
 
 using namespace ax;
-using namespace std;
 
-void test_Evaluator(const vector<TestEval>& tests)
-{
+void test_Evaluator(const std::vector<TestEval> &tests) {
     Options options;
     options.silent = true;
     options.readline = false;
     options.debug_expr = false;
 
-    spdlog::set_level(spdlog::level::info); // Set global log level to info 
+    spdlog::set_level(spdlog::level::info); // Set global log level to info
     Lisp lisp(options);
     lisp.init();
 
     for (auto test : tests) {
-        istringstream is(test.input);
-        ostringstream out;
+        std::istringstream is(test.input);
+        std::ostringstream out;
 
-        //BOOST_TEST_CHECKPOINT(test.input);
+        // BOOST_TEST_CHECKPOINT(test.input);
         lisp.repl(is, out);
 
-        string result = out.str();
+        auto result = out.str();
         result.pop_back(); // chop off \n
-        cout << "eval: " << test.input << " -> " << result << endl;
+        std::cout << "eval: " << test.input << " -> " << result << std::endl;
         if (test.output != result) {
-            BOOST_ERROR(boost::format("\n%1%\nshould be: %3%, \n      not: %2%") % test.input % result % test.output);
+            std::cout << boost::format("\n%1%\nshould be: %3%, \n      not: %2%") % test.input %
+                             result % test.output;
+            FAIL();
             continue;
         }
     }
