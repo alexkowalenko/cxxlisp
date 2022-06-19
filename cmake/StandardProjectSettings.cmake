@@ -76,6 +76,8 @@ set(REPLXX_BUILD_EXAMPLES OFF)
 
 include_directories("${PROJECT_SOURCE_DIR}/extern/utfcpp/source")
 
+set(CLI11_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/CLI11/include")
+
 set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
 set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
 set(ICU_LIBRARIES icuuc)

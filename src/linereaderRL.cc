@@ -14,7 +14,6 @@
 
 #include <iostream>
 
-#include <boost/format.hpp>
 #include <readline/readline.h>
 
 namespace ax {

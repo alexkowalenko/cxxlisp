@@ -11,46 +11,24 @@
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include <spdlog/spdlog.h>
 
-#include <boost/program_options.hpp>
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-int-float-conversion"
+#include <CLI/CLI.hpp>
+#pragma clang diagnostic pop
 namespace ax {
 
-namespace po = boost::program_options;
+int getOptions(int argc, char *argv[], Options &options) {
 
-Options getOptions(int argc, char *argv[]) {
-    Options                 options;
-    po::options_description desc("Allowed options");
-    std::string             debug;
+    std::string debug;
+    CLI::App    app{"cxxlisp: Interprète du Lisp"};
 
-    desc.add_options()("help,h", "produce help message")(
-        "silent,s", po::value<bool>(&(options.silent))->implicit_value(true),
-        "silent, don't print the prompt")(
-        "noreadline,r", po::value<bool>(&(options.readline))->implicit_value(false),
-        "don't use readline for input")(
-        "parseonly,p", po::value<bool>(&(options.parse_only))->implicit_value(true),
-        "only parse the input and print result")(
-        "debug,D", po::value<std::string>(&debug)->implicit_value(""), "debug options: e");
+    app.add_flag("-s,--silent", options.silent, "silent, don't print the prompt");
+    app.add_flag("-r,--noreadline", options.readline, "don't use readline for input");
+    app.add_flag("-p,--parseonly", options.parse_only, "only parse the input and print result");
+    app.add_option("-D,--debug", options.debug_expr, "debug options");
 
-    try {
-        po::variables_map vm;
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-        po::notify(vm);
-
-        if (vm.count("help")) {
-            std::cout << desc << std::endl;
-            exit(EXIT_SUCCESS);
-        }
-        if (!debug.empty()) {
-            if (debug.find('e')) {
-                options.debug_expr = true;
-                SPDLOG_DEBUG("debug: show evaluation ");
-            }
-        }
-    } catch (std::exception &e) {
-        std::cerr << "error: " << e.what() << "\n";
-    }
-
-    return options;
+    CLI11_PARSE(app, argc, argv);
+    return 0;
 }
 
 void Options::push_options() {

@@ -25,7 +25,8 @@ int main(int argc, char *argv[]) {
     init_logging();
 
     // Get options
-    ax::Options options = ax::getOptions(argc, argv);
+    ax::Options options;
+    ax::getOptions(argc, argv, options);
 
     ax::Lisp lispInterp = ax::Lisp(options);
     lispInterp.init();

@@ -1,6 +1,7 @@
 
 include_directories(../include)
 include_directories(${REPLXX_INCLUDE_DIRS})
+include_directories(${CLI11_INCLUDE_DIRS})
 
 function(make_includable input_file output_file)
     file(READ ${input_file} content)

@@ -14,7 +14,6 @@ macro(package_add_benchmark TESTNAME)
         #Add compile target
         add_executable(${TESTNAME} ${ARGN})
 
-        #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
                                           cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} benchmark::benchmark)
 endmacro() 

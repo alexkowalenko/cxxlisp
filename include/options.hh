@@ -26,6 +26,6 @@ class Options {
     std::stack<bool> saved_options;
 };
 
-Options getOptions(int argc, char *argv[]);
+int getOptions(int argc, char *argv[], Options &options);
 
 } // namespace ax
