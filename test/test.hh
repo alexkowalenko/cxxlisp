@@ -11,6 +11,7 @@
 #include <vector>
 
 struct TestEval {
+    TestEval(const std::string &i, const std::string &o) : input(i), output(o){};
     std::string input;
     std::string output;
 };

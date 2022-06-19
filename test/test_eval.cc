@@ -4,8 +4,7 @@
 // Copyright © Alex Kowalenko 2019.
 //
 
-#include <boost/format.hpp>
-
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 
 #include "test.hh"
@@ -494,7 +493,6 @@ TEST(eval, rplacd) {
 }
 
 TEST(eval, eq) {
-    auto                  fmt = boost::format("(eq %1% %1%)");
     std::vector<TestEval> tests = {
         {"(eq t t)", "t"},
         {"(eq nil nil)", "t"},
@@ -522,10 +520,10 @@ TEST(eval, eq) {
         {"(eq 0 -0)", "t"},
         {"(eq -1 1)", "nil"},
         {"(eq 1 'a)", "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(eq {0} {0})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(eq {0} {0})", std::numeric_limits<long>::min() + 1), "t"},
+        {fmt::format("(eq {0} {0})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(eq {0} {0})", std::numeric_limits<long>::max() - 1), "t"},
 
         // Real
         {"(eq 1.1 1.1)", "t"},
@@ -542,7 +540,6 @@ TEST(eval, eq) {
 }
 
 TEST(eval, eql) {
-    auto                  fmt = boost::format("(eql %1% %1%)");
     std::vector<TestEval> tests = {
         {"(eql '(a) '(b))", "nil"},
 
@@ -559,10 +556,10 @@ TEST(eval, eql) {
         {"(eql 0 -0)", "t"},
         {"(eql -1 1)", "nil"},
         {"(eql 1 'a)", "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(eql {0} {0})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(eql {0} {0})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(eql {0} {0})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(eql {0} {0})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         // Real
         {"(eql 1.1 1.1)", "t"},
@@ -579,7 +576,6 @@ TEST(eval, eql) {
 }
 
 TEST(eval, equal) {
-    auto                  fmt = boost::format("(equal %1% %1%)");
     std::vector<TestEval> tests = {
         {"(equal t t)", "t"},
         {"(equal nil nil)", "t"},
@@ -597,10 +593,10 @@ TEST(eval, equal) {
         {"(equal 1 2)", "nil"},
         {"(equal -1 1)", "nil"},
         {"(equal 1 'a)", "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(equal {0} {0})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(equal {0} {0})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(equal {0} {0})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(equal {0} {0})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         // // Characters
         {"(equal #\\a #\\a)", "t"},

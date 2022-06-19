@@ -6,7 +6,7 @@
 
 #include "args.hh"
 
-#include <boost/format.hpp>
+#include <fmt/core.h>
 #include <sstream>
 
 namespace ax {
@@ -59,7 +59,7 @@ std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::strin
     case ArgConstraintType::none:
         if (size != 0) {
             std::ostringstream os;
-            os << boost::format("%1% expects no arguments") % name;
+            os << fmt::format("{} expects no arguments", name);
             return os.str();
         }
         break;
@@ -67,9 +67,9 @@ std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::strin
         if (size != cons.num) {
             std::ostringstream os;
             if (cons.num == 1) {
-                os << boost::format("%1% expecting an argument") % name;
+                os << fmt::format("{} expecting an argument", name);
             } else {
-                os << boost::format("%1% expecting %2% arguments") % name % cons.num;
+                os << fmt::format("{} expecting {} arguments", name, cons.num);
             }
             return os.str();
         }
@@ -77,14 +77,14 @@ std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::strin
     case ArgConstraintType::min:
         if (size < cons.num) {
             std::ostringstream os;
-            os << boost::format("%1% expecting at least %2% arguments") % name % cons.num;
+            os << fmt::format("{} expecting at least {} arguments", name, cons.num);
             return os.str();
         }
         break;
     case ArgConstraintType::max:
         if (size > cons.num) {
             std::ostringstream os;
-            os << boost::format("%1% expecting at max %2% arguments") % name % cons.num;
+            os << fmt::format("{} expecting at max {} arguments", name, cons.num);
             return os.str();
         }
         break;

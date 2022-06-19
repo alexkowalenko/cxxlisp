@@ -8,7 +8,7 @@
 
 #include <limits>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 TEST(number, number) {
@@ -48,16 +48,14 @@ TEST(number, number) {
 }
 
 TEST(eval, numberp) {
-    auto                  fmt = boost::format("(numberp %1%)");
-    auto                  fmp = boost::format("(integerp %1%)");
     std::vector<TestEval> tests = {
         // numberp
         {"(numberp 0)", "t"},
         {"(numberp 1)", "t"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(numberp {})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(numberp {})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(numberp {})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(numberp {})", (std::numeric_limits<long>::max() - 1)), "t"},
         {"(numberp (+ 2 3))", "t"},
         {"(numberp 'a)", "nil"},
         {"(numberp '(a b c))", "nil"},
@@ -70,10 +68,10 @@ TEST(eval, numberp) {
         // integerp
         {"(integerp 0)", "t"},
         {"(integerp 1)", "t"},
-        {boost::str(fmp % (std::numeric_limits<long>::min())), "t"},
-        {boost::str(fmp % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmp % (std::numeric_limits<long>::max())), "t"},
-        {boost::str(fmp % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(integerp {})", (std::numeric_limits<long>::min())), "t"},
+        {fmt::format("(integerp {})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(integerp {})", (std::numeric_limits<long>::max())), "t"},
+        {fmt::format("(integerp {})", (std::numeric_limits<long>::max() - 1)), "t"},
         {"(integerp (+ 2 3))", "t"},
         {"(integerp 3.145926536)", "nil"},
         //{ "(integerp #C(1 2))", "nil" },
@@ -123,7 +121,6 @@ TEST(eval, numberp) {
 }
 
 TEST(eval, zerop) {
-    auto                  fmt = boost::format("(zerop %1%)");
     std::vector<TestEval> tests = {
         {"(zerop 0)", "t"},
         {"(zerop 0.0)", "t"},
@@ -140,19 +137,18 @@ TEST(eval, zerop) {
         {"(zerop 1)", "nil"},
         {"(zerop (+ 2 3))", "nil"},
         {"(zerop -1)", "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<long>::min()), "nil"},
+        {fmt::format("(zerop {})", (std::numeric_limits<long>::min() + 1)), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<long>::max()), "nil"},
+        {fmt::format("(zerop {})", (std::numeric_limits<long>::max() - 1)), "nil"},
 
         // Floats
         {"(zerop 3.145926536)", "nil"},
         {"(zerop -1.2345e-8)", "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::min()),
-         "Numeric exception: float out of range 2.22507e-308\nParse error: Extra bracket found"},
-        {boost::str(fmt % std::numeric_limits<double>::max()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<double>::min()), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<double>::max()), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<double>::epsilon()), "nil"},
+        {fmt::format("(zerop {})", std::numeric_limits<double>::lowest()), "nil"},
 
         // Complex
         //{ "(zerop #C(0 0))", "t" },
@@ -166,14 +162,13 @@ TEST(eval, zerop) {
 }
 
 TEST(eval, plusp) {
-    auto                  fmt = boost::format("(plusp %1%)");
     std::vector<TestEval> tests = {
         {"(plusp 1)", "t"},
         {"(plusp (* 2 3))", "t"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(plusp {})", std::numeric_limits<long>::min()), "nil"},
+        {fmt::format("(plusp {})", (std::numeric_limits<long>::min() + 1)), "nil"},
+        {fmt::format("(plusp {})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(plusp {})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         {"(plusp 0)", "nil"},
         {"(plusp -1)", "nil"},
@@ -193,10 +188,10 @@ TEST(eval, plusp) {
         {"(plusp 3.145926536)", "t"},
         {"(plusp -1.2345e-8)", "nil"},
         {"(plusp 0.0)", "nil"},
-        // { boost::str(fmt % std::numeric_limits<double>::min()), "t" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "nil"},
+        // { fmt::format(fmt % std::numeric_limits<double>::min()), "t" },
+        {fmt::format("(plusp {})", std::numeric_limits<double>::max()), "t"},
+        {fmt::format("(plusp {})", std::numeric_limits<double>::epsilon()), "t"},
+        {fmt::format("(plusp {})", std::numeric_limits<double>::lowest()), "nil"},
 
         {"(plusp 'a)", "Eval error: plusp argument needs to be a number"},
         {"(plusp)", "Eval error: plusp expecting an argument"},
@@ -206,15 +201,14 @@ TEST(eval, plusp) {
 }
 
 TEST(eval, minusp) {
-    auto                  fmt = boost::format("(minusp %1%)");
     std::vector<TestEval> tests = {
         {"(minusp (- 2 3))", "t"},
         {"(minusp -1)", "t"},
         {"(minusp 1)", "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "nil"},
+        {fmt::format("(minusp {})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(minusp {})", std::numeric_limits<long>::min() + 1), "t"},
+        {fmt::format("(minusp {})", std::numeric_limits<long>::max()), "nil"},
+        {fmt::format("(minusp {})", std::numeric_limits<long>::max() - 1), "nil"},
 
         {"(minusp 0)", "nil"},
         {"(minusp 0.0)", "nil"},
@@ -232,10 +226,10 @@ TEST(eval, minusp) {
         {"(minusp 3.145926536)", "nil"},
         {"(minusp -1.2345e-8)", "t"},
         {"(minusp 0.0)", "nil"},
-        //{ boost::str(fmt % std::numeric_limits<double>::min()), "nil" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "t"},
+        //{ fmt::format("(minusp {})", % std::numeric_limits<double>::min()), "nil" },
+        {fmt::format("(minusp {})", std::numeric_limits<double>::max()), "nil"},
+        {fmt::format("(minusp {})", std::numeric_limits<double>::epsilon()), "nil"},
+        {fmt::format("(minusp {})", std::numeric_limits<double>::lowest()), "t"},
 
         {"(minusp 'a)", "Eval error: minusp argument needs to be a number"},
         {"(minusp)", "Eval error: minusp expecting an argument"},
@@ -245,17 +239,16 @@ TEST(eval, minusp) {
 }
 
 TEST(eval, evenp) {
-    auto                  fmt = boost::format("(evenp %1%)");
     std::vector<TestEval> tests = {
         {"(evenp 1)", "nil"},
         {"(evenp (+ 3 3))", "t"},
         {"(evenp 0)", "t"},
         {"(evenp -1)", "nil"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(evenp {})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(evenp {})", (std::numeric_limits<long>::min() + 1)), "nil"},
+        {fmt::format("(evenp {})", std::numeric_limits<long>::max()), "nil"},
+        {fmt::format("(evenp {})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         {"(evenp 3.145926536)", "Eval error: evenp argument needs to be a integer"},
         {"(evenp 'a)", "Eval error: evenp argument needs to be a integer"},
@@ -266,17 +259,16 @@ TEST(eval, evenp) {
 }
 
 TEST(eval, oddp) {
-    auto                  fmt = boost::format("(oddp %1%)");
     std::vector<TestEval> tests = {
         {"(oddp 1)", "t"},
         {"(oddp (/ 2 3))", "nil"},
         {"(oddp 0)", "nil"},
         {"(oddp -1)", "t"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "nil"},
+        {fmt::format("(oddp {})", std::numeric_limits<long>::min()), "nil"},
+        {fmt::format("(oddp {})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(oddp {})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(oddp {})", (std::numeric_limits<long>::max() - 1)), "nil"},
 
         {"(oddp 3.145926536)", "Eval error: oddp argument needs to be a integer"},
         {"(oddp 'a)", "Eval error: oddp argument needs to be a integer"},
@@ -287,17 +279,16 @@ TEST(eval, oddp) {
 }
 
 TEST(eval, equal) {
-    auto                  fmt = boost::format("(= %1% %1%)");
     std::vector<TestEval> tests = {
         {"(= 1 1)", "t"},
         {"(= 1 2)", "nil"},
         {"(= -34 -34)", "t"},
         {"(= 0 -0)", "t"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(= {0} {0})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(= {0} {0})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(= {0} {0})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(= {0} {0})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         // Floats
         {"(= 1.5 1.5)", "t"},
@@ -307,10 +298,10 @@ TEST(eval, equal) {
         {"(= 0.0 0.0)", "t"},
         {"(= 0.0 -0.0)", "t"},
 
-        //{ boost::str(fmt % std::numeric_limits<double>::min()), "t" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "t"},
+        //{ fmt::format(fmt % std::numeric_limits<double>::min()), "t" },
+        {fmt::format("(= {0} {0})", std::numeric_limits<double>::max()), "t"},
+        {fmt::format("(= {0} {0})", std::numeric_limits<double>::epsilon()), "t"},
+        {fmt::format("(= {0} {0})", std::numeric_limits<double>::lowest()), "t"},
 
         // Mixed
         {"(= 0 0.0)", "t"},
@@ -330,7 +321,6 @@ TEST(eval, equal) {
 }
 
 TEST(eval, less) {
-    auto                  fmt = boost::format("(<= %1% %1%)");
     std::vector<TestEval> tests = {
         {"(< 1 2)", "t"},
         {"(< 2 1)", "nil"},
@@ -338,10 +328,10 @@ TEST(eval, less) {
         {"(<= 1 1)", "t"},
         {"(<= 2 1)", "nil"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "t"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "t"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "t"},
+        {fmt::format("(<= {0} {0})", std::numeric_limits<long>::min()), "t"},
+        {fmt::format("(<= {0} {0})", (std::numeric_limits<long>::min() + 1)), "t"},
+        {fmt::format("(<= {0} {0})", std::numeric_limits<long>::max()), "t"},
+        {fmt::format("(<= {0} {0})", (std::numeric_limits<long>::max() - 1)), "t"},
 
         // Floats
         {"(< 1.5 1.5)", "nil"},
@@ -350,10 +340,10 @@ TEST(eval, less) {
         {"(< 1 3.145926536)", "t"},
         {"(< 3.145926536 1)", "nil"},
 
-        //{ boost::str(fmt % std::numeric_limits<double>::min()), "t" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "t"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "t"},
+        //{ fmt::format(fmt % std::numeric_limits<double>::min()), "t" },
+        {fmt::format("(<= {0} {0})", std::numeric_limits<double>::max()), "t"},
+        {fmt::format("(<= {0} {0})", std::numeric_limits<double>::epsilon()), "t"},
+        {fmt::format("(<= {0} {0})", std::numeric_limits<double>::lowest()), "t"},
 
         {"(<= 0 0.0)", "t"},
         // { "(<= 0 0.0s0)", "t" },
@@ -371,7 +361,6 @@ TEST(eval, less) {
 }
 
 TEST(eval, greater) {
-    auto                  fmt = boost::format("(> %1% %1%)");
     std::vector<TestEval> tests = {
         {"(> 1 2)", "nil"},
         {"(> 2 1)", "t"},
@@ -379,10 +368,10 @@ TEST(eval, greater) {
         {"(>= 1 1)", "t"},
         {"(>= 2 1)", "t"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "nil"},
+        {fmt::format("(> {0} {0})", std::numeric_limits<long>::min()), "nil"},
+        {fmt::format("(> {0} {0})", (std::numeric_limits<long>::min() + 1)), "nil"},
+        {fmt::format("(> {0} {0})", std::numeric_limits<long>::max()), "nil"},
+        {fmt::format("(> {0} {0})", (std::numeric_limits<long>::max() - 1)), "nil"},
 
         // Floats
         {"(> 1.5 1.5)", "nil"},
@@ -391,10 +380,9 @@ TEST(eval, greater) {
         {"(> 1 3.145926536)", "nil"},
         {"(> 3.145926536 1)", "t"},
 
-        //{ boost::str(fmt % std::numeric_limits<double>::min()), "nil" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "nil"},
+        {fmt::format("(> {0} {0})", std::numeric_limits<double>::max()), "nil"},
+        {fmt::format("(> {0} {0})", std::numeric_limits<double>::epsilon()), "nil"},
+        {fmt::format("(> {0} {0})", std::numeric_limits<double>::lowest()), "nil"},
 
         {"(> 's 0)", "Eval error: > arguments needs to be a number"},
         {"(>= 234 'dois)", "Eval error: >= arguments needs to be a number"},
@@ -404,17 +392,16 @@ TEST(eval, greater) {
 }
 
 TEST(eval, notequals) {
-    auto                  fmt = boost::format("(/= %1% %1%)");
     std::vector<TestEval> tests = {
         {"(/= 1 1)", "nil"},
         {"(/= 1 2)", "t"},
         {"(/= -34 -34)", "nil"},
         {"(/= 0 -0)", "nil"},
 
-        {boost::str(fmt % std::numeric_limits<long>::min()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::min() + 1)), "nil"},
-        {boost::str(fmt % std::numeric_limits<long>::max()), "nil"},
-        {boost::str(fmt % (std::numeric_limits<long>::max() - 1)), "nil"},
+        {fmt::format("(/= {0} {0})", std::numeric_limits<long>::min()), "nil"},
+        {fmt::format("(/= {0} {0})", (std::numeric_limits<long>::min() + 1)), "nil"},
+        {fmt::format("(/= {0} {0})", std::numeric_limits<long>::max()), "nil"},
+        {fmt::format("(/= {0} {0})", (std::numeric_limits<long>::max() - 1)), "nil"},
 
         // Floats
         {"(/= 1.5 1.5)", "nil"},
@@ -422,17 +409,14 @@ TEST(eval, notequals) {
         {"(/= 1 3.145926536)", "t"},
         {"(/= 3.145926536 1)", "t"},
 
-        //{ boost::str(fmt % std::numeric_limits<double>::min()), "nil" },
-        {boost::str(fmt % std::numeric_limits<double>::max()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::epsilon()), "nil"},
-        {boost::str(fmt % std::numeric_limits<double>::lowest()), "nil"},
+        {fmt::format("(/= {0} {0})", std::numeric_limits<double>::max()), "nil"},
+        {fmt::format("(/= {0} {0})", std::numeric_limits<double>::epsilon()), "nil"},
+        {fmt::format("(/= {0} {0})", std::numeric_limits<double>::lowest()), "nil"},
 
         {"(/= 's 0)", "Eval error: /= arguments needs to be a number"},
         {"(/= 234 'dois)", "Eval error: /= arguments needs to be a number"},
         {"(/=)", "Eval error: /= expecting 2 arguments"},
-        {"(/= 1)", "Eval error: /= expecting 2 arguments"}
-
-    };
+        {"(/= 1)", "Eval error: /= expecting 2 arguments"}};
     test_Evaluator(tests);
 }
 
@@ -484,10 +468,9 @@ TEST(eval, mult) {
         {"(* 2.1 3.1)", "6.51"},
         {"(* 2.1 3.1 1.1)", "7.161"},
 
-        //{ boost::str(boost::format("(* %1% 0)") % std::numeric_limits<double>::min()), "0" },
-        {boost::str(boost::format("(* 0 %1%)") % std::numeric_limits<double>::max()), "0"},
-        {boost::str(boost::format("(* %1% 0)") % std::numeric_limits<double>::epsilon()), "0"},
-        {boost::str(boost::format("(* 0 %1%)") % std::numeric_limits<double>::lowest()), "-0"},
+        {fmt::format("(* 0 {})", std::numeric_limits<double>::max()), "0"},
+        {fmt::format("(* {} 0)", std::numeric_limits<double>::epsilon()), "0"},
+        {fmt::format("(* 0 {})", std::numeric_limits<double>::lowest()), "-0"},
 
         // Complex
         //{ "(* #C(0 1) #C(0 1))", "#C(-1 0)" },

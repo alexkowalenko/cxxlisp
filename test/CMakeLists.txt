@@ -26,7 +26,7 @@ macro(package_add_test TESTNAME)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
-                                          cxxlispl replxx testlib ${ICU_LIBRARIES} ${BOEHM_LIBRARIES}
+                                          cxxlispl replxx testlib fmt::fmt ${ICU_LIBRARIES} ${BOEHM_LIBRARIES}
                                           gtest gtest_main)
 
         add_test(NAME ${TESTNAME} 

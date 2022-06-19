@@ -10,8 +10,6 @@
 
 #include <gtest/gtest.h>
 
-using namespace std;
-
 TEST(eval, chars) {
     std::vector<TestEval> tests = {
         {"#\\a", "#\\a"},

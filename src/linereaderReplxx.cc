@@ -53,8 +53,6 @@ LineReaderReplxx::~LineReaderReplxx() {
 }
 
 uint32_t LineReaderReplxx::get_char() {
-    // BOOST_LOG_TRIVIAL(trace) << "LineReader::get_char" << boost::format("buf: %1% ptr : %2%") %
-    // buf % ptr;
     if (ptr == buf.end()) {
         get_line();
     }

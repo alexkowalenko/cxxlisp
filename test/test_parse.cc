@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include "exceptions.hh"
@@ -354,10 +354,10 @@ void test_Parser(const std::vector<TestParser> &tests) {
             }
             std::ostringstream outStr;
             outStr << ax::to_string(val);
-            std::cout << boost::format("parse %1% : %2%") % test.input % outStr.str() << std::endl;
+            std::cout << fmt::format("parse {} : {}\n", test.input, outStr.str());
             if (test.output != outStr.str()) {
-                std::cout << boost::format("%1% should \nbe: %3%, \nnot %2%") % test.input %
-                                 outStr.str() % test.output;
+                std::cout << fmt::format("{0} should \nbe: {2}, \nnot {1}", test.input,
+                                         outStr.str(), test.output);
                 FAIL();
             }
         } catch (UnknownToken &e) {
@@ -370,7 +370,7 @@ void test_Parser(const std::vector<TestParser> &tests) {
             std::cout << "EOF: ";
             FAIL();
         } catch (std::exception &e) {
-            std::cout << boost::format("Exception thrown %1%") % e.what();
+            std::cout << fmt::format("Exception thrown {}", e.what());
             FAIL();
         } catch (...) {
             std::cout << "Unknown exception thrown on : " << test.input;

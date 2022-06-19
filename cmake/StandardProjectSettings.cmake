@@ -1,3 +1,7 @@
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+message(STATUS "C++ 23")
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
@@ -42,6 +46,12 @@ find_package(Boost 1.70 REQUIRED
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_LIBRARIES})
 add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
+
+#fmt library
+message(STATUS "Using fmt")
+include_directories("${PROJECT_SOURCE_DIR}/extern/fmt/include")
+set(FMT_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/extern/fmt/include")
+set(FMT_LIBRARIES fmt)
 
 # GNU Readline 
 find_package(Readline REQUIRED)
