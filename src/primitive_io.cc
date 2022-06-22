@@ -6,11 +6,9 @@
 
 #include "primitive.hh"
 
+#include <array>
 #include <fstream>
 #include <numeric>
-#include <array>
-
-#include <boost/algorithm/string/replace.hpp>
 
 #include "exceptions.hh"
 
@@ -29,6 +27,15 @@ inline Expr *mk_stream(std::fstream *const s, std::ios_base::openmode m) {
         e->stream->stream_type = StreamType::input;
     }
     return e;
+}
+
+std::wstring replace_all(std::wstring &target, const std::wstring &s, const std::wstring &t) {
+    std::wstring::size_type n = 0;
+    while ((n = target.find(s, n)) != std::wstring::npos) {
+        target.replace(n, s.size(), t);
+        n += t.size();
+    }
+    return target;
 }
 
 //
@@ -170,7 +177,7 @@ Stream *get_input(const std::string &name, Expr *args, std::shared_ptr<SymbolTab
 };
 
 Expr *read(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
-    Stream *              input = get_input(name, args, a);
+    Stream               *input = get_input(name, args, a);
     std::array<char, 255> buf;
     visit(overloaded{
               [&buf](std::istream *arg) { (*arg).getline(&buf[0], 255); },
@@ -202,9 +209,12 @@ Expr *format(const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a
     if (!is_a<Type::string>(arg1(args))) {
         throw EvalException("format: format is not a string " + to_string(arg1(args)));
     }
-    String format = arg1(args)->string;
-    boost::replace_all(format, "~%", "\n");
-    boost::replace_all(format, "~&", "\n");
+    String                    format = arg1(args)->string;
+    const static std::wstring f1 = s2ws(std::string("\\~\\%"));
+    const static std::wstring newLine = s2ws(std::string("\n"));
+    format = replace_all(format, f1, newLine);
+    std::wstring f2 = s2ws(std::string("\\~\\&"));
+    format = replace_all(format, f2, newLine);
 
     auto s_arg = args->cdr->cdr;
     for (size_t index = 1;; index++) {

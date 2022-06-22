@@ -6,8 +6,6 @@
 
 #include "primitive.hh"
 
-#include <boost/algorithm/string.hpp>
-
 namespace ax {
 
 //
@@ -55,15 +53,19 @@ Expr *string_fnct(const std::string &name, Expr *args) {
         s = s2ws(to_string(args->car));
     }
     if (name == "string-upcase") {
-        return mk_string(boost::algorithm::to_upper_copy(s));
+        transform(s.begin(), s.end(), s.begin(), ::toupper);
+        return mk_string(s);
     } else if (name == "string-downcase") {
-        return mk_string(boost::algorithm::to_lower_copy(s));
+        transform(s.begin(), s.end(), s.begin(), ::tolower);
+        return mk_string(s);
     }
     return mk_string(s);
 }
 
 Expr *to_lower_str(const Expr *s) {
-    return mk_string(boost::algorithm::to_lower_copy(std::wstring(s->string)));
+    auto t = std::wstring(s->string);
+    transform(t.begin(), t.end(), t.begin(), ::tolower);
+    return mk_string(t);
 }
 
 static std::function<bool(Char, Char)> eq_char = std::equal_to<Char>();

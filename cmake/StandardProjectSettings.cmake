@@ -40,13 +40,6 @@ endif()
 # Add custom Find cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Boost libraries
-find_package(Boost 1.70 REQUIRED 
-             COMPONENTS log program_options unit_test_framework test_exec_monitor)
-include_directories(${Boost_INCLUDE_DIRS})
-link_libraries(${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES} ${Boost_LIBRARIES})
-add_definitions(-DBOOST_LOG_DYN_LINK) # to link the log library in boost
-
 #fmt library
 message(STATUS "Using fmt")
 include_directories("${PROJECT_SOURCE_DIR}/extern/fmt/include")

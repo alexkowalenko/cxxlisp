@@ -22,7 +22,7 @@ void test_lineReader(const std::vector<TestLineReader> &tests, ax::LineReaderStr
         try {
             auto got = r.get_char();
             std::cout << "got: " << char(got) << " want: " << t.want << std::endl;
-            EXPECT_EQ(got, t.want);
+            EXPECT_EQ(got, uint32_t(t.want));
         } catch (ax::EOFException) {
             if (!t.eof) {
                 std::cout << "No eof at end of file :" << t.want << std::endl;
@@ -62,7 +62,7 @@ TEST(linereader, 3) {
     ax::LineReaderStream r(is);
 
     auto c = r.get_char();
-    EXPECT_EQ(c, 'a');
+    EXPECT_EQ(c, uint32_t('a'));
     test_lineReader(tests, r);
 }
 
@@ -77,7 +77,7 @@ TEST(linereader, push_char) {
     ax::LineReaderStream r(is);
 
     auto c = r.get_char();
-    EXPECT_EQ(c, 'a');
+    EXPECT_EQ(c, uint32_t('a'));
     r.push_char(c);
     test_lineReader(tests, r);
 }
@@ -93,6 +93,6 @@ TEST(linereader, peek_char) {
     ax::LineReaderStream r(is);
 
     auto c = r.peek_char();
-    EXPECT_EQ(c, 'a');
+    EXPECT_EQ(c, uint32_t('a'));
     test_lineReader(tests, r);
 }

@@ -22,12 +22,14 @@ int getOptions(int argc, char *argv[], Options &options) {
     std::string debug;
     CLI::App    app{"cxxlisp: Interprète du Lisp"};
 
+    bool no_readline{false};
     app.add_flag("-s,--silent", options.silent, "silent, don't print the prompt");
-    app.add_flag("-r,--noreadline", options.readline, "don't use readline for input");
+    app.add_flag("-r,--noreadline", no_readline, "don't use readline for input");
     app.add_flag("-p,--parseonly", options.parse_only, "only parse the input and print result");
     app.add_option("-D,--debug", options.debug_expr, "debug options");
 
     CLI11_PARSE(app, argc, argv);
+    options.readline = !no_readline;
     return 0;
 }
 
