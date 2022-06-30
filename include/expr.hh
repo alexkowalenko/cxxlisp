@@ -88,7 +88,7 @@ class Expr {
         Function *function;
         Keyword   keyword;
         Atom      function_ref;
-        Stream *  stream;
+        Stream   *stream;
         Vector    vector;
     };
 
@@ -96,7 +96,9 @@ class Expr {
     unsigned int size() const noexcept;
 
     Expr *at(size_t pos) const noexcept;
-    Expr *operator[](size_t pos) const noexcept { return at(pos); };
+    Expr *operator[](size_t pos) const noexcept {
+        return at(pos);
+    };
     Expr *from(size_t pos) noexcept;
     void  set(size_t pos, Expr *r) noexcept;
     Expr *find(Expr *r) noexcept;

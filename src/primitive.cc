@@ -8,8 +8,6 @@
 
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include "evaluator.hh"
 #include "exceptions.hh"
 #include "function.hh"

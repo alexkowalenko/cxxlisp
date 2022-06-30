@@ -104,26 +104,26 @@ TEST(expr, print) {
     EXPECT_EQ(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "(hello there)");
-    EXPECT_EQ(c->size(), 2);
+    EXPECT_EQ(c->size(), 2u);
 
     c = mk_list({mk_atom("hello"), mk_atom("there")});
     EXPECT_EQ(to_string(c), "(hello there)");
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "(hello there)");
-    EXPECT_EQ(c->size(), 2);
+    EXPECT_EQ(c->size(), 2u);
 
     c = mk_list({mk_atom("hello"), mk_atom("there"), mk_atom("jim")});
     EXPECT_EQ(to_string(c), "(hello there jim)");
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "(hello there jim)");
-    EXPECT_EQ(c->size(), 3);
+    EXPECT_EQ(c->size(), 3u);
 
     c = mk_list({mk_atom("hello"), mk_atom("there"), mk_atom("jim"),
                  mk_list({mk_atom("hello"), mk_atom("there"), mk_atom("jim")})});
     EXPECT_EQ(to_string(c), "(hello there jim (hello there jim))");
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "(hello there jim (hello there jim))");
-    EXPECT_EQ(c->size(), 4);
+    EXPECT_EQ(c->size(), 4u);
 
     c = mk_list(
         {mk_list({mk_atom("hello"), mk_list({mk_atom("hello"), mk_atom("there"), mk_atom("jim")}),
@@ -135,7 +135,7 @@ TEST(expr, print) {
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "((hello (hello there jim) there jim) hello "
                         "there jim (hello there jim))");
-    EXPECT_EQ(c->size(), 5);
+    EXPECT_EQ(c->size(), 5u);
 
     Expr *f = mk_string(L"Olá!"s);
     EXPECT_EQ(to_string(f), "\"Olá!\"");

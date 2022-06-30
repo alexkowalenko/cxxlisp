@@ -6,9 +6,8 @@
 
 #include "parser.hh"
 
+#include <algorithm>
 #include <charconv>
-
-#include <boost/algorithm/string.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
@@ -85,7 +84,8 @@ Expr *Parser::parse_comma() {
 }
 
 Expr *Parser::parse_hash(const Token &tok) {
-    auto token_val = boost::algorithm::to_upper_copy(std::get<std::string>(tok.val));
+    auto token_val = std::get<std::string>(tok.val);
+    transform(token_val.begin(), token_val.end(), token_val.begin(), ::toupper);
     if (token_val == "\\") {
         // character
         auto t = lexer.peek();
@@ -96,7 +96,8 @@ Expr *Parser::parse_hash(const Token &tok) {
             case 'n':
             case 'N': {
                 Token newTok = lexer.get_token();
-                auto  val = boost::algorithm::to_lower_copy(std::get<std::string>(newTok.val));
+                auto  val = std::get<std::string>(newTok.val);
+                transform(val.begin(), val.end(), val.begin(), ::tolower);
                 if (val == "newline") {
                     return mk_char('\n');
                 } else if (val == "space") {

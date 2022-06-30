@@ -17,6 +17,9 @@ set_target_properties(gtest PROPERTIES FOLDER extern)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
+set(INSTALL_GTEST OFF)
+set(BUILD_GMOCK OFF)
+
 add_library(testlib utils.cc)
 target_link_libraries(testlib PRIVATE project_options project_warnings)
 

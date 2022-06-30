@@ -57,6 +57,8 @@ if(ENABLE_TESTING)
   enable_testing()
   add_subdirectory(test)
   add_subdirectory(xtest)
+  set(INSTALL_GTEST OFF)
+  set(BUILD_GMOCK OFF)
 endif()
 
 if(ENABLE_FUZZING)
