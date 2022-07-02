@@ -2,7 +2,7 @@
 
 ## Lexical Information
 
-Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `,@`, `#`
+Special characters are `(` `)` `.` `"` `'`  `;` \` `,` `@` `#`
 
 * `()` marks a list structure.
 
