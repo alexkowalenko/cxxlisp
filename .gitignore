@@ -5,5 +5,3 @@ src/stdlib.lisp.hh
 .cache/*
 .clangd/*
 compile_commands.json
-lib/*
-share/*

@@ -1,7 +1,7 @@
 
 # Test programs build
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 mark_as_advanced(
     # BUILD_GMOCK BUILD_GTEST BUILD_SHARED_LIBS

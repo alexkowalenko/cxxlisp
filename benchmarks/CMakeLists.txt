@@ -1,7 +1,7 @@
 
 # Benchmark programs
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 macro(package_add_benchmark TESTNAME)
         #Add compile target

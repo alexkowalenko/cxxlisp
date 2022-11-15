@@ -4,7 +4,7 @@
 # Copyright © Alex Kowalenko 2022.
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 macro(package_add_test TESTNAME)
     # create an exectuable in which the tests will be stored
