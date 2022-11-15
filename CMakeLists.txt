@@ -50,7 +50,7 @@ include(cmake/StaticAnalyzers.cmake)
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" ON)
 option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" ON)
-option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
+option(ENABLE_FUZZING "Enable Fuzzing Builds" ON)
 
 if(ENABLE_TESTING)
 
