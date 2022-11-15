@@ -49,7 +49,7 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" OFF)
+option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" ON)
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
 if(ENABLE_TESTING)
@@ -79,8 +79,18 @@ if(ENABLE_FUZZING)
 endif()
 
 if(ENABLE_BENCHMARKS)
+
+  CPMAddPackage(
+    NAME benchmark
+    GITHUB_REPOSITORY google/benchmark
+    GIT_TAG v1.7.1
+    OPTIONS
+      "BENCHMARK_ENABLE_INSTALL OFF"
+      "BENCHMARK_ENABLE_TESTING OFF"
+  )
+
   message("Building Benchmarks")
-  # add_subdirectory(benchmarks)
+  add_subdirectory(benchmarks)
 endif()
 
 # Local Code
