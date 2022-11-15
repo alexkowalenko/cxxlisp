@@ -40,36 +40,12 @@ endif()
 # Add custom Find cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-#fmt library
-message(STATUS "Using fmt")
-include_directories("${PROJECT_SOURCE_DIR}/extern/fmt/include")
-set(FMT_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/extern/fmt/include")
-set(FMT_LIBRARIES fmt)
-
-# GNU Readline 
-find_package(Readline REQUIRED)
-include_directories(${Readline_INCLUDE_DIR})
-link_libraries(${Readline_LIBRARY})
-
 #Boehm Garbage collector
 set(BOEHM_INCLUDE_DIRS /usr/local/opt/bdw-gc/include)
 set(BOEHM_LIBRARY_DIRS /usr/local/opt/bdw-gc/lib)
 set(BOEHM_LIBRARIES gc gccpp)
 include_directories(${BOEHM_INCLUDE_DIRS})
 link_directories(${BOEHM_LIBRARY_DIRS})
-
-#replxx
-message(STATUS "Using replxx")
-set(REPLXX_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/replxx/include")
-set(REPLXX_LIBRARY_DIRS "${PROJECT_SOURCE_DIR}/extern/replxx/lib")
-set(REPLXX_LIBRARIES replxx)
-message(STATUS "Using replxx ${REPLXX_LIBRARY_DIRS}")
-
-set(REPLXX_BUILD_EXAMPLES OFF)
-
-include_directories("${PROJECT_SOURCE_DIR}/extern/utfcpp/source")
-
-set(CLI11_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/CLI11/include")
 
 set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
 set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
@@ -78,7 +54,11 @@ include_directories(${ICU_INCLUDE_DIRS})
 link_directories(${ICU_LIBRARY_DIRS})
 message(STATUS "Using International Components for Unicode: ${ICU_INCLUDE_DIRS}")
 
-# spdlog
-set(SPDLOG_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/extern/spdlog/include")
-include_directories(${SPDLOG_INCLUDE_DIRS})
-message(STATUS "Using spdlog: ${SPDLOG_INCLUDE_DIRS}")
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:fmtlib/fmt#9.1.0")
+CPMAddPackage("gh:AmokHuginnsson/replxx#release-0.0.4")
+set(REPLXX_BUILD_EXAMPLES OFF)
+CPMAddPackage("gh:CLIUtils/CLI11#v2.3.0")
+CPMAddPackage("gh:nemtrif/utfcpp#v3.2.1")
+CPMAddPackage("gh:gabime/spdlog@1.11.0")
+# CPMAddPackage(NAME bdwgc GITHUB_REPOSITORY "ivmai/bdwgc" GIT_TAG "v8.2.2" OPTIONS "enable_cplusplus ON")

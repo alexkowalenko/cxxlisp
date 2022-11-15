@@ -1,7 +1,5 @@
 
 include_directories(../include)
-include_directories(${REPLXX_INCLUDE_DIRS})
-include_directories(${CLI11_INCLUDE_DIRS})
 
 function(make_includable input_file output_file)
     file(READ ${input_file} content)
@@ -22,6 +20,11 @@ add_library(cxxlispl STATIC
     stdlib.lisp.hh)
 
 target_link_libraries(
-    cxxlispl
-    PRIVATE project_options
+    cxxlispl 
+    PRIVATE project_options fmt gc
             project_warnings)
+
+target_include_directories(cxxlispl PUBLIC "${utfcpp_SOURCE_DIR}/source")
+target_include_directories(cxxlispl PUBLIC "${replxx_SOURCE_DIR}/include")
+target_include_directories(cxxlispl PUBLIC "${CLI11_SOURCE_DIR}/include")
+target_include_directories(cxxlispl PUBLIC "${spdlog_SOURCE_DIR}/include")

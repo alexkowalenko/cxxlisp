@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 
 # Change compiler here
-set(AX_BASE_CLANG /usr/local/Cellar/llvm/14.0.5)
+set(AX_BASE_CLANG /usr/local/opt/llvm)
 set(CMAKE_CXX_COMPILER ${AX_BASE_CLANG}/bin/clang++)
 message(STATUS "C++ compiler = ${CMAKE_CXX_COMPILER}")
 
@@ -9,7 +9,7 @@ project (cxxlisp LANGUAGES CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
@@ -49,16 +49,28 @@ include(cmake/StaticAnalyzers.cmake)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" ON)
+option(ENABLE_BENCHMARKS "Enable Benchmarks Builds" OFF)
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
 
 if(ENABLE_TESTING)
+
+  CPMAddPackage(
+    NAME googletest
+    GITHUB_REPOSITORY google/googletest
+    GIT_TAG release-1.12.1
+    VERSION 1.12.1
+    OPTIONS
+      "INSTALL_GTEST OFF"
+      "BUILD_GMOCK OFF"
+      "gtest_force_shared_crt ON"
+      "gtest_disable_pthreads ON" 
+      "gtest_hide_internal_symbols ON"
+  )
+
   message("Enabling testing")
   enable_testing()
   add_subdirectory(test)
   add_subdirectory(xtest)
-  set(INSTALL_GTEST OFF)
-  set(BUILD_GMOCK OFF)
 endif()
 
 if(ENABLE_FUZZING)
@@ -68,12 +80,8 @@ endif()
 
 if(ENABLE_BENCHMARKS)
   message("Building Benchmarks")
-  add_subdirectory(benchmarks)
+  # add_subdirectory(benchmarks)
 endif()
-
-add_subdirectory(extern/replxx)
-add_subdirectory(extern/fmt)
-add_subdirectory(extern/spdlog)
 
 # Local Code
 

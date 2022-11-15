@@ -227,6 +227,9 @@ inline Expr *mk_string(const String &s) {
 
 // string <-> wstring conversion functions
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 inline std::wstring s2ws(const std::string &str) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
     return converterX.from_bytes(str);
@@ -236,6 +239,8 @@ inline std::string ws2s(const std::wstring &wstr) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converterX;
     return converterX.to_bytes(wstr);
 }
+
+#pragma clang diagnostic pop
 
 Float as_float(const Expr *const s);
 

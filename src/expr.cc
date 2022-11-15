@@ -59,11 +59,16 @@ Expr *mk_list(size_t size, Expr *const init) {
     return top;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 inline std::string to_string(Float f) {
     std::array<char, 30> buf;
     sprintf(buf.data(), "%.12lg", f);
     return std::string(buf.data());
 }
+
+#pragma clang diagnostic pop
 
 std::string to_dstring(const Expr *const s) {
     if (!s) {
