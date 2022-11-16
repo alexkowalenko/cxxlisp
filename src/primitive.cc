@@ -100,7 +100,7 @@ Expr endp(const Expr args) {
     throw EvalException("end: must be a list " + to_string(args->car));
 }
 
-Expr andor(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
+Expr andor(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
     if (is_false(args)) {
         return name == "and" ? sT : sF;
     }
@@ -165,7 +165,7 @@ Expr rplaca(const std::string &name, Expr args) {
     throw EvalException(name + ": first argument not a list");
 }
 
-Expr setf_car(Evaluator &, Expr args, Expr r, SymbolTable) {
+Expr setf_car(Evaluator &, Expr args, Expr r, SymbolTable &) {
     auto res = mk_list({args->car, r});
     rplaca("setf car", res);
     return r;
@@ -180,7 +180,7 @@ Expr rplacd(const std::string &name, Expr args) {
     throw EvalException(name + ": first argument not a list");
 }
 
-Expr setf_cdr(Evaluator &, Expr args, Expr r, SymbolTable) {
+Expr setf_cdr(Evaluator &, Expr args, Expr r, SymbolTable &) {
     auto res = mk_list({args->car, r});
     rplacd("setf cdr", res);
     return r;
@@ -221,7 +221,7 @@ Expr append(Expr args) {
     return cur;
 }
 
-Expr push(Evaluator &l, const std::string &, const Expr args, SymbolTable a) {
+Expr push(Evaluator &l, const std::string &, const Expr args, SymbolTable & a) {
     auto x = l.eval(args->car, a);
     auto val = get_reference("push", arg1(args), a);
     if (is_a<Type::list>(val)) {
@@ -232,7 +232,7 @@ Expr push(Evaluator &l, const std::string &, const Expr args, SymbolTable a) {
     throw EvalException("push: is not a list: " + to_string(arg1(args)));
 }
 
-Expr pop(const std::string &, const Expr args, SymbolTable a) {
+Expr pop(const std::string &, const Expr args, SymbolTable & a) {
     auto val = get_reference("pop", args->car, a);
     if (is_a<Type::list>(val)) {
         auto ret = val->car;
@@ -266,7 +266,7 @@ Expr equal_p(Expr args) {
 // variable functions
 //
 
-Expr defvar(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
+Expr defvar(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
     if (is_false(args)) {
         throw EvalException(name + " needs a name");
     }
@@ -304,7 +304,7 @@ Expr defvar(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     return n;
 }
 
-Expr setq(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
+Expr setq(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
     if (!args) {
         return sF;
     }
@@ -346,7 +346,7 @@ Expr setq(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     return val;
 }
 
-Expr makunbound(const std::string &, Expr args, SymbolTable a) {
+Expr makunbound(const std::string &, Expr args, SymbolTable & a) {
     if (is_a<Type::atom>(args->car)) {
         a->remove(args->car->atom);
     }
@@ -357,7 +357,7 @@ Expr makunbound(const std::string &, Expr args, SymbolTable a) {
 // Program control
 //
 
-Expr ifFunc(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
+Expr ifFunc(Evaluator &l, const std::string &, Expr args, SymbolTable & a) {
     size_t size = args->size();
     auto   res = l.eval(args->car, a);
     if (is_false(res)) {
@@ -372,7 +372,7 @@ Expr ifFunc(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
     return l.eval(args->cdr->car, a);
 }
 
-Expr cond(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
+Expr cond(Evaluator &l, const std::string &, Expr args, SymbolTable & a) {
     while (args) {
         if (is_a<Type::list>(args->car)) {
             auto first = l.eval(args->car->car, a);
@@ -390,7 +390,7 @@ Expr cond(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
     return sF;
 }
 
-Expr case_fn(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
+Expr case_fn(Evaluator &l, const std::string &, Expr args, SymbolTable & a) {
     auto test = l.eval(args->car, a);
     for (auto cur = args->cdr; !is_false(cur); cur = cur->cdr) {
         if (!is_a<Type::list>(cur->car)) {
@@ -414,11 +414,11 @@ Expr case_fn(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
     return sF;
 }
 
-Expr progn(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
+Expr progn(Evaluator &l, const std::string &, Expr args, SymbolTable & a) {
     return l.perform_list(args, a);
 }
 
-Expr prog1(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
+Expr prog1(Evaluator &l, const std::string &, Expr args, SymbolTable & a) {
     if (is_false(args)) {
         return sF;
     }
@@ -427,7 +427,7 @@ Expr prog1(Evaluator &l, const std::string &, Expr args, SymbolTable a) {
     return result;
 }
 
-Expr let(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
+Expr let(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": expecting a list of bindings");
     }
@@ -456,7 +456,7 @@ Expr let(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
 }
 
 // get a reference, in order to modify it.
-Expr get_reference(const std::string &name, Expr ref, SymbolTable a) {
+Expr get_reference(const std::string &name, Expr ref, SymbolTable & a) {
     if (!is_a<Type::atom>(ref)) {
         throw EvalException(name + ": argument needs to a reference");
     }

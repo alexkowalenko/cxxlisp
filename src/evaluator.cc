@@ -32,7 +32,7 @@ const std::string optional_atom{"&optional"};
 const std::string rest_atom{"&rest"};
 const std::string key_atom{"&key"};
 
-void process_keyword(const std::string &name, Expr params, Expr args, SymbolTable a) {
+void process_keyword(const std::string &name, Expr params, Expr args, SymbolTable &a) {
     for (auto cur = params; !is_false(cur); cur = cur->cdr) {
         if (is_a<Type::atom>(cur->car)) {
             Atom param = cur->car->atom;
@@ -60,7 +60,7 @@ void process_keyword(const std::string &name, Expr params, Expr args, SymbolTabl
     }
 }
 
-SymbolTable Evaluator::create_context(Function *f, Expr evalArgs, SymbolTable a) {
+SymbolTable Evaluator::create_context(Function *f, Expr evalArgs, SymbolTable &a) {
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
     size_t evalArgs_size = 0;
@@ -141,7 +141,7 @@ SymbolTable Evaluator::create_context(Function *f, Expr evalArgs, SymbolTable a)
     return context;
 }
 
-Expr Evaluator::perform_function(Function *f, Expr args, SymbolTable a) {
+Expr Evaluator::perform_function(Function *f, Expr args, SymbolTable &a) {
     Expr evalArgs;
     if (f->macro) {
         // Macro args are evaluated later
@@ -161,7 +161,7 @@ Expr Evaluator::perform_function(Function *f, Expr args, SymbolTable a) {
     return result;
 }
 
-Expr Evaluator::backquote(Expr s, SymbolTable a) {
+Expr Evaluator::backquote(Expr s, SymbolTable &a) {
     if (is_atomic(s)) {
         return s;
     }
@@ -208,7 +208,7 @@ Expr Evaluator::backquote(Expr s, SymbolTable a) {
 }
 
 // eval_list makes a copy of the list.
-Expr Evaluator::eval_list(const Expr expr, SymbolTable a) {
+Expr Evaluator::eval_list(const Expr expr, SymbolTable &a) {
     Expr e{expr};
     if (is_false(e)) {
         return sF;
@@ -227,7 +227,7 @@ Expr Evaluator::eval_list(const Expr expr, SymbolTable a) {
     return result;
 }
 
-Expr Evaluator::perform_list(const Expr expr, SymbolTable a) {
+Expr Evaluator::perform_list(const Expr expr, SymbolTable &a) {
     Expr e{expr};
     auto result = sF;
     for (; e; e = e->cdr) {
@@ -236,7 +236,7 @@ Expr Evaluator::perform_list(const Expr expr, SymbolTable a) {
     return result;
 }
 
-Expr Evaluator::eval(const Expr e, SymbolTable a) {
+Expr Evaluator::eval(const Expr e, SymbolTable &a) {
     if (opt.debug_expr) {
         SPDLOG_DEBUG("eval: {}", to_string(e));
     };

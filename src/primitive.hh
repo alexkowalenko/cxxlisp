@@ -20,9 +20,9 @@ void init_prims();
 
 using PrimBasicFunct = std::function<Expr(const Expr args)>;
 using PrimSimpleFunct = std::function<Expr(const std::string &name, const Expr args)>;
-using PrimFunct = std::function<Expr(const std::string &name, const Expr args, SymbolTable a)>;
+using PrimFunct = std::function<Expr(const std::string &name, const Expr args, SymbolTable & a)>;
 using PrimFullFunct =
-    std::function<Expr(Evaluator &l, const std::string &name, const Expr args, SymbolTable a)>;
+    std::function<Expr(Evaluator &l, const std::string &name, const Expr args, SymbolTable & a)>;
 
 struct Primitive {
     std::string                                                             name;
@@ -36,7 +36,7 @@ inline const bool preEvaluate = true;
 extern std::map<std::string, Primitive> prim_table;
 
 // Accessor functions for setf
-using AccessorFunct = std::function<Expr(Evaluator &l, Expr args, Expr val, SymbolTable a)>;
+using AccessorFunct = std::function<Expr(Evaluator &l, Expr args, Expr val, SymbolTable & a)>;
 
 struct Accessor {
     std::string   name;
@@ -47,7 +47,7 @@ struct Accessor {
 extern std::map<Atom, Accessor> setf_accessors;
 
 // get a reference, in order to modify it.
-Expr get_reference(const std::string &name, Expr ref, SymbolTable a);
+Expr get_reference(const std::string &name, Expr ref, SymbolTable & a);
 
 // Numbers
 
@@ -117,7 +117,7 @@ extern PrimBasicFunct num_acos;
 extern PrimBasicFunct num_atan;
 extern PrimBasicFunct num_sqrt;
 
-Expr incf(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
+Expr incf(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
 Expr float_f(Expr);
 
 template <Int d> Expr inc(const std::string &, Expr args) {
@@ -126,16 +126,16 @@ template <Int d> Expr inc(const std::string &, Expr args) {
 
 // Functions
 
-Expr defun(const std::string &name, Expr args, SymbolTable a);
+Expr defun(const std::string &name, Expr args, SymbolTable & a);
 Expr lambda(const std::string &name, Expr args);
 Expr funct(const std::string &name, Expr args);
-Expr functionp(const std::string &, Expr args, SymbolTable a);
-Expr fboundp(const std::string &, Expr args, SymbolTable a);
-Expr apply(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
-Expr funcall(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
-Expr mapcar(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
-Expr do_times(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
-Expr do_func(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
+Expr functionp(const std::string &, Expr args, SymbolTable & a);
+Expr fboundp(const std::string &, Expr args, SymbolTable & a);
+Expr apply(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
+Expr funcall(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
+Expr mapcar(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
+Expr do_times(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
+Expr do_func(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
 
 // Strings
 
@@ -168,7 +168,7 @@ Expr elt(Expr args);
 Expr setelt(const std::string &name, Expr args);
 Expr subseq(Expr args);
 
-Expr setf_elt(Evaluator &l, Expr args, Expr r, SymbolTable a);
+Expr setf_elt(Evaluator &l, Expr args, Expr r, SymbolTable & a);
 Expr make_sequence(Expr args);
 Expr concatenate(Expr args);
 
@@ -188,15 +188,15 @@ template <StreamType N> Expr stream_typep(Expr args) {
 Expr open(Expr args);
 Expr close(Expr args);
 
-Expr print(const std::string &name, Expr args, SymbolTable a);
-Expr terpri(const std::string &name, Expr args, SymbolTable a);
-Expr read(const std::string &name, Expr args, SymbolTable a);
-Expr read_char(const std::string &name, Expr args, SymbolTable a);
-Expr format(const std::string &name, Expr args, SymbolTable a);
+Expr print(const std::string &name, Expr args, SymbolTable & a);
+Expr terpri(const std::string &name, Expr args, SymbolTable & a);
+Expr read(const std::string &name, Expr args, SymbolTable & a);
+Expr read_char(const std::string &name, Expr args, SymbolTable & a);
+Expr format(const std::string &name, Expr args, SymbolTable & a);
 
-Expr load(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
+Expr load(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
 
-Expr trace(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
-Expr untrace(Evaluator &l, const std::string &name, Expr args, SymbolTable a);
+Expr trace(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
+Expr untrace(Evaluator &l, const std::string &name, Expr args, SymbolTable & a);
 
 } // namespace ax

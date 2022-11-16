@@ -173,7 +173,7 @@ Expr setelt(const std::string &name, Expr args) {
 
 // setf version
 // (var index) result
-Expr setf_elt(Evaluator &, Expr args, Expr r, SymbolTable) {
+Expr setf_elt(Evaluator &, Expr args, Expr r, SymbolTable &) {
     auto newargs = mk_list({args->car, arg1(args), r});
     setelt("setf elt", newargs);
     return r;
