@@ -23,9 +23,9 @@ class Evaluator {
 
     void repl(std::istream &in, std::ostream &os);
 
-    Expr *eval(Expr *const e, std::shared_ptr<SymbolTable> a);
-    Expr *perform_list(const Expr *e, std::shared_ptr<SymbolTable> a);
-    Expr *eval_list(const Expr *e, std::shared_ptr<SymbolTable> a);
+    Expr eval(const Expr e, std::shared_ptr<SymbolTable> a);
+    Expr perform_list(const Expr e, std::shared_ptr<SymbolTable> a);
+    Expr eval_list(const Expr e, std::shared_ptr<SymbolTable> a);
 
     bool has_function(const Atom &f);
 
@@ -34,10 +34,10 @@ class Evaluator {
     Options                      opt;
 
   private:
-    std::shared_ptr<SymbolTable> create_context(Function *f, Expr *const args,
+    std::shared_ptr<SymbolTable> create_context(Function *f, const Expr args,
                                                 std::shared_ptr<SymbolTable> a);
-    Expr *perform_function(Function *f, Expr *const args, std::shared_ptr<SymbolTable> a);
-    Expr *backquote(Expr *s, std::shared_ptr<SymbolTable> a);
+    Expr perform_function(Function *f, const Expr args, std::shared_ptr<SymbolTable> a);
+    Expr backquote(Expr s, std::shared_ptr<SymbolTable> a);
 };
 
 } // namespace ax

@@ -12,7 +12,7 @@ Function::operator std::string() {
     return "λ:" + name + " : " + to_string(body);
 }
 
-std::optional<Expr *> get_keyword_value(Expr *top, const Expr *k) {
+std::optional<Expr> get_keyword_value(Expr top, const Expr k) {
     while (!is_false(top)) {
         if (expr_eq(top->car, k) != sF) {
             if (!is_false(top->cdr)) {

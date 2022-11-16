@@ -8,20 +8,22 @@
 
 #include <codecvt>
 #include <complex>
+#include <cstddef>
 #include <iostream>
 #include <locale>
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshadow"
-#pragma clang diagnostic ignored "-Wconversion"
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic ignored "-Wcast-align"
-#include <gc_cpp.h>
-#pragma clang diagnostic pop
+// #pragma clang diagnostic push
+// #pragma clang diagnostic ignored "-Wshadow"
+// #pragma clang diagnostic ignored "-Wconversion"
+// #pragma clang diagnostic ignored "-Wold-style-cast"
+// #pragma clang diagnostic ignored "-Wunused-parameter"
+// #pragma clang diagnostic ignored "-Wcast-align"
+// #include <gc_cpp.h>
+// #pragma clang diagnostic pop
 
 namespace ax {
 
@@ -42,7 +44,8 @@ enum class Type {
     vector
 };
 
-class Expr;
+class Expr_;
+using Expr = std::shared_ptr<Expr_>;
 
 // defintions of basic types
 using Atom = std::string;
@@ -52,16 +55,17 @@ using Float = double;
 using Keyword = std::string;
 using Char = wchar_t;
 using String = std::wstring;
-using Vector = std::vector<Expr *>;
+using Vector = std::vector<Expr>;
 using Complex = std::complex<Float>;
 
 class Function;
 class Stream;
 
 // Basic element in s-expressions.
-class Expr {
+class Expr_ : public std::enable_shared_from_this<Expr_> {
   public:
-    Expr(Type t) : type(t){};
+    Expr_(Type t) : type(t){};
+    ~Expr_(){};
 
     Type type;
 
@@ -80,147 +84,145 @@ class Expr {
         struct {
             // THis makes easier access as unamed structure,
             // but is not standard C++.
-            Expr *car;
-            Expr *cdr;
+            Expr car;
+            Expr cdr;
         };
-        Char      chr;
-        String    string;
-        Function *function;
-        Keyword   keyword;
-        Atom      function_ref;
-        Stream   *stream;
-        Vector    vector;
+        Char                    chr;
+        String                  string;
+        Function               *function;
+        Keyword                 keyword;
+        Atom                    function_ref;
+        std::shared_ptr<Stream> stream;
+        Vector                  vector;
     };
 
     // Return the size of the list, 0 if not list.
-    unsigned int size() const noexcept;
+    size_t size() noexcept;
 
-    Expr *at(size_t pos) const noexcept;
-    Expr *operator[](size_t pos) const noexcept {
-        return at(pos);
-    };
-    Expr *from(size_t pos) noexcept;
-    void  set(size_t pos, Expr *r) noexcept;
-    Expr *find(Expr *r) noexcept;
+    Expr at(size_t pos) noexcept;
+    Expr operator[](size_t pos) noexcept { return at(pos); };
+    Expr from(size_t pos) noexcept;
+    void set(size_t pos, Expr r) noexcept;
+    Expr find(Expr r) noexcept;
 };
 
 // Various constructors for element types, returning a s-expression
 
-inline Expr *mk_atom(const Atom &s) {
-    auto e = new (GC) Expr(Type::atom);
+inline Expr mk_atom(const Atom &s) {
+    auto e = std::make_shared<Expr_>(Type::atom);
     e->atom = s;
     return e;
 }
 
-inline Expr *mk_bool(const bool s) {
-    auto e = new Expr(Type::boolean); // bools are not make often and last forever.
+inline Expr mk_bool(const bool s) {
+    auto e = std::make_shared<Expr_>(Type::boolean); // bools are not make often and last forever.
     e->boolean = s;
     return e;
 }
 
-inline Expr *mk_int(const Int i) {
-    auto e = new (GC) Expr(Type::integer);
+inline Expr mk_int(const Int i) {
+    auto e = std::make_shared<Expr_>(Type::integer);
     e->integer = i;
     return e;
 }
 
-inline Expr *mk_float(const Float f) {
-    auto e = new (GC) Expr(Type::floating);
+inline Expr mk_float(const Float f) {
+    auto e = std::make_shared<Expr_>(Type::floating);
     e->floating = f;
     return e;
 }
 
-inline Expr *mk_complex(const Complex c) {
-    auto e = new (GC) Expr(Type::complex);
+inline Expr mk_complex(const Complex c) {
+    auto e = std::make_shared<Expr_>(Type::complex);
     e->complex = c;
     return e;
 }
 
-inline Expr *mk_list(Expr *car = nullptr, Expr *cdr = nullptr) {
-    auto e = new (GC) Expr(Type::list);
+inline Expr mk_list(Expr car = nullptr, Expr cdr = nullptr) {
+    auto e = std::make_shared<Expr_>(Type::list);
     e->car = car;
     e->cdr = cdr;
     return e;
 }
 
-Expr *mk_list(std::initializer_list<Expr *>);
-Expr *mk_list(size_t size, Expr *const init);
+Expr mk_list(std::initializer_list<Expr>);
+Expr mk_list(size_t size, const Expr init);
 
 // Test functions for s-expression types
-template <Type t> constexpr bool is_a(const Expr *const s) {
+template <Type t> inline bool is_a(const Expr s) {
     return s->type == t;
 };
 
-constexpr bool is_atom(const Expr *const s) {
+inline bool is_atom(const Expr s) {
     return s->type == Type::atom;
 }
 
-constexpr bool is_bool(const Expr *const s) {
+inline bool is_bool(const Expr s) {
     return s->type == Type::boolean;
 }
 
-constexpr bool is_int(const Expr *const s) {
+inline bool is_int(const Expr s) {
     return s->type == Type::integer;
 }
 
-constexpr bool is_list(const Expr *const s) {
+inline bool is_list(const Expr s) {
     return s->type == Type::list;
 }
 
-constexpr bool is_atomic(const Expr *const s) {
+inline bool is_atomic(const Expr s) {
     return s->type != Type::list;
 }
 
 // Working on lists of arguments
-constexpr Expr *arg0(const Expr *const args) {
+inline Expr arg0(const Expr args) {
     return args->car;
 }
 
-constexpr Expr *arg1(const Expr *const args) {
+inline Expr arg1(const Expr args) {
     return args->cdr->car;
 }
 
-constexpr Expr *arg2(const Expr *const args) {
+inline Expr arg2(const Expr args) {
     return args->cdr->cdr->car;
 }
 
 // Output
 
-std::string to_string(const Expr *const e);
-std::string to_dstring(const Expr *const e);
-std::string to_pstring(const Expr *const s);
+std::string to_string(const Expr e);
+std::string to_dstring(const Expr e);
+std::string to_pstring(const Expr s);
 
-inline std::ostream &operator<<(std::ostream &os, const Expr *const s) {
+inline std::ostream &operator<<(std::ostream &os, const Expr s) {
     return os << to_string(s);
 }
 
 // Bool
 
-inline Expr *const sF = mk_bool(false);
-inline Expr *const sT = mk_bool(true);
+inline const Expr sF = mk_bool(false);
+inline const Expr sT = mk_bool(true);
 
-inline bool is_sF(const Expr *const e) {
+inline bool is_sF(const Expr e) {
     return e == sF || e == nullptr;
 }
 
-inline bool is_false(const Expr *const s)
+inline bool is_false(const Expr s)
 // Is the Bool sF, or is the empty list
 {
     return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
 
-Expr *expr_eq(const Expr *const x, const Expr *const y);
-Expr *expr_eql(const Expr *const x, const Expr *const y);
-Expr *expr_equal(const Expr *const x, const Expr *const);
+Expr expr_eq(const Expr x, const Expr y);
+Expr expr_eql(const Expr x, const Expr y);
+Expr expr_equal(const Expr x, const Expr);
 
-inline Expr *mk_char(Char c) {
-    auto e = new (GC) Expr(Type::character);
+inline Expr mk_char(Char c) {
+    auto e = std::make_shared<Expr_>(Type::character);
     e->chr = c;
     return e;
 }
 
-inline Expr *mk_string(const String &s) {
-    auto e = new (GC) Expr(Type::string);
+inline Expr mk_string(const String &s) {
+    auto e = std::make_shared<Expr_>(Type::string);
     e->string = s;
     return e;
 }
@@ -242,15 +244,15 @@ inline std::string ws2s(const std::wstring &wstr) {
 
 #pragma clang diagnostic pop
 
-Float as_float(const Expr *const s);
+Float as_float(const Expr s);
 
-constexpr bool is_number(const Expr *const n) {
+inline bool is_number(const Expr n) {
     return is_a<Type::integer>(n) || is_a<Type::floating>(n);
 }
 
 // sequence
 
-constexpr bool is_seq(const Expr *const s) {
+inline bool is_seq(const Expr s) {
     return is_a<Type::list>(s) || is_a<Type::string>(s);
 }
 
@@ -273,8 +275,8 @@ inline bool is_seq_type(const Atom &s) {
     return s == type_list || s == type_list2 || s == type_string;
 }
 
-inline Expr *mk_stream(Stream *s) {
-    auto e = new (GC) Expr(Type::stream);
+inline Expr mk_stream(std::shared_ptr<Stream> s) {
+    auto e = std::make_shared<Expr_>(Type::stream);
     e->stream = s;
     return e;
 }
@@ -297,26 +299,26 @@ class Stream {
     std::variant<std::istream *, std::ostream *, std::fstream *> str;
 };
 
-inline Expr *mk_stream(std::istream *s) {
-    auto e = new (GC) Expr(Type::stream);
-    e->stream = new (GC) Stream(s);
+inline Expr mk_stream(std::istream *s) {
+    auto e = std::make_shared<Expr_>(Type::stream);
+    e->stream = std::make_shared<Stream>(s);
     return e;
 }
 
-inline Expr *mk_stream(std::ostream *s) {
-    auto e = new (GC) Expr(Type::stream);
-    e->stream = new (GC) Stream(s);
+inline Expr mk_stream(std::ostream *s) {
+    auto e = std::make_shared<Expr_>(Type::stream);
+    e->stream = std::make_shared<Stream>(s);
     return e;
 }
 
-Expr *mk_stream(std::fstream *const s, std::ios_base::openmode m);
+Expr mk_stream(std::fstream *const s, std::ios_base::openmode m);
 
 // Vectors
-inline Expr *mk_vector() {
-    auto v = new (GC) Expr(Type::vector);
+inline Expr mk_vector() {
+    auto v = std::make_shared<Expr_>(Type::vector);
     v->vector = Vector();
     return v;
 }
 
-Expr *to_vector(Expr *);
+Expr to_vector(Expr);
 } // namespace ax

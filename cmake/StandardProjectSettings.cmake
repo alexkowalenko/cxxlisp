@@ -40,13 +40,6 @@ endif()
 # Add custom Find cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-#Boehm Garbage collector
-set(BOEHM_INCLUDE_DIRS /usr/local/opt/bdw-gc/include)
-set(BOEHM_LIBRARY_DIRS /usr/local/opt/bdw-gc/lib)
-set(BOEHM_LIBRARIES gc gccpp)
-include_directories(${BOEHM_INCLUDE_DIRS})
-link_directories(${BOEHM_LIBRARY_DIRS})
-
 set(ICU_INCLUDE_DIRS /usr/local/opt/icu4c/include)
 set(ICU_LIBRARY_DIRS /usr/local/opt/icu4c/lib)
 set(ICU_LIBRARIES icuuc)
@@ -61,4 +54,3 @@ set(REPLXX_BUILD_EXAMPLES OFF)
 CPMAddPackage("gh:CLIUtils/CLI11#v2.3.0")
 CPMAddPackage("gh:nemtrif/utfcpp#v3.2.1")
 CPMAddPackage("gh:gabime/spdlog@1.11.0")
-# CPMAddPackage(NAME bdwgc GITHUB_REPOSITORY "ivmai/bdwgc" GIT_TAG "v8.2.2" OPTIONS "enable_cplusplus ON")

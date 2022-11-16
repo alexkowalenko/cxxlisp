@@ -7,6 +7,7 @@
 #include "expr.hh"
 
 #include <array>
+#include <memory>
 #include <sstream>
 
 #include <stdio.h>
@@ -26,12 +27,12 @@
 
 namespace ax {
 
-Expr *mk_list(std::initializer_list<Expr *> p) {
+Expr mk_list(std::initializer_list<Expr> p) {
     if (p.size() == 0) {
         return sF;
     }
-    Expr *start = mk_list();
-    Expr *l = start;
+    auto start = mk_list();
+    auto l = start;
     for (auto iter = p.begin(); iter != p.end(); iter++) {
         l->car = *iter;
         if (iter != p.end() - 1) {
@@ -42,10 +43,10 @@ Expr *mk_list(std::initializer_list<Expr *> p) {
     return start;
 }
 
-Expr *mk_list(size_t size, Expr *const init) {
-    Expr *prev = nullptr;
-    auto  top = mk_list();
-    auto  s = top;
+Expr mk_list(size_t size, Expr const init) {
+    Expr prev = nullptr;
+    auto top = mk_list();
+    auto s = top;
     while (size > 0) {
         s->car = init;
         s->cdr = mk_list();
@@ -70,7 +71,7 @@ inline std::string to_string(Float f) {
 
 #pragma clang diagnostic pop
 
-std::string to_dstring(const Expr *const s) {
+std::string to_dstring(const Expr s) {
     if (!s) {
         return "NULL";
     }
@@ -104,7 +105,7 @@ std::string to_dstring(const Expr *const s) {
     }
 }
 
-std::string to_string(const Expr *const s) {
+std::string to_string(const Expr s) {
     if (s == nullptr) {
         return "";
     }
@@ -192,7 +193,7 @@ std::string to_string(const Expr *const s) {
     }
 }
 
-std::string to_pstring(const Expr *const s) {
+std::string to_pstring(const Expr s) {
     if (!s) {
         return "NULL";
     }
@@ -206,15 +207,15 @@ std::string to_pstring(const Expr *const s) {
     }
 }
 
-unsigned int Expr::size() const noexcept {
+size_t Expr_::size() noexcept {
     unsigned int res = 0;
-    for (auto s = this; s && is_list(s); res++, s = s->cdr) {
+    for (auto s = shared_from_this(); s && is_list(s); res++, s = s->cdr) {
     }
     return res;
 }
 
-Expr *Expr::at(size_t pos) const noexcept {
-    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+Expr Expr_::at(size_t pos) noexcept {
+    for (auto s = shared_from_this(); !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             return s->car;
         }
@@ -222,8 +223,8 @@ Expr *Expr::at(size_t pos) const noexcept {
     return sF;
 }
 
-Expr *Expr::from(size_t pos) noexcept {
-    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+Expr Expr_::from(size_t pos) noexcept {
+    for (auto s = shared_from_this(); !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             return s;
         }
@@ -231,8 +232,8 @@ Expr *Expr::from(size_t pos) noexcept {
     return sF;
 }
 
-void Expr::set(size_t pos, Expr *r) noexcept {
-    for (auto s = this; !is_false(s); pos--, s = s->cdr) {
+void Expr_::set(size_t pos, Expr r) noexcept {
+    for (auto s = shared_from_this(); !is_false(s); pos--, s = s->cdr) {
         if (!pos) {
             s->car = r;
             return;
@@ -240,8 +241,8 @@ void Expr::set(size_t pos, Expr *r) noexcept {
     }
 }
 
-Expr *Expr::find(Expr *r) noexcept {
-    for (auto s = this; !is_false(s); s = s->cdr) {
+Expr Expr_::find(Expr r) noexcept {
+    for (auto s = shared_from_this(); !is_false(s); s = s->cdr) {
         if (expr_eq(s->car, r)) {
             return s;
         }
@@ -249,11 +250,11 @@ Expr *Expr::find(Expr *r) noexcept {
     return nullptr;
 }
 
-constexpr bool same_type(Type t, const Expr *x, const Expr *y) {
+inline bool same_type(Type t, const Expr x, const Expr y) {
     return t == x->type && x->type == y->type;
 }
 
-Expr *expr_eq(const Expr *const x, const Expr *const y) {
+Expr expr_eq(const Expr x, const Expr y) {
     if (is_false(x) && is_false(y)) {
         return sT;
     }
@@ -276,11 +277,11 @@ Expr *expr_eq(const Expr *const x, const Expr *const y) {
     return sF;
 }
 
-Expr *expr_eql(const Expr *const x, const Expr *const y) {
+Expr expr_eql(const Expr x, const Expr y) {
     return expr_eq(x, y);
 }
 
-Expr *expr_equal(const Expr *const x, const Expr *const y) {
+Expr expr_equal(const Expr x, const Expr y) {
     if (expr_eql(x, y) == sT) {
         return sT;
     }
@@ -308,7 +309,7 @@ Expr *expr_equal(const Expr *const x, const Expr *const y) {
     return sF;
 }
 
-Float as_float(const Expr *const s) {
+Float as_float(const Expr s) {
     if (is_a<Type::floating>(s)) {
         return s->floating;
     } else if (is_a<Type::integer>(s)) {
@@ -327,7 +328,7 @@ std::string Stream::to_string() {
     return res;
 }
 
-Expr *to_vector(Expr *l) {
+Expr to_vector(Expr l) {
     auto v = mk_vector();
     for (; !is_false(l); l = l->cdr) {
         v->vector.push_back(l->car);

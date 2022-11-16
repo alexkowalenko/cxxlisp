@@ -21,7 +21,7 @@ add_library(cxxlispl STATIC
 
 target_link_libraries(
     cxxlispl 
-    PRIVATE project_options fmt gc
+    PRIVATE project_options fmt
             project_warnings)
 
 target_include_directories(cxxlispl PUBLIC "${utfcpp_SOURCE_DIR}/source")

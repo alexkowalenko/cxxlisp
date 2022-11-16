@@ -22,7 +22,9 @@
 
 namespace ax {
 
-template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template <class... Ts> struct overloaded : Ts... {
+    using Ts::operator()...;
+};
 
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
@@ -30,7 +32,7 @@ const std::string optional_atom{"&optional"};
 const std::string rest_atom{"&rest"};
 const std::string key_atom{"&key"};
 
-void process_keyword(const std::string &name, Expr *params, Expr *args,
+void process_keyword(const std::string &name, Expr params, Expr args,
                      std::shared_ptr<SymbolTable> a) {
     for (auto cur = params; !is_false(cur); cur = cur->cdr) {
         if (is_a<Type::atom>(cur->car)) {
@@ -59,7 +61,7 @@ void process_keyword(const std::string &name, Expr *params, Expr *args,
     }
 }
 
-std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr *evalArgs,
+std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr evalArgs,
                                                        std::shared_ptr<SymbolTable> a) {
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
@@ -141,8 +143,8 @@ std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr *evalAr
     return context;
 }
 
-Expr *Evaluator::perform_function(Function *f, Expr *args, std::shared_ptr<SymbolTable> a) {
-    Expr *evalArgs;
+Expr Evaluator::perform_function(Function *f, Expr args, std::shared_ptr<SymbolTable> a) {
+    Expr evalArgs;
     if (f->macro) {
         // Macro args are evaluated later
         evalArgs = args;
@@ -161,13 +163,13 @@ Expr *Evaluator::perform_function(Function *f, Expr *args, std::shared_ptr<Symbo
     return result;
 }
 
-Expr *Evaluator::backquote(Expr *s, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::backquote(Expr s, std::shared_ptr<SymbolTable> a) {
     if (is_atomic(s)) {
         return s;
     }
     if (is_a<Type::list>(s)) {
-        auto  top = mk_list();
-        Expr *p = nullptr;
+        auto top = mk_list();
+        Expr p = nullptr;
         for (auto cur = top; !is_false(s); s = s->cdr, cur = cur->cdr) {
             if (is_a<Type::atom>(s->car) &&
                 (s->car->atom == unquote_at->atom || s->car->atom == splice_unquote_at->atom)) {
@@ -177,7 +179,7 @@ Expr *Evaluator::backquote(Expr *s, std::shared_ptr<SymbolTable> a) {
                         cur->car = res;
                     } else if (is_a<Type::list>(res)) {
                         // splice in list
-                        Expr *prev = nullptr;
+                        Expr prev = nullptr;
                         for (; !is_false(res); cur = cur->cdr, res = res->cdr) {
                             cur->car = res->car;
                             cur->cdr = mk_list();
@@ -208,12 +210,13 @@ Expr *Evaluator::backquote(Expr *s, std::shared_ptr<SymbolTable> a) {
 }
 
 // eval_list makes a copy of the list.
-Expr *Evaluator::eval_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::eval_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
+    Expr e{expr};
     if (is_false(e)) {
         return sF;
     }
-    Expr *result = mk_list();
-    Expr *rl = result;
+    Expr result = mk_list();
+    Expr rl = result;
     for (; e; e = e->cdr) {
         if (!rl->car) {
             rl->car = eval(e->car, a);
@@ -226,7 +229,8 @@ Expr *Evaluator::eval_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
     return result;
 }
 
-Expr *Evaluator::perform_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::perform_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
+    Expr e{expr};
     auto result = sF;
     for (; e; e = e->cdr) {
         result = eval(e->car, a);
@@ -234,9 +238,9 @@ Expr *Evaluator::perform_list(const Expr *e, std::shared_ptr<SymbolTable> a) {
     return result;
 }
 
-Expr *Evaluator::eval(Expr *const e, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::eval(const Expr e, std::shared_ptr<SymbolTable> a) {
     if (opt.debug_expr) {
-        SPDLOG_DEBUG( "eval: {}",to_string(e));
+        SPDLOG_DEBUG("eval: {}", to_string(e));
     };
 
     if (is_false(e)) { // stops nullptrs
@@ -318,14 +322,13 @@ Expr *Evaluator::eval(Expr *const e, std::shared_ptr<SymbolTable> a) {
             if (check) {
                 throw EvalException(*check);
             }
-            return visit(
-                overloaded{
-                    [&](PrimBasicFunct pf) -> Expr * { return pf(result); },
-                    [&](PrimSimpleFunct pf) -> Expr * { return pf(name, result); },
-                    [&](PrimFunct pf) -> Expr * { return pf(name, result, a); },
-                    [&](PrimFullFunct pf) -> Expr * { return pf(*this, name, result, a); },
-                },
-                prim->second.pf);
+            return visit(overloaded{
+                             [&](PrimBasicFunct pf) -> Expr { return pf(result); },
+                             [&](PrimSimpleFunct pf) -> Expr { return pf(name, result); },
+                             [&](PrimFunct pf) -> Expr { return pf(name, result, a); },
+                             [&](PrimFullFunct pf) -> Expr { return pf(*this, name, result, a); },
+                         },
+                         prim->second.pf);
         }
     } else if (is_a<Type::function>(e_car)) {
         // compiled function in function position - output of apply.

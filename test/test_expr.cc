@@ -15,7 +15,7 @@ using namespace std;
 
 TEST(expr, is) {
     // Test Atoms
-    Expr *a = mk_atom("hello");
+    Expr a = mk_atom("hello");
     EXPECT_TRUE(is_atom(a) == true);
     EXPECT_TRUE(is_a<Type::atom>(a) == true);
     EXPECT_TRUE(is_list(a) == false);
@@ -37,7 +37,7 @@ TEST(expr, is) {
     EXPECT_TRUE(is_a<Type::list>(a) == false);
     EXPECT_TRUE(is_int(a) == true);
 
-    Expr *b = mk_list();
+    Expr b = mk_list();
     EXPECT_TRUE(is_atom(b) == false);
     EXPECT_TRUE(is_list(b) == true);
     EXPECT_TRUE(is_a<Type::atom>(b) == false);
@@ -54,15 +54,15 @@ TEST(expr, is) {
     EXPECT_TRUE(is_a<Type::list>(b) == true);
     EXPECT_TRUE(is_int(b) == false);
 
-    Expr *e = mk_function_ref("atom");
+    Expr e = mk_function_ref("atom");
     EXPECT_TRUE(is_a<Type::atom>(e) == false);
     EXPECT_TRUE(is_a<Type::function_ref>(e) == true);
 
-    Expr *f = mk_string(L"Olá!");
+    Expr f = mk_string(L"Olá!");
     EXPECT_TRUE(is_a<Type::atom>(f) == false);
     EXPECT_TRUE(is_a<Type::string>(f) == true);
 
-    Expr *g = mk_char('c');
+    Expr g = mk_char('c');
     EXPECT_TRUE(is_a<Type::atom>(g) == false);
     EXPECT_TRUE(is_a<Type::integer>(g) == false);
     EXPECT_TRUE(is_a<Type::character>(g) == true);
@@ -70,7 +70,7 @@ TEST(expr, is) {
 
 TEST(expr, print) {
     stringstream ss;
-    Expr        *a = mk_list();
+    Expr        a = mk_list();
     EXPECT_EQ(to_string(a), "nil");
     ss << a;
     EXPECT_EQ(ss.str(), "nil");
@@ -90,7 +90,7 @@ TEST(expr, print) {
     (ss = stringstream()) << a;
     EXPECT_EQ(ss.str(), "-616561564165146146");
 
-    Expr *c = mk_list(mk_atom("hello"));
+    Expr c = mk_list(mk_atom("hello"));
     EXPECT_EQ(to_string(c), "(hello)");
     (ss = stringstream()) << c;
     EXPECT_EQ(ss.str(), "(hello)");
@@ -137,39 +137,39 @@ TEST(expr, print) {
                         "there jim (hello there jim))");
     EXPECT_EQ(c->size(), 5u);
 
-    Expr *f = mk_string(L"Olá!"s);
+    Expr f = mk_string(L"Olá!"s);
     EXPECT_EQ(to_string(f), "\"Olá!\"");
     (ss = stringstream()) << f;
     EXPECT_EQ(ss.str(), "\"Olá!\"");
 
-    Expr *g = mk_char('g');
+    Expr g = mk_char('g');
     EXPECT_EQ(to_string(g), "#\\g");
     (ss = stringstream()) << g;
     EXPECT_EQ(ss.str(), "#\\g");
 
-    Expr *g1 = mk_char(' ');
+    Expr g1 = mk_char(' ');
     EXPECT_EQ(to_string(g1), "#\\space");
     (ss = stringstream()) << g1;
     EXPECT_EQ(ss.str(), "#\\space");
 
-    Expr *g2 = mk_char('\n');
+    Expr g2 = mk_char('\n');
     EXPECT_EQ(to_string(g2), "#\\newline");
     (ss = stringstream()) << g2;
     EXPECT_EQ(ss.str(), "#\\newline");
 
-    Expr *g3 = mk_char(u'Ж');
+    Expr g3 = mk_char(u'Ж');
     EXPECT_EQ(to_string(g3), "#\\Ж");
     (ss = stringstream()) << g3;
     EXPECT_EQ(ss.str(), "#\\Ж");
 
-    Expr *g4 = mk_char(U'👾'); // or L'👾'
+    Expr g4 = mk_char(U'👾'); // or L'👾'
     EXPECT_EQ(to_string(g4), "#\\👾");
     (ss = stringstream()) << g4;
     EXPECT_EQ(ss.str(), "#\\👾");
 }
 
 TEST(expr_if, False) {
-    Expr *a = mk_atom("hello");
+    Expr a = mk_atom("hello");
     EXPECT_TRUE(!is_false(a));
 
     EXPECT_TRUE(is_false(sF));

@@ -8,7 +8,7 @@ macro(package_add_benchmark TESTNAME)
         add_executable(${TESTNAME} ${ARGN})
 
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
-                                          cxxlispl replxx ${ICU_LIBRARIES} ${BOEHM_LIBRARIES} benchmark::benchmark)
+                                          cxxlispl replxx ${ICU_LIBRARIES} benchmark::benchmark)
 endmacro() 
 
 package_add_benchmark(bench_1 bench_1.cc)

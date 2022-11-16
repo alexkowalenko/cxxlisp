@@ -8,7 +8,7 @@
 
 namespace ax {
 
-std::optional<Expr *> SymbolTable::find(const std::string &name) const {
+std::optional<Expr> SymbolTable::find(const std::string &name) const {
     if (auto x = table.find(name); x != table.end()) {
         return x->second;
     }
@@ -18,7 +18,7 @@ std::optional<Expr *> SymbolTable::find(const std::string &name) const {
     return {};
 }
 
-bool SymbolTable::set(const std::string &name, Expr *const val) {
+bool SymbolTable::set(const std::string &name, const Expr val) {
     if (auto x = table.find(name); x != table.end()) {
         put(name, val);
         return true;

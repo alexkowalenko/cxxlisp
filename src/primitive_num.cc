@@ -14,14 +14,14 @@
 
 namespace ax {
 
-Expr *numberp(Expr *args) {
+Expr numberp(Expr args) {
     return is_a<Type::integer>(args->car) || is_a<Type::floating>(args->car) ? sT : sF;
 }
 
 PrimBasicFunct num_predicate0(const std::function<bool(Float, Float)> &f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](Expr *const args) { return f(as_float(args->car), 0.0) ? sT : sF; };
+    return [&](const Expr args) { return f(as_float(args->car), 0.0) ? sT : sF; };
 }
 
 // these need to be static, as they are held by functions, when the functor here goes out of scope.
@@ -44,7 +44,7 @@ PrimBasicFunct plusp = num_predicate0(gtf);
 PrimBasicFunct minusp = num_predicate0(ltf);
 
 PrimBasicFunct predicate_num(std::function<bool(Float, Float)> &f) {
-    return [&](Expr *args) -> Expr * {
+    return [&](Expr args) -> Expr {
         return f(as_float(args->car), as_float(args->cdr->car)) ? sT : sF;
     };
 }
@@ -77,7 +77,7 @@ static std::function<Float(Float, Float)> remf = [](Float a, Float b) -> Float {
 PrimBasicFunct numeric_operation_int(const std::function<Int(Int, Int)> &f, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
-    return [=](Expr *args) -> Expr * {
+    return [=](Expr args) -> Expr {
         if (is_false(args)) {
             return mk_int(s);
         }
@@ -91,7 +91,7 @@ PrimBasicFunct numeric_operation_int(const std::function<Int(Int, Int)> &f, Int 
     };
 }
 
-bool is_all_integer(Expr *args) {
+bool is_all_integer(Expr args) {
     while (!is_false(args)) {
         if (!is_a<Type::integer>(args->car)) {
             return false;
@@ -101,11 +101,11 @@ bool is_all_integer(Expr *args) {
     return true;
 }
 
-PrimBasicFunct numeric_operation_float(const std::function<Int(Int, Int)> &      f,
+PrimBasicFunct numeric_operation_float(const std::function<Int(Int, Int)>       &f,
                                        const std::function<Float(Float, Float)> &fr, Int s)
 // Returns a function implementing the function f across the list of arguments.
 {
-    return [=](Expr *args) -> Expr * {
+    return [=](Expr args) -> Expr {
         if (is_false(args)) {
             return mk_int(s);
         }
@@ -132,7 +132,7 @@ PrimBasicFunct numeric_operation2_float(const std::function<Int(Int, Int)> &f,
                                         const std::function<Float(Float, Float)> &)
 // Returns a function implementing the function f across 2 arguments.
 {
-    return [=](Expr *args) -> Expr * {
+    return [=](Expr args) -> Expr {
         if (is_all_integer(args)) {
             return mk_int(f(args->car->integer, args->cdr->car->integer));
         }
@@ -147,7 +147,7 @@ PrimBasicFunct num_div = numeric_operation_float(div, divf, 1);
 PrimBasicFunct num_mod = numeric_operation2_float(mod, modf);
 PrimBasicFunct num_rem = numeric_operation2_float(rem, remf);
 
-Expr *num_sub_init(Expr *args) {
+Expr num_sub_init(Expr args) {
     if (args->size() == 1) {
         return mk_float(-as_float(args->car));
     }
@@ -155,7 +155,7 @@ Expr *num_sub_init(Expr *args) {
 }
 
 PrimBasicFunct check_zeros(PrimBasicFunct f) {
-    return [=](Expr *args) -> Expr * {
+    return [=](Expr args) -> Expr {
         auto x = args;
         x = x->cdr; // start at second item
         while (x) {
@@ -174,7 +174,7 @@ PrimBasicFunct check_zeros(PrimBasicFunct f) {
 PrimBasicFunct numeric_operation(const std::function<Float(Float, Float)> &f, Float s)
 // Returns a function implementing the function f across the list of arguments.
 {
-    return [=](Expr *args) -> Expr * {
+    return [=](Expr args) -> Expr {
         if (is_false(args)) {
             return mk_int(Int(s));
         }
@@ -200,7 +200,7 @@ PrimBasicFunct num_min =
 PrimBasicFunct numeric_single(const std::function<Float(Float)> &f)
 // Returns a function implementing the function f on one argument.
 {
-    return [=](Expr *args) -> Expr * { return mk_float(f(as_float(args->car))); };
+    return [=](Expr args) -> Expr { return mk_float(f(as_float(args->car))); };
 }
 
 PrimBasicFunct num_abs = numeric_single([](Float x) -> Float { return abs(x); });
@@ -219,7 +219,7 @@ PrimBasicFunct num_acos = numeric_single([](Float x) -> Float { return Float(aco
 PrimBasicFunct num_atan = numeric_single([](Float x) -> Float { return Float(atan(x)); });
 PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqrt(x)); });
 
-Expr *incf(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<SymbolTable> a) {
+Expr incf(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
     auto val = get_reference(name, args->car, a);
     auto incr = mk_int(1);
     if (args->size() > 1) {
@@ -236,7 +236,7 @@ Expr *incf(Evaluator &l, const std::string &name, Expr *args, std::shared_ptr<Sy
     return result;
 }
 
-Expr *float_f(Expr *args) {
+Expr float_f(Expr args) {
     return mk_float(as_float(args->car));
 }
 }; // namespace ax

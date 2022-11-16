@@ -50,7 +50,7 @@ Int atoi(const std::string &str) {
     return value * sign;
 }
 
-Expr *mk_symbolInt(const std::string &atom) {
+Expr mk_symbolInt(const std::string &atom) {
     if (atom == "nil") {
         return sF;
     } else if (atom == "t") {
@@ -75,7 +75,7 @@ Expr *mk_symbolInt(const std::string &atom) {
     return mk_atom(atom);
 }
 
-Expr *Parser::parse_comma() {
+Expr Parser::parse_comma() {
     if (lexer.peek() == '@') {
         lexer.get_token();
         return splice_unquote_at;
@@ -83,7 +83,7 @@ Expr *Parser::parse_comma() {
     return unquote_at;
 }
 
-Expr *Parser::parse_hash(const Token &tok) {
+Expr Parser::parse_hash(const Token &tok) {
     auto token_val = std::get<std::string>(tok.val);
     transform(token_val.begin(), token_val.end(), token_val.begin(), ::toupper);
     if (token_val == "\\") {

@@ -26,7 +26,7 @@ enum class ArgType {
 struct ArgConstraint {
     ArgConstraintType constraint;
     unsigned int      num;
-    ArgType           argType = ArgType::any;
+    ArgType           argType{ArgType::any};
 };
 
 const ArgConstraint one_arg = {ArgConstraintType::eq, 1};
@@ -55,5 +55,5 @@ const ArgConstraint two_str = {ArgConstraintType::eq, 2, ArgType::string};
 const ArgConstraint two_char = {ArgConstraintType::eq, 2, ArgType::character};
 
 std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::string &name,
-                                     const Expr *args);
+                                     const Expr args);
 } // namespace ax

@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 add_library(testlib utils.cc)
 target_link_libraries(testlib PRIVATE project_options
-                                      project_warnings cxxlispl replxx gccpp ${ICU_LIBRARIES} gtest)
+                                      project_warnings cxxlispl replxx ${ICU_LIBRARIES} gtest)
 target_include_directories(testlib PUBLIC "${spdlog_SOURCE_DIR}/include")
 
 
@@ -26,7 +26,7 @@ macro(package_add_test TESTNAME)
 
         #link to Boost libraries AND your targets and dependencies
         target_link_libraries(${TESTNAME} PRIVATE project_options project_warnings
-                                          cxxlispl fmt replxx gc gccpp testlib ${ICU_LIBRARIES}
+                                          cxxlispl fmt replxx testlib ${ICU_LIBRARIES}
                                           gtest gtest_main)
 
         add_test(NAME ${TESTNAME} 

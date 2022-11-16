@@ -26,11 +26,11 @@ PrimBasicFunct str_ge = predicate_str<String>(ge_str);
 PrimBasicFunct str_lt = predicate_str<String>(lt_str);
 PrimBasicFunct str_le = predicate_str<String>(le_str);
 
-PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr *(const Expr *)> trans) {
-    return [=](Expr *args) -> Expr * {
-        auto  new_list = mk_list();
-        auto  nl = new_list;
-        Expr *prev = nullptr;
+PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr(const Expr)> trans) {
+    return [=](Expr args) -> Expr {
+        auto new_list = mk_list();
+        auto nl = new_list;
+        Expr prev = nullptr;
         while (!is_false(args)) {
             nl->car = trans(args->car);
             nl->cdr = mk_list();
@@ -43,7 +43,7 @@ PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr *(const Expr *)> tr
     };
 }
 
-Expr *string_fnct(const std::string &name, Expr *args) {
+Expr string_fnct(const std::string &name, Expr args) {
     std::wstring s;
     if (is_a<Type::string>(args->car)) {
         s = args->car->string;
@@ -62,7 +62,7 @@ Expr *string_fnct(const std::string &name, Expr *args) {
     return mk_string(s);
 }
 
-Expr *to_lower_str(const Expr *s) {
+Expr to_lower_str(const Expr s) {
     auto t = std::wstring(s->string);
     transform(t.begin(), t.end(), t.begin(), ::tolower);
     return mk_string(t);
@@ -82,7 +82,7 @@ PrimBasicFunct char_ge = predicate_chr<Char>(ge_char);
 PrimBasicFunct char_lt = predicate_chr<Char>(lt_char);
 PrimBasicFunct char_le = predicate_chr<Char>(le_char);
 
-Expr *to_lower_char(const Expr *s) {
+Expr to_lower_char(const Expr s) {
     return mk_char(tolower(s->chr));
 }
 
