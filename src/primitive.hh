@@ -18,11 +18,11 @@ namespace ax {
 
 void init_prims();
 
-using PrimBasicFunct = std::function<Expr(const Expr args)>;
-using PrimSimpleFunct = std::function<Expr(const std::string &name, const Expr args)>;
-using PrimFunct = std::function<Expr(const std::string &name, const Expr args, SymbolTable & a)>;
+using PrimBasicFunct = std::function<Expr(const Expr & args)>;
+using PrimSimpleFunct = std::function<Expr(const std::string &name, const Expr & args)>;
+using PrimFunct = std::function<Expr(const std::string &name, const Expr & args, SymbolTable & a)>;
 using PrimFullFunct =
-    std::function<Expr(Evaluator &l, const std::string &name, const Expr args, SymbolTable & a)>;
+    std::function<Expr(Evaluator &l, const std::string &name, const Expr & args, SymbolTable & a)>;
 
 struct Primitive {
     std::string                                                             name;
@@ -146,9 +146,9 @@ extern PrimBasicFunct str_ge;
 extern PrimBasicFunct str_lt;
 extern PrimBasicFunct str_le;
 
-PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr(const Expr)> trans);
+PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr(const Expr &)> trans);
 Expr           string_fnct(const std::string &name, Expr args);
-Expr           to_lower_str(const Expr s);
+Expr           to_lower_str(const Expr & s);
 
 // Characters
 
@@ -159,7 +159,7 @@ extern PrimBasicFunct char_ge;
 extern PrimBasicFunct char_lt;
 extern PrimBasicFunct char_le;
 
-Expr to_lower_char(const Expr s);
+Expr to_lower_char(const Expr & s);
 
 // Sequences
 

@@ -21,11 +21,11 @@ std::map<Atom, Accessor>         setf_accessors;
 
 const Atom otherwise_sym("otherwise");
 
-Expr atom(const Expr args) {
+Expr atom(const Expr & args) {
     return is_atomic(args->car) || is_false(args->car) ? sT : sF;
 }
 
-Expr symbolp(const Expr args) {
+Expr symbolp(const Expr & args) {
     auto a = args->car;
     if (is_false(a)) {
         return sT;
@@ -87,7 +87,7 @@ Expr null(Expr const args) {
 }
 
 // must be a list, zero size or nil.
-Expr endp(const Expr args) {
+Expr endp(const Expr & args) {
     if (is_a<Type::list>(args->car)) {
         if (args->car->size() == 0 || args->car->car == nullptr) {
             return sT;
@@ -221,7 +221,7 @@ Expr append(Expr args) {
     return cur;
 }
 
-Expr push(Evaluator &l, const std::string &, const Expr args, SymbolTable & a) {
+Expr push(Evaluator &l, const std::string &, const Expr & args, SymbolTable & a) {
     auto x = l.eval(args->car, a);
     auto val = get_reference("push", arg1(args), a);
     if (is_a<Type::list>(val)) {
@@ -232,7 +232,7 @@ Expr push(Evaluator &l, const std::string &, const Expr args, SymbolTable & a) {
     throw EvalException("push: is not a list: " + to_string(arg1(args)));
 }
 
-Expr pop(const std::string &, const Expr args, SymbolTable & a) {
+Expr pop(const std::string &, const Expr & args, SymbolTable & a) {
     auto val = get_reference("pop", args->car, a);
     if (is_a<Type::list>(val)) {
         auto ret = val->car;

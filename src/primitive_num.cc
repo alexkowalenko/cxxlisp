@@ -21,7 +21,7 @@ Expr numberp(Expr args) {
 PrimBasicFunct num_predicate0(const std::function<bool(Float, Float)> &f)
 // Returns a function with compare the first element to zero.
 {
-    return [&](const Expr args) { return f(as_float(args->car), 0.0) ? sT : sF; };
+    return [&](const Expr &args) { return f(as_float(args->car), 0.0) ? sT : sF; };
 }
 
 // these need to be static, as they are held by functions, when the functor here goes out of scope.
@@ -219,7 +219,7 @@ PrimBasicFunct num_acos = numeric_single([](Float x) -> Float { return Float(aco
 PrimBasicFunct num_atan = numeric_single([](Float x) -> Float { return Float(atan(x)); });
 PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqrt(x)); });
 
-Expr incf(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
+Expr incf(Evaluator &l, const std::string &name, Expr args, SymbolTable &a) {
     auto val = get_reference(name, args->car, a);
     auto incr = mk_int(1);
     if (args->size() > 1) {

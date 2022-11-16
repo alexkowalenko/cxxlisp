@@ -23,9 +23,9 @@ class Evaluator {
 
     void repl(std::istream &in, std::ostream &os);
 
-    Expr eval(const Expr e, SymbolTable &a);
-    Expr perform_list(const Expr e, SymbolTable &a);
-    Expr eval_list(const Expr e, SymbolTable &a);
+    Expr eval(const Expr &e, SymbolTable &a);
+    Expr perform_list(const Expr &e, SymbolTable &a);
+    Expr eval_list(const Expr &e, SymbolTable &a);
 
     bool has_function(const Atom &f);
 
@@ -34,8 +34,8 @@ class Evaluator {
     Options         opt;
 
   private:
-    SymbolTable create_context(Function *f, const Expr args, SymbolTable &a);
-    Expr        perform_function(Function *f, const Expr args, SymbolTable &a);
+    SymbolTable create_context(Function *f, Expr &args, SymbolTable &a);
+    Expr        perform_function(Function *f, const Expr &args, SymbolTable &a);
     Expr        backquote(Expr s, SymbolTable &a);
 };
 

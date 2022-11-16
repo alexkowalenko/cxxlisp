@@ -43,7 +43,7 @@ Expr mk_list(std::initializer_list<Expr> p) {
     return start;
 }
 
-Expr mk_list(size_t size, Expr const init) {
+Expr mk_list(size_t size, Expr const &init) {
     Expr prev = nullptr;
     auto top = mk_list();
     auto s = top;
@@ -71,7 +71,7 @@ inline std::string to_string(Float f) {
 
 #pragma clang diagnostic pop
 
-std::string to_dstring(const Expr s) {
+std::string to_dstring(const Expr &s) {
     if (!s) {
         return "NULL";
     }
@@ -105,7 +105,7 @@ std::string to_dstring(const Expr s) {
     }
 }
 
-std::string to_string(const Expr s) {
+std::string to_string(const Expr &s) {
     if (s == nullptr) {
         return "";
     }
@@ -193,7 +193,7 @@ std::string to_string(const Expr s) {
     }
 }
 
-std::string to_pstring(const Expr s) {
+std::string to_pstring(const Expr &s) {
     if (!s) {
         return "NULL";
     }
@@ -250,11 +250,11 @@ Expr Expr_::find(Expr r) noexcept {
     return nullptr;
 }
 
-inline bool same_type(Type t, const Expr x, const Expr y) {
+inline bool same_type(Type t, const Expr &x, const Expr &y) {
     return t == x->type && x->type == y->type;
 }
 
-Expr expr_eq(const Expr x, const Expr y) {
+Expr expr_eq(const Expr &x, const Expr &y) {
     if (is_false(x) && is_false(y)) {
         return sT;
     }
@@ -277,11 +277,11 @@ Expr expr_eq(const Expr x, const Expr y) {
     return sF;
 }
 
-Expr expr_eql(const Expr x, const Expr y) {
+Expr expr_eql(const Expr &x, const Expr &y) {
     return expr_eq(x, y);
 }
 
-Expr expr_equal(const Expr x, const Expr y) {
+Expr expr_equal(const Expr &x, const Expr &y) {
     if (expr_eql(x, y) == sT) {
         return sT;
     }
@@ -309,7 +309,7 @@ Expr expr_equal(const Expr x, const Expr y) {
     return sF;
 }
 
-Float as_float(const Expr s) {
+Float as_float(const Expr &s) {
     if (is_a<Type::floating>(s)) {
         return s->floating;
     } else if (is_a<Type::integer>(s)) {

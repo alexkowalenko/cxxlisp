@@ -12,7 +12,7 @@
 namespace ax {
 
 template <Type t>
-std::optional<std::string> checkType(const std::string &name, const Expr a,
+std::optional<std::string> checkType(const std::string &name, const Expr &a,
                                      const std::string &tname) {
     Expr args{a};
     if (args->size() == 1) {
@@ -30,7 +30,7 @@ std::optional<std::string> checkType(const std::string &name, const Expr a,
     return {};
 }
 
-std::optional<std::string> checkTypeNumeric(const std::string &name, const Expr a,
+std::optional<std::string> checkTypeNumeric(const std::string &name, const Expr &a,
                                             const std::string &tname) {
     Expr args{a};
     if (is_false(args)) {
@@ -51,7 +51,7 @@ std::optional<std::string> checkTypeNumeric(const std::string &name, const Expr 
 }
 
 std::optional<std::string> checkArgs(const ArgConstraint &cons, const std::string &name,
-                                     const Expr args) {
+                                     const Expr &args) {
     size_t size = 0;
     if (args) {
         size = args->size();
