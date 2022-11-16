@@ -60,7 +60,7 @@ void process_keyword(const std::string &name, Expr &params, const Expr &args, Sy
     }
 }
 
-SymbolTable Evaluator::create_context(Function *f, Expr &args, SymbolTable &a) {
+SymbolTable Evaluator::create_context(Function &f, Expr &args, SymbolTable &a) {
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
     size_t evalArgs_size{0};
@@ -142,7 +142,7 @@ SymbolTable Evaluator::create_context(Function *f, Expr &args, SymbolTable &a) {
     return context;
 }
 
-Expr Evaluator::perform_function(Function *f, const Expr &args, SymbolTable &a) {
+Expr Evaluator::perform_function(Function &f, const Expr &args, SymbolTable &a) {
     Expr evalArgs;
     if (f->macro) {
         // Macro args are evaluated later

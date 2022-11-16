@@ -34,8 +34,8 @@ class Evaluator {
     Options         opt;
 
   private:
-    SymbolTable create_context(Function *f, Expr &args, SymbolTable &a);
-    Expr        perform_function(Function *f, const Expr &args, SymbolTable &a);
+    SymbolTable create_context(Function &f, Expr &args, SymbolTable &a);
+    Expr        perform_function(Function &f, const Expr &args, SymbolTable &a);
     Expr        backquote(Expr s, SymbolTable &a);
 };
 

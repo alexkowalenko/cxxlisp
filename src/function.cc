@@ -8,11 +8,12 @@
 
 namespace ax {
 
-Function::operator std::string() {
+Function_::operator std::string() {
     return "λ:" + name + " : " + to_string(body);
 }
 
-std::optional<Expr> get_keyword_value(Expr top, const Expr k) {
+std::optional<Expr> get_keyword_value(const Expr &t, const Expr &k) {
+    Expr top{t};
     while (!is_false(top)) {
         if (expr_eq(top->car, k) != sF) {
             if (!is_false(top->cdr)) {

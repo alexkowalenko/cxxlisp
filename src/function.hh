@@ -12,19 +12,25 @@
 
 namespace ax {
 
-class Function {
+class Function_ {
   public:
-    Function(Atom n, Expr p) : name(n), parameters(p){};
+    Function_(const Atom &n, const Expr &p) : name(n), parameters(p){};
 
     operator std::string();
 
     Atom name;
     Expr parameters;
     Expr body;
-    bool macro = false;
+    bool macro{false};
 };
 
-inline Expr mk_function(Function *f) {
+using Function = std::shared_ptr<Function_>;
+
+inline Function mk_function(const Atom &n, Expr &p) {
+    return std::make_shared<Function_>(n, p);
+}
+
+inline Expr mk_function(const Function &f) {
     auto e = std::make_shared<Expr_>(Type::function);
     e->function = f;
     return e;
@@ -42,6 +48,6 @@ inline Expr mk_function_ref(const std::string &k) {
     return e;
 }
 
-std::optional<Expr> get_keyword_value(const Expr args, const Expr k);
+std::optional<Expr> get_keyword_value(const Expr &args, const Expr &k);
 
 } // namespace ax

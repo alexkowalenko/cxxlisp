@@ -58,7 +58,8 @@ using String = std::wstring;
 using Vector = std::vector<Expr>;
 using Complex = std::complex<Float>;
 
-class Function;
+class Function_;
+using Function = std::shared_ptr<Function_>;
 class Stream;
 
 // Basic element in s-expressions.
@@ -89,7 +90,7 @@ class Expr_ : public std::enable_shared_from_this<Expr_> {
         };
         Char                    chr;
         String                  string;
-        Function               *function;
+        Function                function;
         Keyword                 keyword;
         Atom                    function_ref;
         std::shared_ptr<Stream> stream;
@@ -146,53 +147,53 @@ inline Expr mk_list(Expr car = nullptr, Expr cdr = nullptr) {
 }
 
 Expr mk_list(std::initializer_list<Expr>);
-Expr mk_list(size_t size, const Expr & init);
+Expr mk_list(size_t size, const Expr &init);
 
 // Test functions for s-expression types
-template <Type t> inline bool is_a(const Expr & s) {
+template <Type t> inline bool is_a(const Expr &s) {
     return s->type == t;
 };
 
-inline bool is_atom(const Expr & s) {
+inline bool is_atom(const Expr &s) {
     return s->type == Type::atom;
 }
 
-inline bool is_bool(const Expr & s) {
+inline bool is_bool(const Expr &s) {
     return s->type == Type::boolean;
 }
 
-inline bool is_int(const Expr & s) {
+inline bool is_int(const Expr &s) {
     return s->type == Type::integer;
 }
 
-inline bool is_list(const Expr & s) {
+inline bool is_list(const Expr &s) {
     return s->type == Type::list;
 }
 
-inline bool is_atomic(const Expr & s) {
+inline bool is_atomic(const Expr &s) {
     return s->type != Type::list;
 }
 
 // Working on lists of arguments
-inline Expr arg0(const Expr & args) {
+inline Expr arg0(const Expr &args) {
     return args->car;
 }
 
-inline Expr arg1(const Expr & args) {
+inline Expr arg1(const Expr &args) {
     return args->cdr->car;
 }
 
-inline Expr arg2(const Expr & args) {
+inline Expr arg2(const Expr &args) {
     return args->cdr->cdr->car;
 }
 
 // Output
 
-std::string to_string(const Expr & e);
-std::string to_dstring(const Expr & e);
-std::string to_pstring(const Expr & s);
+std::string to_string(const Expr &e);
+std::string to_dstring(const Expr &e);
+std::string to_pstring(const Expr &s);
 
-inline std::ostream &operator<<(std::ostream &os, const Expr & s) {
+inline std::ostream &operator<<(std::ostream &os, const Expr &s) {
     return os << to_string(s);
 }
 
@@ -201,19 +202,19 @@ inline std::ostream &operator<<(std::ostream &os, const Expr & s) {
 inline const Expr sF = mk_bool(false);
 inline const Expr sT = mk_bool(true);
 
-inline bool is_sF(const Expr & e) {
+inline bool is_sF(const Expr &e) {
     return e == sF || e == nullptr;
 }
 
-inline bool is_false(const Expr & s)
+inline bool is_false(const Expr &s)
 // Is the Bool sF, or is the empty list
 {
     return is_sF(s) || (s->type == Type::list && s->car == nullptr);
 }
 
-Expr expr_eq(const Expr & x, const Expr & y);
-Expr expr_eql(const Expr & x, const Expr & y);
-Expr expr_equal(const Expr & x, const Expr &);
+Expr expr_eq(const Expr &x, const Expr &y);
+Expr expr_eql(const Expr &x, const Expr &y);
+Expr expr_equal(const Expr &x, const Expr &);
 
 inline Expr mk_char(Char c) {
     auto e = std::make_shared<Expr_>(Type::character);
@@ -244,15 +245,15 @@ inline std::string ws2s(const std::wstring &wstr) {
 
 #pragma clang diagnostic pop
 
-Float as_float(const Expr & s);
+Float as_float(const Expr &s);
 
-inline bool is_number(const Expr & n) {
+inline bool is_number(const Expr &n) {
     return is_a<Type::integer>(n) || is_a<Type::floating>(n);
 }
 
 // sequence
 
-inline bool is_seq(const Expr & s) {
+inline bool is_seq(const Expr &s) {
     return is_a<Type::list>(s) || is_a<Type::string>(s);
 }
 
