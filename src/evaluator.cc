@@ -32,8 +32,7 @@ const std::string optional_atom{"&optional"};
 const std::string rest_atom{"&rest"};
 const std::string key_atom{"&key"};
 
-void process_keyword(const std::string &name, Expr params, Expr args,
-                     std::shared_ptr<SymbolTable> a) {
+void process_keyword(const std::string &name, Expr params, Expr args, SymbolTable a) {
     for (auto cur = params; !is_false(cur); cur = cur->cdr) {
         if (is_a<Type::atom>(cur->car)) {
             Atom param = cur->car->atom;
@@ -61,19 +60,18 @@ void process_keyword(const std::string &name, Expr params, Expr args,
     }
 }
 
-std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr evalArgs,
-                                                       std::shared_ptr<SymbolTable> a) {
+SymbolTable Evaluator::create_context(Function *f, Expr evalArgs, SymbolTable a) {
     // BOOST_LOG_TRIVIAL(debug) << "function args: " << to_string(evalArgs);
 
     size_t evalArgs_size = 0;
     if (evalArgs) {
         evalArgs_size = evalArgs->size();
     };
-    size_t                       arg_count = 0;
-    bool                         optional = false;
-    bool                         rest = false;
-    std::shared_ptr<SymbolTable> context = std::make_shared<SymbolTable>(a.get());
-    auto f_param_size = is_false(f->parameters) ? 0 : f->parameters->size();
+    size_t      arg_count = 0;
+    bool        optional = false;
+    bool        rest = false;
+    SymbolTable context = mk_symbol_table(a);
+    auto        f_param_size = is_false(f->parameters) ? 0 : f->parameters->size();
 
     for (auto param = f->parameters; !is_false(param); param = param->cdr) {
         if (is_a<Type::keyword>(param->car) && param->car->keyword == optional_atom) {
@@ -143,7 +141,7 @@ std::shared_ptr<SymbolTable> Evaluator::create_context(Function *f, Expr evalArg
     return context;
 }
 
-Expr Evaluator::perform_function(Function *f, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::perform_function(Function *f, Expr args, SymbolTable a) {
     Expr evalArgs;
     if (f->macro) {
         // Macro args are evaluated later
@@ -163,7 +161,7 @@ Expr Evaluator::perform_function(Function *f, Expr args, std::shared_ptr<SymbolT
     return result;
 }
 
-Expr Evaluator::backquote(Expr s, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::backquote(Expr s, SymbolTable a) {
     if (is_atomic(s)) {
         return s;
     }
@@ -210,7 +208,7 @@ Expr Evaluator::backquote(Expr s, std::shared_ptr<SymbolTable> a) {
 }
 
 // eval_list makes a copy of the list.
-Expr Evaluator::eval_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::eval_list(const Expr expr, SymbolTable a) {
     Expr e{expr};
     if (is_false(e)) {
         return sF;
@@ -229,7 +227,7 @@ Expr Evaluator::eval_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
     return result;
 }
 
-Expr Evaluator::perform_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::perform_list(const Expr expr, SymbolTable a) {
     Expr e{expr};
     auto result = sF;
     for (; e; e = e->cdr) {
@@ -238,7 +236,7 @@ Expr Evaluator::perform_list(const Expr expr, std::shared_ptr<SymbolTable> a) {
     return result;
 }
 
-Expr Evaluator::eval(const Expr e, std::shared_ptr<SymbolTable> a) {
+Expr Evaluator::eval(const Expr e, SymbolTable a) {
     if (opt.debug_expr) {
         SPDLOG_DEBUG("eval: {}", to_string(e));
     };

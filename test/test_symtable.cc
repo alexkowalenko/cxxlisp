@@ -13,12 +13,12 @@
 using namespace ax;
 
 TEST(symboltable, invoker) {
-    SymbolTable tab(nullptr);
-    tab.put("a", mk_atom("hello"));
-    tab.put("b", mk_int(3));
-    tab.put("c", sF);
+    SymbolTable tab = mk_symbol_table();
+    tab->put("a", mk_atom("hello"));
+    tab->put("b", mk_int(3));
+    tab->put("c", sF);
 
-    if (auto x = tab.find("a")) {
+    if (auto x = tab->find("a")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "hello");
     } else {
@@ -26,7 +26,7 @@ TEST(symboltable, invoker) {
         FAIL();
     }
 
-    if (auto x = tab.find("b")) {
+    if (auto x = tab->find("b")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "3");
     } else {
@@ -34,7 +34,7 @@ TEST(symboltable, invoker) {
         FAIL();
     }
 
-    if (auto x = tab.find("c")) {
+    if (auto x = tab->find("c")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "nil");
     } else {
@@ -42,14 +42,14 @@ TEST(symboltable, invoker) {
         FAIL();
     }
 
-    if (auto x = tab.find("d")) {
+    if (auto x = tab->find("d")) {
         std::cout << "d should not be found";
     };
 
     auto aa = mk_atom("aa");
     auto aaa = mk_atom("aa");
-    tab.put(aa->atom, aa);
-    if (auto x = tab.find(aaa->atom)) {
+    tab->put(aa->atom, aa);
+    if (auto x = tab->find(aaa->atom)) {
         std::cout << to_string(*x) << std::endl;
         EXPECT_EQ(to_string(*x), "aa");
     } else {
@@ -59,16 +59,16 @@ TEST(symboltable, invoker) {
 }
 
 TEST(symboltable, nested) {
-    SymbolTable tab(nullptr);
+    SymbolTable tab = mk_symbol_table();
 
-    tab.put("a", mk_atom("hello"));
-    tab.put("b", mk_int(3));
-    tab.put("c", sF);
+    tab->put("a", mk_atom("hello"));
+    tab->put("b", mk_int(3));
+    tab->put("c", sF);
 
-    SymbolTable tab2(&tab);
-    tab2.put("d", mk_atom("Bonjour"));
+    auto tab2 = mk_symbol_table(tab);
+    tab2->put("d", mk_atom("Bonjour"));
 
-    if (auto x = tab2.find("a")) {
+    if (auto x = tab2->find("a")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "hello");
     } else {
@@ -76,7 +76,7 @@ TEST(symboltable, nested) {
         FAIL();
     }
 
-    if (auto x = tab2.find("b")) {
+    if (auto x = tab2->find("b")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "3");
     } else {
@@ -84,7 +84,7 @@ TEST(symboltable, nested) {
         FAIL();
     }
 
-    if (auto x = tab2.find("c")) {
+    if (auto x = tab2->find("c")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "nil");
     } else {
@@ -92,7 +92,7 @@ TEST(symboltable, nested) {
         FAIL();
     }
 
-    if (auto x = tab2.find("d")) {
+    if (auto x = tab2->find("d")) {
         std::cout << to_string(*x) << std::endl;
         EXPECT_EQ(to_string(*x), "Bonjour");
     } else {
@@ -102,16 +102,16 @@ TEST(symboltable, nested) {
 }
 
 TEST(symboltable, set) {
-    SymbolTable tab(nullptr);
+    SymbolTable tab = mk_symbol_table();
 
-    tab.put("a", mk_atom("hello"));
-    tab.put("b", mk_int(3));
-    tab.put("c", sF);
+    tab->put("a", mk_atom("hello"));
+    tab->put("b", mk_int(3));
+    tab->put("c", sF);
 
-    SymbolTable tab2(&tab);
-    tab2.put("d", mk_atom("bonjour"));
+    SymbolTable tab2 = mk_symbol_table(tab);
+    tab2->put("d", mk_atom("bonjour"));
 
-    if (auto x = tab2.find("a")) {
+    if (auto x = tab2->find("a")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "hello");
     } else {
@@ -119,10 +119,10 @@ TEST(symboltable, set) {
         FAIL();
     }
 
-    tab2.set("a", mk_atom("bonjour"));
+    tab2->set("a", mk_atom("bonjour"));
 
     //  Find in second
-    if (auto x = tab2.find("a")) {
+    if (auto x = tab2->find("a")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "bonjour");
     } else {
@@ -131,7 +131,7 @@ TEST(symboltable, set) {
     }
 
     // Find in first
-    if (auto x = tab.find("a")) {
+    if (auto x = tab->find("a")) {
         std::cout << to_string(*x) << " ";
         EXPECT_EQ(to_string(*x), "bonjour");
     } else {

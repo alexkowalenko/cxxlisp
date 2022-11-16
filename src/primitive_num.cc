@@ -219,7 +219,7 @@ PrimBasicFunct num_acos = numeric_single([](Float x) -> Float { return Float(aco
 PrimBasicFunct num_atan = numeric_single([](Float x) -> Float { return Float(atan(x)); });
 PrimBasicFunct num_sqrt = numeric_single([](Float x) -> Float { return Float(sqrt(x)); });
 
-Expr incf(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr incf(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     auto val = get_reference(name, args->car, a);
     auto incr = mk_int(1);
     if (args->size() > 1) {

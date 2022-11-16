@@ -8,17 +8,21 @@
 
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "expr.hh"
 
 namespace ax {
 
-class SymbolTable {
-  public:
-    SymbolTable(SymbolTable *const s) : next(s){};
+class SymbolTable_;
+using SymbolTable = std::shared_ptr<SymbolTable_>;
 
-    SymbolTable(const SymbolTable &) = delete; // stop copying
+class SymbolTable_ {
+  public:
+    SymbolTable_(SymbolTable s) : next(s){};
+
+    SymbolTable_(const SymbolTable_ &) = delete; // stop copying
 
     inline void put(const std::string &name, const Expr val) { table[name] = val; };
 
@@ -30,7 +34,11 @@ class SymbolTable {
 
   private:
     std::map<std::string, Expr> table;
-    SymbolTable *const          next;
+    SymbolTable                 next;
 };
+
+inline SymbolTable mk_symbol_table(SymbolTable s = nullptr) {
+    return std::make_shared<SymbolTable_>(s);
+}
 
 } // namespace ax

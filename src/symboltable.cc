@@ -8,7 +8,7 @@
 
 namespace ax {
 
-std::optional<Expr> SymbolTable::find(const std::string &name) const {
+std::optional<Expr> SymbolTable_::find(const std::string &name) const {
     if (auto x = table.find(name); x != table.end()) {
         return x->second;
     }
@@ -18,7 +18,7 @@ std::optional<Expr> SymbolTable::find(const std::string &name) const {
     return {};
 }
 
-bool SymbolTable::set(const std::string &name, const Expr val) {
+bool SymbolTable_::set(const std::string &name, const Expr val) {
     if (auto x = table.find(name); x != table.end()) {
         put(name, val);
         return true;
@@ -31,7 +31,7 @@ bool SymbolTable::set(const std::string &name, const Expr val) {
     }
 };
 
-void SymbolTable::remove(const std::string &name) {
+void SymbolTable_::remove(const std::string &name) {
     if (auto x = table.find(name); x != table.end()) {
         table.erase(name);
         return;
@@ -40,7 +40,7 @@ void SymbolTable::remove(const std::string &name) {
     }
 }
 
-void SymbolTable::dump(std::ostream &os) const {
+void SymbolTable_::dump(std::ostream &os) const {
     os << "Dump symbol table: " << '\n';
     for (auto x : table) {
         os << x.first << " -> " << to_string(x.second) << std::endl;

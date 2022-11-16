@@ -23,9 +23,9 @@ class Lisp {
     void terminate();
 
   private:
-    Options &                    opt;
-    std::shared_ptr<SymbolTable> symboltable;
-    std::set<Atom>               trace_functions;
+    Options       &opt;
+    SymbolTable    symboltable;
+    std::set<Atom> trace_functions;
 };
 
 } // namespace ax

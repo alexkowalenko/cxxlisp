@@ -8,6 +8,7 @@
 
 #include "exceptions.hh"
 #include "parser.hh"
+#include "symboltable.hh"
 
 namespace ax {
 
@@ -34,7 +35,7 @@ Function *createFunction(const std::string &name, Expr args) {
     return f;
 }
 
-Expr defun(const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr defun(const std::string &name, Expr args, SymbolTable a) {
     if (!is_a<Type::atom>(args->car)) {
         throw EvalException(name + " function name needs to an atom");
     }
@@ -62,7 +63,7 @@ Expr funct(const std::string &name, Expr args) {
     throw EvalException(name + " function name needs to an atom");
 }
 
-Expr find_funct(std::string &n, std::shared_ptr<SymbolTable> a) {
+Expr find_funct(std::string &n, SymbolTable a) {
     if (auto p = prim_table.find(n); p != prim_table.end()) {
         return sT;
     }
@@ -74,7 +75,7 @@ Expr find_funct(std::string &n, std::shared_ptr<SymbolTable> a) {
     return sF;
 }
 
-Expr functionp(const std::string &, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr functionp(const std::string &, Expr args, SymbolTable a) {
     if (is_a<Type::function>(args->car)) { // This is the difference
         return sT;
     } else if (is_a<Type::function_ref>(args->car)) {
@@ -84,7 +85,7 @@ Expr functionp(const std::string &, Expr args, std::shared_ptr<SymbolTable> a) {
 }
 
 // Like functionp but works on atoms
-Expr fboundp(const std::string &, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr fboundp(const std::string &, Expr args, SymbolTable a) {
     if (!is_a<Type::atom>(args->car)) {
         return sF;
     } else {
@@ -93,8 +94,7 @@ Expr fboundp(const std::string &, Expr args, std::shared_ptr<SymbolTable> a) {
     return sF;
 }
 
-Expr get_function(Evaluator &l, const std::string &name, Expr arg,
-                  std::shared_ptr<SymbolTable> a) {
+Expr get_function(Evaluator &l, const std::string &name, Expr arg, SymbolTable a) {
     auto fn = l.eval(arg, a);
     if (is_a<Type::function_ref>(fn)) {
         return mk_list(mk_atom(fn->function_ref));
@@ -106,7 +106,7 @@ Expr get_function(Evaluator &l, const std::string &name, Expr arg,
     return sF;
 }
 
-Expr apply(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr apply(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     auto ex = get_function(l, name, args->car, a);
     auto res = l.eval(args->cdr->car, a);
     if (is_a<Type::list>(res)) {
@@ -127,13 +127,13 @@ Expr apply(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<Sym
     return l.eval(ex, a);
 }
 
-Expr funcall(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr funcall(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     auto ex = get_function(l, name, args->car, a);
     ex->cdr = args->cdr;
     return l.eval(ex, a);
 }
 
-Expr mapcar(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr mapcar(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     auto ex = get_function(l, name, args->car, a);
     auto evalargs = l.eval_list(args->cdr, a);
     for (auto x = evalargs; !is_false(x); x = x->cdr) {
@@ -174,7 +174,7 @@ end:
     return resulttop;
 }
 
-Expr do_times(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr do_times(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": has no parameter list " + to_string(args->car));
     }
@@ -182,10 +182,10 @@ Expr do_times(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<
     if (params->size() < 2) {
         throw EvalException(name + ": not enough vars in parameter list");
     }
-    auto                         variable = arg0(params);
-    auto                         limit = arg1(params);
-    std::shared_ptr<SymbolTable> context = std::make_shared<SymbolTable>(a.get());
-    Expr                         result = nullptr;
+    auto        variable = arg0(params);
+    auto        limit = arg1(params);
+    SymbolTable context = mk_symbol_table(a);
+    Expr        result = nullptr;
     if (params->size() >= 3) {
         result = arg2(params);
         if (!is_a<Type::atom>(result)) {
@@ -243,11 +243,11 @@ end:
 }
 
 // (do (params) ((test) return) x1 x2 ...)
-Expr do_func(Evaluator &l, const std::string &name, Expr args, std::shared_ptr<SymbolTable> a) {
+Expr do_func(Evaluator &l, const std::string &name, Expr args, SymbolTable a) {
     if (!is_a<Type::list>(args->car)) {
         throw EvalException(name + ": has no parameter list " + to_string(args->car));
     }
-    std::shared_ptr<SymbolTable> context = std::make_shared<SymbolTable>(a.get());
+    SymbolTable context = mk_symbol_table(a);
     for (auto params = args->car; !is_false(params); params = params->cdr) {
         if (!is_a<Type::list>(params->car)) {
             throw EvalException(name + ": parameter is not a list " + to_string(params->car));
