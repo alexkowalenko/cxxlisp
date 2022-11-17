@@ -21,13 +21,12 @@
 #pragma clang diagnostic pop
 
 #include "exceptions.hh"
-#include "linereaderRL.hh"
 
 namespace ax {
 
 namespace {
 
-inline bool is_emoji(uint32_t c) {
+constexpr bool is_emoji(uint32_t c) {
     return (0x1f600 <= c && c <= 0x1f64f) || // Emoticons
            (0x1F300 <= c && c <= 0x1F5FF) || // Misc Symbols and Pictographs
            (0x1F680 <= c && c <= 0x1F6FF) || // Transport and Map

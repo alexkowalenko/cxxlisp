@@ -12,12 +12,12 @@ namespace ax {
 
 class Options {
   public:
-    bool silent = false;
-    bool readline = true;
-    bool parse_only = false;
+    bool silent{false};
+    bool readline{true};
+    bool parse_only{false};
 
     // Debug options
-    bool debug_expr = false;
+    bool debug_expr{false};
 
     void push_options();
     void pop_options();

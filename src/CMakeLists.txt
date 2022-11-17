@@ -14,7 +14,7 @@ endif()
 
 add_library(cxxlispl STATIC
     args.cc             lexer.cc            lisp.cc             primitive_funcs.cc  primitive_str.cc
-    evaluator.cc        linereaderRL.cc     options.cc          primitive_io.cc     symboltable.cc
+    evaluator.cc        options.cc          primitive_io.cc     symboltable.cc
     expr.cc             linereaderReplxx.cc parser.cc           primitive_num.cc    token.cc
     function.cc         linereaderStream.cc primitive.cc        primitive_seq.cc    tracer.cc 
     stdlib.lisp.hh)

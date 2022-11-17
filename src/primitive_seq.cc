@@ -33,7 +33,7 @@ template <> Expr seq_length<String>(const String s) {
     return mk_int(Int(s.size()));
 }
 
-Expr length(Expr args) {
+Expr length(const Expr &args) {
     if (is_false(args->car)) {
         return mk_int(0);
     }
@@ -47,7 +47,7 @@ Expr length(Expr args) {
     throw EvalException("length: needs sequence argument");
 }
 
-Expr elt(Expr args) {
+Expr elt(const Expr &args) {
     if (!is_a<Type::integer>(args->cdr->car)) {
         throw EvalException("elt: index is not a integer");
     }
@@ -73,7 +73,7 @@ Expr elt(Expr args) {
     throw EvalException("length: needs sequence argument");
 }
 
-Expr subseq(Expr args) {
+Expr subseq(const Expr &args) {
     if (is_false(args->car)) {
         return sF;
     }
@@ -133,7 +133,7 @@ T seq_setelt(const std::string &name, T &s, size_t index, const S &r) {
     return s;
 }
 
-void set_str_elt(const std::string &name, Expr seq, Expr c, size_t index) {
+void set_str_elt(const std::string &name, const Expr &seq, const Expr &c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -146,7 +146,7 @@ void set_str_elt(const std::string &name, Expr seq, Expr c, size_t index) {
     seq->string[index] = c->chr;
 }
 
-void set_list_elt(const std::string &name, Expr seq, Expr c, size_t index) {
+void set_list_elt(const std::string &name, const Expr &seq, const Expr &c, size_t index) {
     if (!is_seq(seq)) {
         throw EvalException(name + ": needs sequence argument");
     }
@@ -156,7 +156,7 @@ void set_list_elt(const std::string &name, Expr seq, Expr c, size_t index) {
     seq->set(index, c);
 }
 
-Expr setelt(const std::string &name, Expr args) {
+Expr setelt(const std::string &name, const Expr &args) {
     auto seq = args->car;
     auto rindex = arg1(args);
     if (!is_a<Type::integer>(rindex)) {
@@ -173,13 +173,13 @@ Expr setelt(const std::string &name, Expr args) {
 
 // setf version
 // (var index) result
-Expr setf_elt(Evaluator &, Expr args, Expr r, SymbolTable &) {
+Expr setf_elt(Evaluator &, const Expr &args, const Expr &r, SymbolTable &) {
     auto newargs = mk_list({args->car, arg1(args), r});
     setelt("setf elt", newargs);
     return r;
 }
 
-Expr make_sequence(Expr args) {
+Expr make_sequence(const Expr &args) {
     if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
         throw EvalException("make-sequence: first argument must be a sequence type name");
     }
@@ -204,7 +204,7 @@ Expr make_sequence(Expr args) {
     }
 }
 
-Expr concatenate_str(Expr args) {
+Expr concatenate_str(const Expr &args) {
     String result;
     for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
         if (is_a<Type::string>(ptr->car)) {
@@ -222,7 +222,7 @@ Expr concatenate_str(Expr args) {
     return mk_string(result);
 }
 
-Expr concatenate_list(Expr args) {
+Expr concatenate_list(const Expr &args) {
     auto result = mk_list();
     auto cur = result;
     for (auto ptr = args; !is_false(ptr); ptr = ptr->cdr) {
@@ -251,7 +251,7 @@ Expr concatenate_list(Expr args) {
     return result;
 }
 
-Expr concatenate(Expr args) {
+Expr concatenate(const Expr &args) {
     if (!is_a<Type::atom>(args->car) || !is_seq_type(args->car->atom)) {
         throw EvalException("concatenate: first argument must be a sequence type name");
     }

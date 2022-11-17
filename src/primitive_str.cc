@@ -43,7 +43,7 @@ PrimBasicFunct funct_ci(PrimBasicFunct f, std::function<Expr(const Expr &)> tran
     };
 }
 
-Expr string_fnct(const std::string &name, Expr args) {
+Expr string_fnct(const std::string &name, const Expr &args) {
     std::wstring s;
     if (is_a<Type::string>(args->car)) {
         s = args->car->string;

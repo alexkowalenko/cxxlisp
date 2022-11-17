@@ -49,11 +49,11 @@ const Expr keyword_direction = mk_keyword(":direction");
 const Expr keyword_input = mk_keyword(":input");
 const Expr keyword_output = mk_keyword(":output");
 
-Expr throw_error(Expr args) {
+Expr throw_error(const Expr &args) {
     throw EvalException(to_string(args->car));
 }
 
-Expr quit(Expr args) {
+Expr quit(const Expr &args) {
     if (!is_false(args)) {
         if (is_a<Type::integer>(args)) {
             long ret = args->integer;
@@ -63,7 +63,7 @@ Expr quit(Expr args) {
     throw ExceptionQuit(0);
 }
 
-Expr open(Expr args) {
+Expr open(const Expr &args) {
     std::cout << "open args " << args << std::endl;
     if (is_a<Type::string>(args->car)) {
         auto filename = ws2s(args->car->string);
@@ -87,7 +87,7 @@ Expr open(Expr args) {
     throw EvalException("open: excepting filename as a string");
 };
 
-Expr close(Expr args) {
+Expr close(const Expr &args) {
     if (is_a<Type::stream>(args->car)) {
         if (auto f = std::get_if<std::fstream *>(&args->car->stream->str)) {
             if ((*f)->is_open()) {
@@ -100,7 +100,7 @@ Expr close(Expr args) {
     throw EvalException("close: not a stream");
 }
 
-std::shared_ptr<Stream> get_output(const std::string &name, Expr args, SymbolTable & a) {
+std::shared_ptr<Stream> get_output(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> output;
     if (args->size() == 1) {
         output = get_reference(name, std_out, a)->stream;
@@ -114,7 +114,7 @@ std::shared_ptr<Stream> get_output(const std::string &name, Expr args, SymbolTab
     return output;
 }
 
-Expr print(const std::string &name, Expr args, SymbolTable & a) {
+Expr print(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> output = get_output(name, args, a);
 
     std::string out_str;
@@ -143,7 +143,7 @@ Expr print(const std::string &name, Expr args, SymbolTable & a) {
     return args->car;
 }
 
-Expr terpri(const std::string &name, Expr args, SymbolTable & a) {
+Expr terpri(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> output;
     if (args->size() == 0) {
         output = get_reference(name, std_out, a)->stream;
@@ -165,7 +165,7 @@ Expr terpri(const std::string &name, Expr args, SymbolTable & a) {
     return sT;
 }
 
-std::shared_ptr<Stream> get_input(const std::string &name, Expr args, SymbolTable & a) {
+std::shared_ptr<Stream> get_input(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> input;
     if (args->size() == 0) {
         input = get_reference(name, std_in, a)->stream;
@@ -179,7 +179,7 @@ std::shared_ptr<Stream> get_input(const std::string &name, Expr args, SymbolTabl
     return input;
 };
 
-Expr read(const std::string &name, Expr args, SymbolTable & a) {
+Expr read(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> input = get_input(name, args, a);
     std::array<char, 255>   buf;
     visit(overloaded{
@@ -193,7 +193,7 @@ Expr read(const std::string &name, Expr args, SymbolTable & a) {
     return mk_string(s2ws(std::string(&buf[0], strlen(&buf[0]))));
 }
 
-Expr read_char(const std::string &name, Expr args, SymbolTable & a) {
+Expr read_char(const std::string &name, const Expr &args, SymbolTable &a) {
     std::shared_ptr<Stream> input = get_input(name, args, a);
 
     char c;
@@ -208,7 +208,7 @@ Expr read_char(const std::string &name, Expr args, SymbolTable & a) {
     return mk_char(Char(c));
 }
 
-Expr format(const std::string &name, Expr args, SymbolTable & a) {
+Expr format(const std::string &name, const Expr &args, SymbolTable &a) {
     if (!is_a<Type::string>(arg1(args))) {
         throw EvalException("format: format is not a string " + to_string(arg1(args)));
     }
@@ -277,7 +277,7 @@ Expr format(const std::string &name, Expr args, SymbolTable & a) {
     return sT;
 }
 
-Expr trace(Evaluator &l, const std::string &, Expr args, SymbolTable &) {
+Expr trace(Evaluator &l, const std::string &, const Expr &args, SymbolTable &) {
     if (args && args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
@@ -308,7 +308,7 @@ Expr trace(Evaluator &l, const std::string &, Expr args, SymbolTable &) {
     return top;
 }
 
-Expr untrace(Evaluator &l, const std::string &, Expr args, SymbolTable &) {
+Expr untrace(Evaluator &l, const std::string &, const Expr &args, SymbolTable &) {
     if (args && args->size() > 0) {
         for (auto cur = args; !is_false(cur); cur = cur->cdr) {
             if (!is_atom(cur->car)) {
@@ -325,7 +325,7 @@ Expr untrace(Evaluator &l, const std::string &, Expr args, SymbolTable &) {
     return sT;
 }
 
-Expr load(Evaluator &l, const std::string &name, Expr args, SymbolTable & a) {
+Expr load(Evaluator &l, const std::string &name, const Expr &args, SymbolTable &a) {
     std::ifstream file;
     auto          filename = ws2s(args->car->string);
     file.open(filename);

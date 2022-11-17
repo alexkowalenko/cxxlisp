@@ -11,7 +11,6 @@
 
 #include "exceptions.hh"
 #include "function.hh"
-#include "linereaderRL.hh"
 #include "linereaderReplxx.hh"
 #include "linereaderStream.hh"
 #include "parser.hh"
@@ -362,7 +361,6 @@ bool Evaluator::has_function(const Atom &name) {
 void Evaluator::repl(std::istream &istr, std::ostream &ostr) {
     std::unique_ptr<LineReader> rl;
     if (opt.readline) {
-        // rl = make_unique<LineReaderReadLine>();
         rl = std::make_unique<LineReaderReplxx>();
     } else {
         rl = std::make_unique<LineReaderStream>(istr);
